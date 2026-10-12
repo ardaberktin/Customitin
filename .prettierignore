@@ -1,0 +1,9 @@
+node_modules
+dist
+.expo
+package-lock.json
+fixtures
+playwright-report
+test-results
+**/ios
+**/android

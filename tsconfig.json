@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@customitin/core": ["packages/core/src/index.ts"],
+      "@customitin/react-native": ["packages/react-native/src/index.ts"],
+      "@customitin/react-native/*": ["packages/react-native/src/*"],
+      "@customitin/server": ["packages/server/src/index.ts"],
+      "@customitin/cli": ["packages/cli/src/api.ts"],
+      "@customitin/examples": ["examples/shared/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "examples/**/*.ts",
+    "examples/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "*.ts",
+    "scripts/**/*.ts"
+  ],
+  "exclude": ["**/node_modules", "**/dist", "fixtures", "**/.expo"]
+}

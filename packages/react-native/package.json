@@ -1,0 +1,48 @@
+{
+  "name": "@customitin/react-native",
+  "version": "0.1.0-alpha.1",
+  "description": "Local-first application personalization react-native",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "react-native": "./src/storage/index.ts",
+      "import": "./dist/storage/index.js",
+      "require": "./dist/storage/index.cjs"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "react-native": "./src/adapters/index.ts",
+      "import": "./dist/adapters/index.js",
+      "require": "./dist/adapters/index.cjs"
+    },
+    "./navigation": {
+      "types": "./dist/navigation/index.d.ts",
+      "react-native": "./src/navigation/index.ts",
+      "import": "./dist/navigation/index.js",
+      "require": "./dist/navigation/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@customitin/core": "0.1.0-alpha.1"
+  },
+  "peerDependencies": {
+    "react": ">=19.2.0 <20",
+    "react-native": ">=0.83.0 <0.84"
+  }
+}

@@ -1,0 +1,20 @@
+name: Validate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.15.0
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run bundle -w @customitin/recipe-example
+      - run: npm run bundle -w @customitin/movie-example
+      - run: mkdir -p examples/task-app/dist && npm run bundle:ios -w @customitin/task-example && npm run bundle:android -w @customitin/task-example

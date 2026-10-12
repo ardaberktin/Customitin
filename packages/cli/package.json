@@ -1,0 +1,36 @@
+{
+  "name": "@customitin/cli",
+  "version": "0.1.0-alpha.1",
+  "description": "Local-first application personalization cli",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./api": {
+      "types": "./dist/api.d.ts",
+      "import": "./dist/api.js",
+      "require": "./dist/api.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@customitin/core": "0.1.0-alpha.1",
+    "zod": "4.1.13",
+    "ts-morph": "27.0.2",
+    "@customitin/server": "0.1.0-alpha.1"
+  },
+  "bin": {
+    "customitin": "./dist/index.js"
+  }
+}

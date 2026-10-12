@@ -1,0 +1,15 @@
+appId: host.exp.Exponent
+---
+- tapOn: 'Customize.*'
+- tapOn: 'Show quick recipes in a grid'
+- assertVisible: 'Your preview'
+- scrollUntilVisible:
+    element:
+      id: 'apply-button'
+    direction: DOWN
+- tapOn:
+    id: 'apply-button'
+- tapOn: 'Quick & lovely.*'
+- assertVisible: 'Open Lemon & herb orzo'
+- tapOn: 'Open Lemon & herb orzo'
+- assertVisible: 'Orzo, lemon, parsley, feta'

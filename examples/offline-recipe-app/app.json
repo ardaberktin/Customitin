@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Gather · Customitin",
+    "slug": "customitin-recipe",
+    "scheme": "customitin-recipe",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.customitin.recipe"
+    },
+    "android": {
+      "package": "dev.customitin.recipe"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router"]
+  }
+}

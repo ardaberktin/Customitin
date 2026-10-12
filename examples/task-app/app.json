@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Daybook \u00b7 Customitin",
+    "slug": "customitin-task",
+    "scheme": "customitin-task",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.customitin.task"
+    },
+    "android": {
+      "package": "dev.customitin.task"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}

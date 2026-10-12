@@ -1,0 +1,1 @@
+Use strict TypeScript and small, readable modules. Fix lint errors and warnings. Keep domain logic out of SDK packages. New UI copy goes in the English dictionary only. Run npm run check and relevant interaction tests after changes. Document manual deployment and device checks honestly.

@@ -1,0 +1,53 @@
+{
+  "name": "customitin",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run boundaries",
+    "boundaries": "node scripts/check-boundaries.mjs",
+    "dev": "npm run web -w @customitin/recipe-example",
+    "dev:movie": "npm run web -w @customitin/movie-example -- --port 8082",
+    "dev:tasks": "npm run web -w @customitin/task-example",
+    "server": "node --import tsx examples/planner-server/src/index.ts --demo",
+    "cli": "node --import tsx packages/cli/src/index.ts",
+    "test:e2e": "playwright test",
+    "server:live": "node --import tsx examples/planner-server/src/index.ts",
+    "manifests": "node --import tsx scripts/export-manifests.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.57.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "eslint": "10.12.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "27.2.0",
+    "prettier": "3.7.4",
+    "tsup": "8.5.1",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "4.1.11"
+  },
+  "overrides": {
+    "esbuild": "0.28.2",
+    "uuid": "11.1.1"
+  }
+}

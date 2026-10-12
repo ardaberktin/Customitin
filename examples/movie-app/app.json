@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Frame \u00b7 Customitin",
+    "slug": "customitin-movie",
+    "scheme": "customitin-movie",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.customitin.movie"
+    },
+    "android": {
+      "package": "dev.customitin.movie"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}

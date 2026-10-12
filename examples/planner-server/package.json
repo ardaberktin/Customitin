@@ -1,0 +1,10 @@
+{
+  "name": "@customitin/planner-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@customitin/core": "0.1.0-alpha.1",
+    "@customitin/server": "0.1.0-alpha.1"
+  }
+}

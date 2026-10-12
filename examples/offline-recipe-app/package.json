@@ -1,0 +1,32 @@
+{
+  "name": "@customitin/recipe-example",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "bundle": "expo export --platform all"
+  },
+  "dependencies": {
+    "@customitin/core": "0.1.0-alpha.1",
+    "@customitin/examples": "0.1.0",
+    "@customitin/react-native": "0.1.0-alpha.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "55.0.31",
+    "expo-constants": "55.0.17",
+    "expo-linking": "55.0.17",
+    "expo-router": "55.0.18",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.10",
+    "react-native-safe-area-context": "5.6.2",
+    "react-native-screens": "4.23.0",
+    "react-native-web": "0.21.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2"
+  }
+}

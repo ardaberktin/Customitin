@@ -1,0 +1,43 @@
+{
+  "name": "@customitin/task-example",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "react-native start --config metro.config.cjs",
+    "web": "CUSTOMITIN_WEB_BUILD=1 expo start --web --port 8083",
+    "ios": "react-native run-ios",
+    "android": "react-native run-android",
+    "bundle": "expo export --platform all",
+    "bundle:ios": "react-native bundle --platform ios --dev false --entry-file index.ts --bundle-output dist/index.ios.js --assets-dest dist/assets --config metro.config.cjs",
+    "bundle:android": "react-native bundle --platform android --dev false --entry-file index.ts --bundle-output dist/index.android.js --assets-dest dist/assets --config metro.config.cjs"
+  },
+  "dependencies": {
+    "@customitin/core": "0.1.0-alpha.1",
+    "@customitin/examples": "0.1.0",
+    "@customitin/react-native": "0.1.0-alpha.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/bottom-tabs": "7.20.0",
+    "@react-navigation/native": "7.5.0",
+    "@react-navigation/native-stack": "7.20.0",
+    "expo": "55.0.31",
+    "expo-constants": "55.0.17",
+    "expo-linking": "55.0.17",
+    "expo-router": "55.0.18",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.10",
+    "react-native-safe-area-context": "5.6.2",
+    "react-native-screens": "4.23.0",
+    "react-native-web": "0.21.4"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-export-namespace-from": "7.29.7",
+    "@react-native-community/cli": "20.2.0",
+    "@react-native-community/cli-platform-android": "20.2.0",
+    "@react-native-community/cli-platform-ios": "20.2.0",
+    "@react-native/babel-preset": "0.83.10",
+    "@react-native/metro-config": "0.83.10",
+    "@types/react": "19.2.2"
+  }
+}

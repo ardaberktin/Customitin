@@ -1,0 +1,449 @@
+{
+  "appId": "recipe-demo",
+  "revision": "demo-v1",
+  "components": [
+    {
+      "id": "intro",
+      "title": "Welcome",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "host",
+      "props": {},
+      "acceptsChildren": false
+    },
+    {
+      "id": "featured",
+      "title": "Featured collection",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "host",
+      "props": {},
+      "acceptsChildren": false
+    },
+    {
+      "id": "library",
+      "title": "Library",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "host",
+      "props": {},
+      "acceptsChildren": false
+    },
+    {
+      "id": "collection",
+      "title": "Personal collection",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "collection",
+      "props": {},
+      "acceptsChildren": false
+    },
+    {
+      "id": "summary",
+      "title": "Collection count",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "summary",
+      "props": {},
+      "acceptsChildren": false
+    },
+    {
+      "id": "stack",
+      "title": "Section group",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "stack",
+      "props": {},
+      "acceptsChildren": true
+    },
+    {
+      "id": "text",
+      "title": "Heading",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "text",
+      "props": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "nullable": false
+        },
+        "size": {
+          "type": "number",
+          "required": false,
+          "nullable": false,
+          "min": 14,
+          "max": 32
+        }
+      },
+      "acceptsChildren": false
+    },
+    {
+      "id": "shortcut",
+      "title": "Shortcut",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "shortcut",
+      "props": {
+        "label": {
+          "type": "string",
+          "required": true,
+          "nullable": false
+        }
+      },
+      "acceptsChildren": false
+    },
+    {
+      "id": "card",
+      "title": "Item card",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "kind": "item",
+      "props": {},
+      "acceptsChildren": false
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "home",
+      "title": "Home",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "defaultLayout": [
+        {
+          "id": "intro",
+          "componentId": "intro",
+          "props": {},
+          "children": []
+        },
+        {
+          "id": "featured",
+          "componentId": "featured",
+          "props": {},
+          "children": []
+        },
+        {
+          "id": "library",
+          "componentId": "library",
+          "props": {},
+          "children": []
+        }
+      ],
+      "requiredNodeIds": [
+        "intro"
+      ],
+      "allowedComponentIds": [
+        "intro",
+        "featured",
+        "library",
+        "collection",
+        "summary",
+        "stack",
+        "text",
+        "shortcut"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "catalog",
+      "title": "Recipes",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "completeness": "complete",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "neq",
+            "contains",
+            "in",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ],
+          "sortable": true,
+          "groupable": false
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "neq",
+            "contains",
+            "in",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ],
+          "sortable": true,
+          "groupable": false
+        },
+        "note": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "neq",
+            "contains",
+            "in",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ],
+          "sortable": true,
+          "groupable": false
+        },
+        "category": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "neq",
+            "contains",
+            "in",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ],
+          "sortable": true,
+          "groupable": true
+        },
+        "minutes": {
+          "type": "number",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ],
+          "sortable": true,
+          "groupable": false
+        },
+        "ingredients": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "neq",
+            "contains",
+            "in",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ],
+          "sortable": true,
+          "groupable": false
+        },
+        "favorite": {
+          "type": "boolean",
+          "required": true,
+          "nullable": false,
+          "filterOps": [
+            "eq",
+            "neq"
+          ],
+          "sortable": true,
+          "groupable": false
+        }
+      },
+      "idField": "id",
+      "titleField": "title",
+      "subtitleField": "note",
+      "maxRows": 500,
+      "pageSize": 2,
+      "supportsCount": true,
+      "supportsGrouping": true,
+      "detailDestinationId": "detail",
+      "detailParam": "id"
+    }
+  ],
+  "destinations": [
+    {
+      "id": "home",
+      "title": "Home",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "params": {},
+      "placements": [
+        "tab",
+        "shortcut",
+        "overflow"
+      ],
+      "protected": true
+    },
+    {
+      "id": "customize",
+      "title": "Customize",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "params": {},
+      "placements": [
+        "tab",
+        "shortcut",
+        "overflow"
+      ],
+      "protected": true
+    },
+    {
+      "id": "detail",
+      "title": "Details",
+      "provenance": {
+        "version": 1,
+        "evidence": "examples/shared/src/registry.ts",
+        "status": "developer-reviewed"
+      },
+      "params": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "nullable": false
+        }
+      },
+      "placements": [
+        "shortcut",
+        "overflow"
+      ],
+      "protected": false
+    }
+  ],
+  "themeTokens": {
+    "appearance.mode": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "values": [
+        "light",
+        "dark"
+      ],
+      "default": "light",
+      "consumers": [
+        "Home",
+        "Cards",
+        "Composer",
+        "Personal destinations"
+      ]
+    },
+    "type.scale": {
+      "type": "number",
+      "required": false,
+      "nullable": false,
+      "min": 1,
+      "max": 1.4,
+      "default": 1,
+      "consumers": [
+        "All SDK text",
+        "Host home text"
+      ]
+    },
+    "layout.density": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "values": [
+        "comfortable",
+        "compact"
+      ],
+      "default": "comfortable",
+      "consumers": [
+        "All SDK sections",
+        "Host cards"
+      ]
+    },
+    "shape.radius": {
+      "type": "number",
+      "required": false,
+      "nullable": false,
+      "min": 0,
+      "max": 28,
+      "default": 18,
+      "consumers": [
+        "Cards"
+      ]
+    },
+    "motion.reduced": {
+      "type": "boolean",
+      "required": false,
+      "nullable": false,
+      "default": true,
+      "consumers": [
+        "Static SDK renderer (no motion)"
+      ]
+    }
+  },
+  "defaultNavigation": [
+    {
+      "target": "destination",
+      "id": "home",
+      "label": "My kitchen",
+      "placement": "tab"
+    },
+    {
+      "target": "destination",
+      "id": "customize",
+      "label": "Customize",
+      "placement": "tab"
+    }
+  ],
+  "limits": {
+    "depth": 5,
+    "nodes": 50,
+    "tabs": 4,
+    "sources": 3
+  }
+}

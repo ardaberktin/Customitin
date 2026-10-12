@@ -1,0 +1,13 @@
+{
+  "name": "@customitin/examples",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@customitin/core": "0.1.0-alpha.1",
+    "@customitin/react-native": "0.1.0-alpha.1",
+    "@tanstack/react-query": "5.90.12",
+    "@react-navigation/native": "7.5.0"
+  },
+  "type": "module"
+}
