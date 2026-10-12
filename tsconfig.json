@@ -16,14 +16,13 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "types": ["node"],
-    "baseUrl": ".",
     "paths": {
-      "@customitin/core": ["packages/core/src/index.ts"],
-      "@customitin/react-native": ["packages/react-native/src/index.ts"],
-      "@customitin/react-native/*": ["packages/react-native/src/*"],
-      "@customitin/server": ["packages/server/src/index.ts"],
-      "@customitin/cli": ["packages/cli/src/api.ts"],
-      "@customitin/examples": ["examples/shared/src/index.ts"]
+      "@customitin/core": ["./packages/core/src/index.ts"],
+      "@customitin/react-native": ["./packages/react-native/src/index.ts"],
+      "@customitin/react-native/*": ["./packages/react-native/src/*"],
+      "@customitin/server": ["./packages/server/src/index.ts"],
+      "@customitin/cli": ["./packages/cli/src/api.ts"],
+      "@customitin/examples": ["./examples/shared/src/index.ts"]
     }
   },
   "include": [
