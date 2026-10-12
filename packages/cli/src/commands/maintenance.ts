@@ -9,10 +9,16 @@ import {
   safePath,
 } from './files';
 import { inspectProject } from '../discovery/scan';
-export async function doctorProject(root: string) {
+import { integrationDiagnostics } from './diagnostics';
+import { identityPath } from '../configuration/identity';
+export async function doctorProject(
+  root: string,
+  options: { typecheck?: boolean } = {},
+) {
   const report = await inspectProject(root);
   const ownership = await readOwnership(root);
   const issues: string[] = [];
+  const recommendations: string[] = [];
   if (!ownership) issues.push('No installation manifest. Run init --dry-run.');
   for (const file of ownership?.files ?? [])
     if (
@@ -38,7 +44,10 @@ export async function doctorProject(root: string) {
       issues.push('Invalid capability manifest.');
     }
   }
-  if (!report.versions['@customitin/react-native'])
+  if (
+    !report.versions['@customitin/core'] ||
+    !report.versions['@customitin/react-native']
+  )
     issues.push(
       'Install @customitin/core and @customitin/react-native (local tarballs until published).',
     );
@@ -50,9 +59,17 @@ export async function doctorProject(root: string) {
       'Connect persistent host storage. The scaffold currently uses in-memory preview storage.',
     );
   if (config?.includes('= undefined'))
-    issues.push('Configure the planner endpoint and host authentication.');
+    recommendations.push(
+      'Optional: connect a planner endpoint for natural-language customization. Manual preferences work offline.',
+    );
+  if (config?.includes("scope = 'local-device'"))
+    recommendations.push(
+      'Review local-device scope: connect an account-specific scope before using authenticated data.',
+    );
+  issues.push(...(await integrationDiagnostics(root, !!options.typecheck)));
   return {
     issues,
+    recommendations,
     coverage: report,
     nextChecks: [
       'Run the host typecheck, lint and bundle commands.',
@@ -73,7 +90,8 @@ export async function removeProject(root: string, dryRun = true) {
       conflicts.push(file.path);
       continue;
     }
-    removed.push(file.path);
+    // Overrides can reference past selectors. Retain their identity history for reinstall.
+    if (file.path !== identityPath) removed.push(file.path);
   }
   // Preserve the complete integration if any part has user changes.
   if (!dryRun && conflicts.length === 0) {

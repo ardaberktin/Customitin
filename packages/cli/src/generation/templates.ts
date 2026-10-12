@@ -1,40 +1,52 @@
-import { dirname, relative } from 'node:path';
 import type { CapabilityRegistry } from '@customitin/core';
-import type { DiscoveryReport } from '../discovery/scan';
+import type { DiscoveryReport } from '../discovery/types';
+import type { ResolvedIntegration } from '../configuration/resolve';
+import { generateSources } from './sources';
+import { generateComponents } from './components';
+import { generateNavigation } from './navigation';
+import { generateRoot } from './root';
+export { relativeImport } from './imports';
+
 export function generateFiles(
   report: DiscoveryReport,
   registry: CapabilityRegistry,
+  integration: ResolvedIntegration,
 ): Record<string, string> {
-  const imports = registry.sources.map((source, index) => {
-    const symbol = report.symbols.find((s) => s.id === source.id);
-    if (!symbol) throw new Error('Missing evidence');
-    return `import { ${symbol.name} as load${index} } from ${JSON.stringify('../' + symbol.file.replace(/\.tsx?$/, ''))};`;
-  });
   return {
     'personalize/capabilities.json': JSON.stringify(registry, null, 2) + '\n',
     'personalize/server-manifest.json':
       JSON.stringify(registry, null, 2) + '\n',
-    'personalize/sources.ts': `import { createLocalSource, registrySchema } from '@customitin/core';\nimport capabilities from './capabilities.json';\n${imports.join('\n')}\nconst registry = registrySchema.parse(capabilities);\nexport const sources = {\n${registry.sources
-      .map(
-        (s, i) =>
-          `${JSON.stringify(s.id)}: createLocalSource(registry.sources[${i}]!, async () => (await load${i}()).map(row => ({ ${Object.keys(
-            s.fields,
-          )
-            .map(
-              (field) =>
-                `${JSON.stringify(field)}: row[${JSON.stringify(field)}]`,
-            )
-            .join(', ')} }))),`,
-      )
-      .join('\n')}\n};\n`,
-    'personalize/root.tsx': `import { useState, type ReactNode } from 'react';\nimport { ScrollView, View } from 'react-native';\nimport { registrySchema } from '@customitin/core';\nimport { ActionButton, CustomizableSurface, CustomizationProvider, PersonalizationScreen } from '@customitin/react-native';\nimport capabilities from './capabilities.json';\nimport { sources } from './sources';\nimport { storage, planner, scope } from './config';\nconst registry = registrySchema.parse(capabilities);\nconst bindings = { sources };\nexport function PersonalizationRoot({ children }: { children: ReactNode }) {\n const [screen, setScreen] = useState('original');\n return <CustomizationProvider options={{ registry, storage, scope, planner }} bindings={bindings}><View style={{ flex: 1 }}>{screen === 'customize' ? <PersonalizationScreen /> : screen === 'personal' ? <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ padding: 24 }}><CustomizableSurface id="home" /></ScrollView> : children}<View style={{ flexDirection: 'row', gap: 8, padding: 12 }}><ActionButton label="Original app" onPress={() => setScreen('original')} secondary /><ActionButton label="My space" onPress={() => setScreen('personal')} secondary /><ActionButton label="Customize" onPress={() => setScreen('customize')} /></View></View></CustomizationProvider>;\n}\n`,
-    'personalize/README.md': `# Generated integration\n\nConnected: ${registry.sources.map((s) => s.title).join(', ') || 'appearance and a personal surface only'}.\n\nSource semantics remain developer-reviewed. Original screens are preserved; SDK appearance controls affect SDK surfaces only. Existing navigation and private state are not rewritten. Configure config.ts with persistent host storage, your opaque profile scope, and createHttpPlanner from @customitin/react-native/adapters. Runtime credentials belong on your server. Deploy server-manifest.json with the planner.\n\nTry “use a dark reading theme” or “show ${registry.sources[0]?.title ?? 'my collection'} in a grid” with a connected planner.\n`,
+    'personalize/sources.ts': generateSources(integration),
+    'personalize/components.tsx': generateComponents(integration),
+    'personalize/navigation.ts': generateNavigation(report, integration),
+    'personalize/root.tsx': generateRoot(report),
+    'personalize/README.md': `# Generated Customitin integration
+
+Connected sources: ${registry.sources.map((s) => s.title).join(', ') || 'none yet'}.
+Connected components: ${integration.components.map((c) => c.symbol.name).join(', ') || 'generic cards'}.
+Connected routes: ${integration.routes.map((r) => r.title).join(', ') || 'original app only'}.
+
+Edit overrides.json for capability decisions; edit config.ts for host storage, session and planner configuration. All other files here are generated. Commit bindings.lock.json to retain IDs through file moves. Do not hand-edit generated adapters; supply custom bindings through useHostConfiguration in config.ts.
+
+Run customitin inspect --cwd <app> for selectors. Edit overrides, run customitin refresh --dry-run, review, then refresh --apply. Run customitin doctor and your application checks. Run customitin guide for bundled AI documentation and customitin guide --topic testing for consumer checks.
+
+Original screens stay mounted. Generated UI adds Original app, My space and Customize. Saved view navigation is handled within My space. SDK appearance affects SDK surfaces; existing styles and provider dependencies require a host bridge. Use a user-specific scope on login/account changes. Deploy the matching server-manifest.json with the developer-owned planner. Provider keys belong on the server.
+`,
   };
 }
-export const initialConfig = `import { memoryStorage } from '@customitin/react-native/storage';\nimport type { PlannerTransport } from '@customitin/react-native';\n// Developer-owned file. Replace memory storage with AsyncStorage or encrypted host storage.\nexport const storage = memoryStorage();\nexport const scope = 'local-device';\n// Set a developer-controlled endpoint and host session headers. Never put provider keys here.\nexport const planner: PlannerTransport | undefined = undefined;\n`;
-export function relativeImport(from: string, to: string): string {
-  const path = relative(dirname(from), to)
-    .replace(/\\/g, '/')
-    .replace(/\.tsx?$/, '');
-  return path.startsWith('.') ? path : `./${path}`;
+export function initialConfig(report: DiscoveryReport): string {
+  const persistent =
+    !!report.versions['@react-native-async-storage/async-storage'];
+  return `${persistent ? "import AsyncStorage from '@react-native-async-storage/async-storage';\nimport { asyncStorageAdapter } from '@customitin/react-native/storage';" : "import { memoryStorage } from '@customitin/react-native/storage';"}
+import type { PlannerTransport, RuntimeBindings } from '@customitin/react-native';
+// Developer-owned. This file is never overwritten by refresh or removal.
+export const storage = ${persistent ? 'asyncStorageAdapter(AsyncStorage)' : 'memoryStorage()'};
+export const scope = 'local-device';
+export const planner: PlannerTransport | undefined = undefined;
+// Read your existing session hook here and return a stable user scope.
+// Memoize custom bindings if they depend on session state.
+export function useHostConfiguration(): { scope: string; bindings?: Partial<RuntimeBindings> } {
+  return { scope };
+}
+`;
 }

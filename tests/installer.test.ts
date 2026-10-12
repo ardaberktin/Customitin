@@ -89,6 +89,12 @@ it('installs a compiling fixture, reruns without changes, and restores the origi
           '@customitin/react-native/storage': [
             'packages/react-native/src/storage/index.ts',
           ],
+          '@customitin/react-native/adapters': [
+            'packages/react-native/src/adapters/index.ts',
+          ],
+          '@customitin/react-native/navigation': [
+            'packages/react-native/src/navigation/index.ts',
+          ],
         },
       },
       include: ['*.tsx', '*.ts', 'personalize'],

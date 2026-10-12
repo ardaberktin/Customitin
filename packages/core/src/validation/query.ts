@@ -65,10 +65,12 @@ export function validateView(
   const source = registry.sources.find((s) => s.id === view.sourceId);
   invariant(source, `Unknown collection ${view.sourceId}`);
   validateQuery(view.query, source);
+  const renderer = registry.components.find(
+    (c) => c.id === view.presentation.itemRendererId && c.kind === 'item',
+  );
+  invariant(renderer, 'Unknown item renderer');
   invariant(
-    registry.components.some(
-      (c) => c.id === view.presentation.itemRendererId && c.kind === 'item',
-    ),
-    'Unknown item renderer',
+    !renderer.sourceIds || renderer.sourceIds.includes(view.sourceId),
+    'Item renderer does not support this collection',
   );
 }

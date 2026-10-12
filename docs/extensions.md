@@ -8,7 +8,7 @@ A complete source must return every matching row within its declared row budget,
 
 ## Components and appearance
 
-Declare component kind, validated props, children policy and provenance in the registry. Supply host components and item renderers through `RuntimeBindings`; executable functions stay out of planner metadata. An item renderer receives the approved row, title/subtitle, density and existing detail callback. Only registered destinations receive navigation callbacks. Generic nodes support stack, text, host section, collection, summary and shortcut. Required nodes are preserved exactly.
+Declare component kind, validated props, children policy and provenance in the registry. Supply host components and item renderers through `RuntimeBindings`; executable functions stay out of planner metadata. An item renderer receives the approved row, title/subtitle, density and existing detail callback. Item component descriptors can include sourceIds to restrict them to compatible collections; validateView enforces that restriction. Only registered destinations receive navigation callbacks. Generic nodes support stack, text, host section, collection, summary and shortcut. Required nodes are preserved exactly.
 
 `usePersonalTheme` supports the documented SDK tokens: `appearance.mode`, `type.scale`, `layout.density`, `shape.radius`, and static/reduced motion. Color values are constrained to the two reviewed palettes. To connect an existing theme system, read `useRenderedProfile().theme` in the host theme bridge and map only registered tokens. State which consumers are connected; wrapping the app does not migrate styles automatically.
 
@@ -25,3 +25,11 @@ Pass `StorageAdapter` with async getItem/setItem/removeItem. A single setItem mu
 ## Planner provider
 
 Implement `ModelProvider.generate({ request, registry, repair? }, signal)`. Return a proposal, clarification, unsupported, retryable-error, or rejected response matching core schemas. The handler independently validates every response. Source functions, identity, and secrets never appear in configuration. The mobile runtime uses a separate `PlannerTransport`; a local/on-device planner can implement that interface without a hosted service.
+
+## Generated integrations and query helpers
+
+The CLI derives capabilities from supported TypeScript patterns and merges durable overrides. Start at [AI integration guide](ai/integration.md). Generated files belong to the installer; host custom bindings belong in config.ts's useHostConfiguration hook. Keep shared providers above that integration when its components need them.
+
+The optional /adapters export includes createCachedSource (complete repositories), createQuerySource (validated remote query/context/cursor contract), projectRows (approved-field projection) and queryInvalidation (structural query-cache notifications). These helpers do not import TanStack Query. Generated TanStack adapters reuse the existing client with scope-suffixed keys and subscribe to invalidation/manual cache updates. Infinite query caches are not treated as complete sources.
+
+PersonalizationHost supplies Original app, My space and Customize controls plus saved-view navigation. It preserves the mounted host subtree while personal UI is visible. This maintains navigator/form state but also means existing host effects can continue running; check lifecycle/performance and accessibility on target devices.

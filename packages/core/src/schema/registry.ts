@@ -55,6 +55,7 @@ export const registrySchema = z
             ]),
             props: z.record(idSchema, ruleSchema),
             acceptsChildren: z.boolean(),
+            sourceIds: z.array(idSchema).max(30).optional(),
           })
           .strict(),
       )

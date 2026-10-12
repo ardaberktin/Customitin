@@ -52,9 +52,15 @@ npm run cli -- refresh --cwd /absolute/path/to/app --dry-run
 npm run cli -- remove --cwd /absolute/path/to/app --apply
 ```
 
-The first automatic data adapter supports exported zero-argument functions returning a typed complete array with an `id` field and primitive, non-nullable fields. A `@customitinComplete` JSDoc tag is an explicit host completeness contract, not an inference from a cache. Without that declaration the installer reports the ambiguity and generates appearance/surface scaffolding. The automatically wired root must be a default function returning one JSX expression. Hooks, conditional roots, nested navigator rewrites, existing style migration and business semantics require review.
+The CLI discovers typed array loaders, exported repository methods, zero-argument TanStack Query option factories and explicit paginated query contracts. It derives scalar fields, enums, nullable values, component props and route parameters. Existing exported query clients and React Navigation refs can be reused; Expo Router routes have generated bindings.
 
-The generated integration gives the host an original screen, a personal surface, and a customization entry point. It does **not** claim complete control over the host's private screens or styles. `personalize/config.ts` is developer-owned and is never overwritten. Connect persistent storage, active profile scope, and planner headers there. See [installer coverage](docs/installer.md).
+Use `--complete <selector>` to confirm an unannotated complete source, `--component <selector>` and `--route <selector>` to enable discovered UI capabilities. These repeatable flags save decisions in developer-owned `personalize/overrides.json`. Use field allowlists and query operator overrides there; `customitin schema` prints its exact schema. `personalize/config.ts` supplies host session/scope, planner and custom bindings. Neither developer-owned file is removed by uninstall.
+
+The installer creates a personal surface, saved-view navigation and a customization entry point while keeping the original app mounted. It supports simple default function/arrow roots. Existing provider placement, nested navigator rewrites, hooks, private state and style migration still need host review. AsyncStorage is wired automatically when already installed; otherwise the scaffold uses memory storage and doctor reports it.
+
+`personalize/bindings.lock.json` preserves capability IDs and source selections through refreshes. File moves with unique unchanged export names retain IDs; explicit symbol overrides handle renames. Commit the lock with the integration. Generated file edits block refresh/removal instead of being overwritten. `doctor --typecheck` checks the host and generated TypeScript without executing host scripts.
+
+Start an AI-assisted integration with [llms.txt](llms.txt), the [AI playbook](docs/ai/integration.md), or `npm run cli -- guide`. Every built package includes the guides under `dist/docs`; the CLI can print individual chapters with `guide --topic contracts`. See the [CLI reference](docs/ai/cli-reference.md) and [installer coverage](docs/installer.md).
 
 Optional installer AI analysis requires `CUSTOMITIN_INSTALLER_API_KEY`, `CUSTOMITIN_INSTALLER_MODEL`, `--ai`, and `--approve-context <digest>` matching the locally reviewed `inspect --context` output. Only bounded symbol signatures and locations are transmitted, never file bodies, environment files, or domain records. There is no vendor service or required vendor account.
 
@@ -71,3 +77,5 @@ npm run bundle -w @customitin/movie-example
 See [verification record](docs/verification.md), [compatibility](docs/compatibility.md), [extension contracts](docs/extensions.md), and [remaining release gates](docs/release-checklist.md). Saved configurations contain no collection records or prompt history. AsyncStorage is unencrypted: supply encrypted host storage if layout labels or filters are sensitive.
 
 MIT licensed. No telemetry. No payments, deletions, arbitrary code, SQL, or model-selected network execution.
+
+Fresh-install verification is reproducible with `npm run test:consumer`; it creates an official React Native app and exercises packed artifacts without workspace aliases. `npm run pack:local -- /tmp/customitin-packages` builds tarballs and prints install commands. Read the [AI testing guide](docs/ai/testing.md) and [fresh-app results](docs/fresh-app-verification.md) for scope and remaining native/deployment checks.

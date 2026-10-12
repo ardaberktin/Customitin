@@ -1,0 +1,25 @@
+# Customitin
+
+> Local-first React Native personalization SDK. Functional alpha; packages are not published. Prefer the CLI and durable overrides over hand-written registries.
+
+## Start here
+
+- [AI documentation index](docs/ai/index.md)
+- [Integration playbook](docs/ai/integration.md)
+- [Source, component and navigation contracts](docs/ai/contracts.md)
+- [Overrides, stable IDs and maintenance](docs/ai/maintenance.md)
+- [Troubleshooting and verification](docs/ai/troubleshooting.md)
+- [Fresh consumer testing](docs/ai/testing.md)
+- [CLI reference](docs/ai/cli-reference.md)
+- [Single-file documentation](llms-full.txt)
+
+## Additional references
+
+- [Architecture and quick start](README.md)
+- [Runtime extension contracts](docs/extensions.md)
+- [Planner deployment](docs/deployment.md)
+- [Supported compatibility](docs/compatibility.md)
+- [Native testing](docs/native-testing.md)
+- [Release gates](docs/release-checklist.md)
+
+Use inspect to discover exact symbols. Use schema for the authoritative overrides format. Never infer completeness from an array/cache, run hooks outside React, or put model keys in the app. Generated files belong to the CLI; config.ts and overrides.json belong to the developer.

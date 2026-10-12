@@ -1,4 +1,5 @@
 import { build } from 'tsup';
+import { cp } from 'node:fs/promises';
 for (const name of ['core', 'react-native', 'server', 'cli']) {
   const entry =
     name === 'react-native'
@@ -29,7 +30,9 @@ for (const name of ['core', 'react-native', 'server', 'cli']) {
       'react-native',
       'zod',
       'ts-morph',
+      'prettier',
     ],
     target: 'es2022',
   });
+  await cp('docs/ai', `packages/${name}/dist/docs`, { recursive: true });
 }

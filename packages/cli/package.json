@@ -28,7 +28,8 @@
     "@customitin/core": "0.1.0-alpha.1",
     "zod": "4.1.13",
     "ts-morph": "27.0.2",
-    "@customitin/server": "0.1.0-alpha.1"
+    "@customitin/server": "0.1.0-alpha.1",
+    "prettier": "3.7.4"
   },
   "bin": {
     "customitin": "./dist/index.js"

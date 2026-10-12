@@ -1,5 +1,8 @@
 /** Main language only. Hosts can supply translated strings in a future minor release. */
 export const en = {
+  originalApp: 'Original app',
+  mySpace: 'My space',
+  customize: 'Customize',
   title: 'Make room for you.',
   subtitle: 'A quieter layout. Bigger text. Your favorite things, closer.',
   prompt: 'What would make this space feel more like yours?',

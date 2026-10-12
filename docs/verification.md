@@ -2,6 +2,18 @@
 
 Recorded October 11, 2026 on macOS arm64 with Node 24.15.0. This is a functional alpha verification record, not a public-release certification. The supplied specification is preserved in [original-plan.md](original-plan.md).
 
+## Fresh-app acceptance — October 12, 2026
+
+The follow-up [fresh React Native verification](fresh-app-verification.md) used actual tarballs and the packaged CLI in independent official templates. It passed the 58-test SDK check, three native consumer interaction tests, both platform Metro bundles, lifecycle/override checks, three browser regressions, an iOS simulator build and interactive native customization/data/navigation checks. It fixed native package resolution, shared-provider placement, safe areas, generated lint/formatting, offline diagnostics and reinstall identity. No live provider or physical device was used.
+
+## CLI integration update — October 12, 2026 (earlier run)
+
+The expanded installer was verified with `npm run check`: strict TypeScript, zero-warning lint, formatting, 53 tests across 11 files, ESM/CJS/declaration builds for all four packages, mobile boundaries and AI documentation freshness checks. New fixtures compile generated complete-repository, TanStack Query, paginated-contract, component, Expo Router and React Navigation integrations. Tests also cover field allowlists, persistent identity and selections, explicit renames, ownership conflicts, cache invalidation/cancellation, source-restricted renderers and the generated shell's interactions.
+
+All three cross-app Playwright acceptance tests passed using the installed Chromium headless revision 1223 through `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. The configured default browser revision 1200 was absent, and the initial sandbox disallowed loopback server binding; the successful run used local server/browser permissions. Expo's offline dependency-validation notices are expected in this test configuration.
+
+The CLI guide was exercised from source and built output; a package dry-run confirmed all six AI guide chapters are included. No npm packages were published. This update did not rerun native exports, simulator/device tests or live model-provider evaluation; the older results below remain a historical record, not evidence for new native behavior.
+
 ## Passed
 
 | Check             | Result                                                                                                          |
@@ -44,14 +56,14 @@ GitHub Actions is configured to run these commands. No remote CI run is claimed;
 ## Open verification and release work
 
 - Android interactive acceptance remains unverified: the local API 35 emulator's System UI became unresponsive. Android production JavaScript/Hermes exports succeeded, which is a separate check.
-- No signed iOS/Android app, native bare-app compilation, physical-device performance measurement, full accessibility audit, or independent pilot installation has been performed. Maestro flow source is supplied but was not run.
+- No signed iOS/Android app, physical-device performance measurement, full accessibility audit, or external pilot installation has been performed. Native bare-app simulator compilation and a local independent fresh-app installation are covered by the follow-up record above. Maestro flow source is supplied but was not run.
 - OpenAI/Anthropic adapters passed mocked HTTP contract tests. No live provider key was used, no paid inference was performed, and the proposed 60-request semantic-quality target remains unmeasured. Demo prompts are deterministic and labelled accordingly.
-- Installer automation is bounded to evidenced complete typed repositories and simple function roots. Nested navigation/theme migrations and advanced query patterns still need developer adapters; see [installer coverage](installer.md).
+- Installer automation now covers the patterns in the October 12 update. Nested navigation/theme migrations, arbitrary hooks, providers hidden inside host components and parameterized/infinite query patterns still need host adapters; see [installer coverage](installer.md).
 - The renderer bounds query work and row counts, but has not met a measured physical-device scrolling or memory budget. Large-list virtualization remains follow-up release work.
 
 ## Dependency audit
 
-The final `npm audit` reports **40 affected dependency entries: 32 high, eight moderate, zero critical**. These counts include parent packages inheriting transitive findings; the remaining underlying advisories are:
+The October 11 `npm audit` reported **40 affected dependency entries: 32 high, eight moderate, zero critical**. These counts include parent packages inheriting transitive findings; the remaining underlying advisories are:
 
 | Dependency             | Advisory                                                                                        | Current limitation                                                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |

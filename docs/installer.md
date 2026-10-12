@@ -1,27 +1,27 @@
 # Installer coverage and ownership
 
-Discovery reads TypeScript, package manifests, and tsconfig as data. It does not import application modules or execute project scripts. Exported symbols have file/line evidence. Secret-like files, dependency/build/native directories, symlinks, and files with detected credential literals are excluded from selected AI context. Context consists of synthesized signatures and locations, not source bodies or comments. It is inspectable with `inspect --context`; the SHA-256 digest must match before optional AI transmission.
+Read the [AI integration playbook](ai/integration.md), [contracts](ai/contracts.md), [override/refresh guide](ai/maintenance.md), and [CLI reference](ai/cli-reference.md) for complete instructions. `customitin guide` exposes these guides without network access; `customitin schema` exposes the actual override schema.
 
-Supported automatic binding: exported zero-argument typed array loader, primitive non-nullable fields, `id`, and the explicit `@customitinComplete` contract. The source remains proposed until a developer verifies its semantics. There are generic cards when component prop contracts cannot be proven. Hook functions are reported for a hook-safe adapter, never invoked as ordinary loaders. Paginated endpoints and query factories can use the public runtime adapter; automatic extraction of those patterns is a documented alpha gap.
+## Discovery and generation
 
-Supported root edit: a named default function with one top-level JSX return. AST editing adds a `PersonalizationRoot` wrapper without changing existing JSX. This creates a separate personal surface and an explicit entry control. The original component remains available. Existing nested navigation is not rewritten, hardcoded styles are not migrated, and the wrapper does not expose private application state.
+Discovery reads TypeScript as data, resolves its type graph and does not execute app modules or package scripts. It handles exported functions, arrow loaders, repository methods, scalar-record component props, zero-argument query-option factories, query clients, Expo routes and explicit React Navigation ParamList aliases/refs. Scalar enums and nullable/optional values are supported; nested records stay unexposed.
 
-`init` and `refresh` are dry-run by default and print exact proposed file content plus changes and conflicts. `--apply` explicitly writes the reviewed integration. `personalize/config.ts` is always developer-owned. The ownership manifest stores generated hashes and original root content. Repeated install is a no-op with the same evidence. Changed generated files block refresh. Removal refuses the entire removal when an owned file has drifted, preventing a partially broken integration; it never removes config.ts. A crash during installation remains diagnosable from ownership hashes. Refresh supports template regeneration; resolving consumer changes is a manual review step.
+Complete array repositories require @customitinComplete or a reviewed completeness override. This is a host completeness contract, not an inference from a cache. Paginated functions require @customitinQuery and the documented query/context/cursor contract. Remote operators must be explicitly declared. Query factories use the existing selected QueryClient with scoped keys and invalidation subscriptions; arbitrary hooks/infinite queries need host adapters.
 
-The doctor checks ownership drift, mobile/server manifest agreement, required SDK dependencies, and default in-memory/unconfigured-endpoint placeholders. Consumers run their existing typecheck, lint, adapter tests, and bundle scripts explicitly; the CLI does not execute unknown project scripts. Tests compile a clean generated consumer and compare the original source after removal. Model-selected shell commands and arbitrary model-generated code are never executed.
+Components require --component, an enabled override, or @customitinComponent. Supported host sections have scalar props; item cards have one compatible scalar-record prop and optional onPress. Generated item descriptors restrict their source IDs. Context providers, complex required props and active forms require host wrappers. Routes are discovered but only enabled explicitly. Expo catch-all routes and nested React Navigation params require custom bindings.
 
-For a source you have verified complete:
+Default function and arrow roots returning a single JSX expression/fragment can be wrapped. Conditional returns and higher-order roots are diagnosed instead of rewritten. The generated shell keeps the original app mounted and offers Original app, My space and Customize, including saved-view navigation inside My space. It does not rewrite the host tab navigator or migrate styles.
 
-```ts
-interface Item {
-  id: string;
-  title: string;
-  available: boolean;
-}
-/** @customitinComplete */
-export async function loadItems(): Promise<Item[]> {
-  return existingRepository.readAll();
-}
-```
+## Persistent configuration
 
-The model may select only discovered, complete symbols. Ambiguous fields remain unresolved. A metadata confidence score is never treated as verification. App identity derives from the package name and stays stable across checkout paths. Use a unique package name and review identity changes when renaming an app.
+config.ts and overrides.json are developer-owned. Generated bindings/manifests and bindings.lock.json are installer-owned. The lock retains stable IDs across unique file moves and reviewed symbol rebindings. Semantic manifest revisions exclude source evidence locations. Optional AI source selections persist across refreshes. Older installations preserve matching legacy source IDs during their first lock migration.
+
+init/refresh are dry-run by default and print exact generated content, new developer-owned setup, changes, conflicts and unresolved items. --apply writes the plan; --dry-run wins when both are supplied. Selection flags explicitly merge requested decisions into overrides. Existing config is never overwritten. Generated-file drift blocks replacement/removal. remove restores the original root and leaves config/overrides.
+
+## Diagnostics and context
+
+Doctor checks ownership, manifest agreement, source/override resolution, generated changes and storage/planner/scope placeholders. --typecheck adds static host/generated TypeScript diagnostics; it does not run package scripts. Developers still run host lint, adapter tests, interaction tests and bundles.
+
+Secret-like filenames, dependency/build/native directories, symlinks and files with detected credential literals are excluded from selected AI context. Context consists of synthesized signatures, prop/field contracts and route locations; never function bodies, comments, environment files or domain records. Literal enum metadata can still be private. Review inspect --context; its SHA-256 digest must match before optional transmission. The model selects only existing complete sources and never emits executable installer code or shell commands.
+
+The test suite compiles generated consumers using actual installed framework types, checks stable identity through moves/renames, validates cache invalidation/cancellation and exercises generated-shell interactions. Physical devices, live provider behavior and independent pilots remain separate release checks.

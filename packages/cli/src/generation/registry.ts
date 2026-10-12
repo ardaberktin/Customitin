@@ -1,54 +1,72 @@
+import { createHash } from 'node:crypto';
 import {
   createProfile,
   registrySchema,
+  validateValues,
   type CapabilityRegistry,
 } from '@customitin/core';
-import type { DiscoveryReport } from '../discovery/scan';
+import type { DiscoveryReport } from '../discovery/types';
+import type { ResolvedIntegration } from '../configuration/resolve';
+import { sourceDescriptor } from './source-descriptor';
+
 export function generateRegistry(
   report: DiscoveryReport,
-  selectedIds?: string[],
+  integration: ResolvedIntegration,
 ): CapabilityRegistry {
-  const sources = report.symbols.filter(
-    (s) =>
-      s.kind === 'source' &&
-      s.complete &&
-      (!selectedIds || selectedIds.includes(s.id)) &&
-      s.fields.id &&
-      Object.values(s.fields).every((f) => !f.nullable),
-  );
   const provenance = {
     version: 1,
     evidence: 'Installer template',
-    status: 'proposed' as const,
+    status: 'proposed',
   };
+  const generic = [
+    {
+      id: 'welcome',
+      title: 'Welcome',
+      kind: 'text',
+      props: { text: { type: 'string', required: true } },
+    },
+    { id: 'collection', title: 'Collection', kind: 'collection', props: {} },
+    { id: 'item', title: 'Item card', kind: 'item', props: {} },
+    {
+      id: 'shortcut',
+      title: 'Shortcut',
+      kind: 'shortcut',
+      props: { label: { type: 'string', required: true } },
+    },
+  ];
+  const components = integration.components.map(
+    ({ symbol, options, sourceId }) => {
+      validateValues(options.defaults, symbol.props, symbol.name, false);
+      return {
+        id: symbol.id,
+        title: options.title ?? symbol.name,
+        kind: sourceId ? 'item' : 'host',
+        ...(sourceId ? { sourceIds: [sourceId] } : {}),
+        acceptsChildren: false,
+        props: sourceId
+          ? {}
+          : Object.fromEntries(
+              Object.entries(symbol.props).map(([name, rule]) => [
+                name,
+                {
+                  ...rule,
+                  required: rule.required && !(name in options.defaults),
+                },
+              ]),
+            ),
+        provenance: {
+          ...provenance,
+          evidence: `${symbol.file}:${symbol.line}`,
+        },
+      };
+    },
+  );
   const registry = registrySchema.parse({
-    appId: 'installed-app',
-    revision: `r-${report.contextDigest.slice(0, 16)}`,
+    appId: report.appId,
+    revision: 'pending',
     components: [
-      {
-        id: 'welcome',
-        title: 'Welcome',
-        kind: 'text',
-        props: { text: { type: 'string', required: true } },
-        acceptsChildren: false,
-        provenance,
-      },
-      {
-        id: 'collection',
-        title: 'Collection',
-        kind: 'collection',
-        props: {},
-        acceptsChildren: false,
-        provenance,
-      },
-      {
-        id: 'item',
-        title: 'Item card',
-        kind: 'item',
-        props: {},
-        acceptsChildren: false,
-        provenance,
-      },
+      ...generic.map((c) => ({ ...c, provenance, acceptsChildren: false })),
+      ...components,
     ],
     surfaces: [
       {
@@ -64,40 +82,15 @@ export function generateRegistry(
           },
         ],
         requiredNodeIds: [],
-        allowedComponentIds: ['welcome', 'collection'],
+        allowedComponentIds: [
+          'welcome',
+          'collection',
+          'shortcut',
+          ...components.filter((c) => c.kind === 'host').map((c) => c.id),
+        ],
       },
     ],
-    sources: sources.map((s) => ({
-      id: s.id,
-      title: s.name,
-      provenance: { ...provenance, evidence: `${s.file}:${s.line}` },
-      completeness: 'complete',
-      fields: Object.fromEntries(
-        Object.entries(s.fields).map(([name, rule]) => [
-          name,
-          {
-            ...rule,
-            filterOps:
-              rule.type === 'boolean'
-                ? ['eq', 'neq']
-                : rule.type === 'number'
-                  ? ['eq', 'lt', 'lte', 'gt', 'gte']
-                  : ['eq', 'contains'],
-            sortable: true,
-            groupable: true,
-          },
-        ]),
-      ),
-      idField: 'id',
-      titleField:
-        Object.keys(s.fields).find((f) =>
-          ['title', 'name', 'label'].includes(f),
-        ) ?? 'id',
-      maxRows: 500,
-      pageSize: 50,
-      supportsCount: true,
-      supportsGrouping: true,
-    })),
+    sources: integration.sources.map((s) => sourceDescriptor(s, integration)),
     destinations: [
       {
         id: 'original',
@@ -107,6 +100,14 @@ export function generateRegistry(
         protected: true,
         provenance,
       },
+      ...integration.routes.map(({ route, title }) => ({
+        id: route.id,
+        title,
+        params: route.params,
+        placements: ['shortcut', 'overflow'],
+        protected: false,
+        provenance: { ...provenance, evidence: route.file },
+      })),
     ],
     defaultNavigation: [
       {
@@ -139,7 +140,15 @@ export function generateRegistry(
     },
     limits: { depth: 5, nodes: 40, tabs: 4, sources: 3 },
   });
-  registry.appId = report.appId;
+  // Locations are evidence, not a capability change. Moving a file must not obsolete profiles.
+  registry.sources.sort((a, b) => a.id.localeCompare(b.id));
+  registry.components.sort((a, b) => a.id.localeCompare(b.id));
+  registry.destinations.sort((a, b) => a.id.localeCompare(b.id));
+  for (const surface of registry.surfaces) surface.allowedComponentIds.sort();
+  const semantics = JSON.stringify(registry, (key, value: unknown) =>
+    key === 'provenance' || key === 'revision' ? undefined : value,
+  );
+  registry.revision = `r-${createHash('sha256').update(semantics).digest('hex').slice(0, 16)}`;
   createProfile(registry, 'validation');
   return registry;
 }
