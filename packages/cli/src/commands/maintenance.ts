@@ -5,27 +5,36 @@ import {
   hash,
   manifestPath,
   readOptional,
-  readOwnership,
   safePath,
 } from './files';
 import { inspectProject } from '../discovery/scan';
 import { integrationDiagnostics } from './diagnostics';
 import { identityPath } from '../configuration/identity';
+import { restoreHost } from '../generation/restore-host';
+import { readHostOwnership } from './host-ownership';
 export async function doctorProject(
   root: string,
   options: { typecheck?: boolean } = {},
 ) {
   const report = await inspectProject(root);
-  const ownership = await readOwnership(root);
+  const ownership = await readHostOwnership(root);
   const issues: string[] = [];
   const recommendations: string[] = [];
   if (!ownership) issues.push('No installation manifest. Run init --dry-run.');
-  for (const file of ownership?.files ?? [])
-    if (
-      hash((await readOptional(await safePath(root, file.path))) ?? '') !==
-      file.hash
-    )
-      issues.push(`Drift: ${file.path}`);
+  for (const file of ownership?.files ?? []) {
+    const current = await readOptional(await safePath(root, file.path));
+    if (current === null) {
+      issues.push(`Missing: ${file.path}`);
+      continue;
+    }
+    if (file.host) {
+      try {
+        restoreHost(file.path, current, file);
+      } catch (error) {
+        issues.push(`${file.path}: ${(error as Error).message}`);
+      }
+    } else if (hash(current) !== file.hash) issues.push(`Drift: ${file.path}`);
+  }
   const mobile = await readOptional(
     await safePath(root, 'personalize/capabilities.json'),
   );
@@ -78,15 +87,22 @@ export async function doctorProject(
   };
 }
 export async function removeProject(root: string, dryRun = true) {
-  const manifest = await readOwnership(root);
+  const manifest = await readHostOwnership(root);
   if (!manifest) return { removed: [], conflicts: [] };
   const conflicts: string[] = [];
   const removed: string[] = [];
+  const restored = new Map<string, string | null>();
   for (const file of manifest.files) {
     const path = await safePath(root, file.path);
     const current = await readOptional(path);
     if (current === null) continue;
-    if (hash(current) !== file.hash) {
+    try {
+      if (file.host)
+        restored.set(file.path, restoreHost(file.path, current, file));
+      else if (hash(current) !== file.hash)
+        throw new Error('Generated file drift');
+      else restored.set(file.path, file.before);
+    } catch {
       conflicts.push(file.path);
       continue;
     }
@@ -96,8 +112,9 @@ export async function removeProject(root: string, dryRun = true) {
   // Preserve the complete integration if any part has user changes.
   if (!dryRun && conflicts.length === 0) {
     for (const file of manifest.files.filter((f) => removed.includes(f.path))) {
-      if (file.before === null) await unlink(await safePath(root, file.path));
-      else await atomicWrite(root, file.path, file.before);
+      const content = restored.get(file.path)!;
+      if (content === null) await unlink(await safePath(root, file.path));
+      else await atomicWrite(root, file.path, content);
     }
     await unlink(await safePath(root, manifestPath));
   }

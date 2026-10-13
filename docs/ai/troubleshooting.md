@@ -17,6 +17,8 @@
 | Planner unavailable                  | No endpoint, invalid session, revision mismatch or provider failure     | Verify backend configuration and matching manifest; inspect safe server diagnostics |
 | Refresh required                     | Source/override/template changed                                        | Review refresh --dry-run, then apply and recheck                                    |
 | Drift                                | Someone edited an owned file                                            | Preserve those edits in config/host code; resolve deliberately before regeneration  |
+| SDK wrapper props/imports changed    | A generated host boundary was altered                                   | Restore the indicated SDK syntax; ordinary host JSX/logic can remain edited         |
+| Project changed while planning       | A new save arrived during regeneration                                  | Let watch retry after the next save settles, or rerun refresh                       |
 
 Generated sources and routes are typed but still depend on truthful host contracts. A passing typecheck does not prove completeness, correct filtering, authorization or visual quality.
 

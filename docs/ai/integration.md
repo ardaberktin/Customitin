@@ -37,6 +37,19 @@ Use the developer's existing AI to read this report and the application's own re
 
 ## 2. Make the few semantic decisions once
 
+For existing-screen customization, start with the screen metadata in `inspect`. Enable the intended exported screens (selectors are examples; use the report's actual values):
+
+```sh
+npx --no-install customitin init --screen 'src/screens/Home.tsx#Home' --dry-run
+npx --no-install customitin init --screen 'src/screens/Home.tsx#Home' --apply
+```
+
+Repeat `--screen` for additional screens. No source adapters, navigation ref, hand-written registry, or model key are needed just to personalize an existing screen. The original screen continues to obtain its own data and run its own callbacks. Generated root wiring uses CustomizationProvider, leaving the host navigator in place. The selected screens receive inline controls instead of a separate My space.
+
+After installation, edit the screens' ordinary JSX, hooks and handlers in place. Content/style changes use normal Fast Refresh. Run `npx --no-install customitin watch --apply` alongside the existing dev server to update section registration automatically after structural edits. No removal/reinstall cycle is needed. One-shot `refresh --apply` is also available; keep React section keys stable and leave the generated wrapper ID/sectionIds props alone. See [editable host ownership](maintenance.md#file-ownership).
+
+Supported screens return a vertical React Native View/ScrollView with static JSX sections. Give repeated siblings stable string `key` or `testID` values; wrap mapped/conditional groups in a keyed View. Inspect reports the sections or an actionable reason automatic instrumentation is unavailable. Review the dry-run and mark business-critical sections with `screens[selector].requiredSections` in overrides before shipping. Section labels default to the key/testID or component name. See [exact screen contracts](contracts.md#existing-screens) for layout and appearance boundaries.
+
 A source with @customitinComplete is automatically eligible. For an unannotated array loader you have verified returns the entire authorized collection, use `--complete`. Enable suitable display components and routes using repeatable flags:
 
 ```sh
@@ -82,7 +95,7 @@ export function useHostConfiguration() {
 
 `localProfileKey` above is illustrative, not an SDK session property. Choose the app's actual stable opaque account scope. Change it immediately on logout/account switching. The SDK clears active personalization and cancels pending work when its scope changes. Host query keys/authentication must also isolate users.
 
-The generated root merges custom sources, components and items over generated bindings. `bindings.navigate` can replace generated navigation. Custom hooks must be under their required providers. The CLI preserves visible outer JSX provider chains whose names end in Provider (including Context.Provider). Providers hidden inside other components or navigators need a shared host wrapper arranged before init. For an installed root, remove the owned integration before restructuring the host root, then reinstall; config, overrides and identity history survive. Do not hand-edit personalize/root.tsx. Keep options and custom bindings stable/memoized to avoid unnecessary runtime resets or data reloads.
+The generated root merges custom sources, components and items over generated bindings. `bindings.navigate` can replace generated navigation. Custom hooks must be under their required providers. The CLI preserves visible outer JSX provider chains whose names end in Provider (including Context.Provider). Providers hidden inside other components or navigators need a shared host wrapper arranged before init. Edit an installed host root normally while retaining its PersonalizationRoot boundary; refresh preserves the changes and recalculates supported provider placement. Do not hand-edit personalize/root.tsx. Keep options and custom bindings stable/memoized to avoid unnecessary runtime resets or data reloads.
 
 ## 4. Connect the assistant
 
@@ -102,6 +115,8 @@ Then run the host's lint, tests and bundle commands. Doctor's typecheck is stati
 
 Report the actual connected source/component/route names, storage, account scope, planner status, checks and manual deployment/device work. Commit generated files, overrides, config and bindings.lock.json together. Subsequent app changes use refresh, not a new manually written registry.
 
-The generated My space initially displays a welcome message. Registering sources, cards and routes makes them available for proposals; it does not automatically insert them into a saved layout. Appearance controls work immediately without a planner. See [testing](testing.md) for a deterministic proposal that exercises data/card/navigation integration without buying model credits, and for the native Jest setup. Do not ship the test planner as a natural-language assistant.
+For selected existing screens, exercise each original route, customize its layout, hide/show a section containing local state, apply, restart, undo, and restore. Confirm the app's existing callbacks and provider context still work. Check native layout, keyboard/focus and accessibility because section wrappers can affect flex geometry. Text scaling applies only to explicit fontSize/lineHeight values in connected Text nodes, and compact spacing scales numeric gap/rowGap/columnGap values. It does not restyle imported custom component internals.
+
+When no screens are selected, the generated My space initially displays a welcome message. Registering sources, cards and routes makes them available for proposals; it does not automatically insert them into a saved layout. Appearance controls work immediately without a planner. See [testing](testing.md) for a deterministic proposal that exercises data/card/navigation integration without buying model credits, and for the native Jest setup. Do not ship the test planner as a natural-language assistant.
 
 When react-native-safe-area-context is already installed, generation connects its provider/insets to the SDK shell automatically. Personal panels and shell buttons stay inside the safe area while the original navigator retains its own layout. The SDK itself has no mandatory safe-area dependency; custom hosts can pass insets directly to PersonalizationHost.

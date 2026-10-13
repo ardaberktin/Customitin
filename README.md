@@ -2,6 +2,10 @@
 
 An open-source, local-first personalization SDK for React Native. Users describe a change, preview it, and apply it to their own space. Applications keep their existing data clients and authentication. Developers own their planner endpoint and AI credentials.
 
+Existing screens can also be personalized in place. Select a supported screen with `customitin init --screen 'src/screens/Home.tsx#Home' --dry-run`, then repeat with `--apply`. The CLI retains its original JSX/data/callbacks and adds section reorder/hide, text-size/spacing preferences, preview/apply, undo and layout restoration directly to that screen. This path uses the app's existing navigation and does not add My space. See [screen contracts and boundaries](docs/ai/contracts.md#existing-screens).
+
+Keep editing those screens normally. Content, styles and handlers work with Fast Refresh; run `customitin watch --apply` alongside the existing dev server to regenerate section bindings after structural changes. Refresh and removal preserve current host edits. Keep section keys stable and generated SDK wrapper props/imports intact. See the [maintenance workflow](docs/ai/maintenance.md).
+
 **Status: functional 0.1 alpha.** Four buildable packages, three working reference applications, a bounded installer, and deterministic tests. The full public-release targets in the original plan (independent pilots, hardware performance budgets, store builds, and live-provider evaluations) remain release gates, not claims of completion.
 
 ## Run it
@@ -56,7 +60,7 @@ The CLI discovers typed array loaders, exported repository methods, zero-argumen
 
 Use `--complete <selector>` to confirm an unannotated complete source, `--component <selector>` and `--route <selector>` to enable discovered UI capabilities. These repeatable flags save decisions in developer-owned `personalize/overrides.json`. Use field allowlists and query operator overrides there; `customitin schema` prints its exact schema. `personalize/config.ts` supplies host session/scope, planner and custom bindings. Neither developer-owned file is removed by uninstall.
 
-The installer creates a personal surface, saved-view navigation and a customization entry point while keeping the original app mounted. It supports simple default function/arrow roots. Existing provider placement, nested navigator rewrites, hooks, private state and style migration still need host review. AsyncStorage is wired automatically when already installed; otherwise the scaffold uses memory storage and doctor reports it.
+Without screen selections, the installer creates a personal surface, saved-view navigation and a customization entry point while keeping the original app mounted. With `--screen`, it instruments selected vertical View/ScrollView screens instead. It supports simple default function/arrow roots and retains hooks/callbacks inside selected screens. Existing provider placement, nested navigator rewrites, flex-dependent section geometry and deep style migration still need host review. AsyncStorage is wired automatically when already installed; otherwise the scaffold uses memory storage and doctor reports it.
 
 `personalize/bindings.lock.json` preserves capability IDs and source selections through refreshes. File moves with unique unchanged export names retain IDs; explicit symbol overrides handle renames. Commit the lock with the integration. Generated file edits block refresh/removal instead of being overwritten. `doctor --typecheck` checks the host and generated TypeScript without executing host scripts.
 

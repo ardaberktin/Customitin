@@ -31,6 +31,14 @@ export function validateLayout(
 ): Set<string> {
   const surface = registry.surfaces.find((s) => s.id === surfaceId);
   invariant(surface, `Unknown surface ${surfaceId}`);
+  if (surface.kind === 'screen')
+    for (const node of nodes)
+      invariant(
+        surface.defaultLayout.some(
+          (original) => JSON.stringify(original) === JSON.stringify(node),
+        ),
+        'Existing screen sections may only be reordered or hidden',
+      );
   const ids = new Set<string>();
   const sources = new Set<string>();
   function visit(node: LayoutNode, depth: number): void {

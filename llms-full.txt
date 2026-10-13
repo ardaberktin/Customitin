@@ -22,7 +22,9 @@ In a built CLI package, `customitin guide` prints this page; `customitin guide -
 
 A capability registry describes approved components, sources, navigation destinations, theme tokens and customizable surfaces. A source adapter executes a validated query through host code. A saved profile contains configuration, not domain records. A planner proposes schema-validated operations. The mobile runtime previews them and persists only after the user applies them.
 
-The SDK does not migrate every existing screen or style. Generated integrations preserve the original app and add My space and Customize. The original navigator stays mounted. The CLI keeps visible outer JSX provider chains (names ending in Provider, including Context.Provider) above the personal UI. Providers hidden inside another component or navigator still need a shared host wrapper; arrange that before init. For an installed root, use the documented removal/reinstall workflow before restructuring it so ownership checks remain intact.
+To personalize existing UI, use `inspect` and enable supported screen selectors with `init --screen <selector>`. The CLI instruments the selected screen's existing JSX, registers its sections, and mounts a provider around the original app. Each selected screen gets its own customization controls; this mode does not add My space or replace navigation. Users can reorder/hide optional sections, preview/apply, undo, restore the layout, and change connected text sizes/spacing without a planner. Hooks, callbacks and data stay in host code. See [screen contracts](contracts.md#existing-screens).
+
+Without screen selections, generated integrations retain the separate My space/Customize shell. Neither mode migrates every existing screen or style. The CLI keeps visible outer JSX provider chains (names ending in Provider, including Context.Provider) above personalization. Providers hidden inside another component or navigator still need a shared host wrapper. Edit host screens/root normally and use watch --apply alongside the dev server to regenerate section bindings; refresh/remove preserve current host edits. Keep the generated SDK wrapper props/imports intact. See [maintenance](maintenance.md).
 
 ## Working rules for integration agents
 
@@ -49,7 +51,7 @@ The SDK does not migrate every existing screen or style. Generated integrations 
 
 ## Known boundaries
 
-Hook execution remains inside React. Arbitrary hooks, nested navigator rewrites, forms, native/custom canvases, component context requirements, relative-date semantics, theme-system migration and authorization are not automatically inferred. Query-option generation currently supports zero-argument factories returning array queries. Infinite queries and factories requiring runtime arguments need a host adapter. React Navigation generation uses explicit ParamList type aliases and an existing exported navigation ref; it does not create a second NavigationContainer.
+Hook execution remains inside React. Existing-screen instrumentation supports static sections in a vertical View/ScrollView. Conditional roots, virtualized/horizontal layouts, native/custom canvases, required-control semantics, deep custom-component styling, relative-date semantics, theme-system migration and authorization are not automatically inferred. Existing forms can remain inside a section; the SDK preserves their mounted state but does not edit their behavior. Query-option generation currently supports zero-argument factories returning array queries. Infinite queries and factories requiring runtime arguments need a host adapter. React Navigation generation uses explicit ParamList type aliases and an existing exported navigation ref; it does not create a second NavigationContainer.
 
 
 ---
@@ -94,6 +96,19 @@ Finish the template's own platform setup before native testing. Install persiste
 Use the developer's existing AI to read this report and the application's own repository. Optional `--ai` sends a separately reviewed bounded metadata context to a provider, but is not required to automate integration.
 
 ## 2. Make the few semantic decisions once
+
+For existing-screen customization, start with the screen metadata in `inspect`. Enable the intended exported screens (selectors are examples; use the report's actual values):
+
+```sh
+npx --no-install customitin init --screen 'src/screens/Home.tsx#Home' --dry-run
+npx --no-install customitin init --screen 'src/screens/Home.tsx#Home' --apply
+```
+
+Repeat `--screen` for additional screens. No source adapters, navigation ref, hand-written registry, or model key are needed just to personalize an existing screen. The original screen continues to obtain its own data and run its own callbacks. Generated root wiring uses CustomizationProvider, leaving the host navigator in place. The selected screens receive inline controls instead of a separate My space.
+
+After installation, edit the screens' ordinary JSX, hooks and handlers in place. Content/style changes use normal Fast Refresh. Run `npx --no-install customitin watch --apply` alongside the existing dev server to update section registration automatically after structural edits. No removal/reinstall cycle is needed. One-shot `refresh --apply` is also available; keep React section keys stable and leave the generated wrapper ID/sectionIds props alone. See [editable host ownership](maintenance.md#file-ownership).
+
+Supported screens return a vertical React Native View/ScrollView with static JSX sections. Give repeated siblings stable string `key` or `testID` values; wrap mapped/conditional groups in a keyed View. Inspect reports the sections or an actionable reason automatic instrumentation is unavailable. Review the dry-run and mark business-critical sections with `screens[selector].requiredSections` in overrides before shipping. Section labels default to the key/testID or component name. See [exact screen contracts](contracts.md#existing-screens) for layout and appearance boundaries.
 
 A source with @customitinComplete is automatically eligible. For an unannotated array loader you have verified returns the entire authorized collection, use `--complete`. Enable suitable display components and routes using repeatable flags:
 
@@ -140,7 +155,7 @@ export function useHostConfiguration() {
 
 `localProfileKey` above is illustrative, not an SDK session property. Choose the app's actual stable opaque account scope. Change it immediately on logout/account switching. The SDK clears active personalization and cancels pending work when its scope changes. Host query keys/authentication must also isolate users.
 
-The generated root merges custom sources, components and items over generated bindings. `bindings.navigate` can replace generated navigation. Custom hooks must be under their required providers. The CLI preserves visible outer JSX provider chains whose names end in Provider (including Context.Provider). Providers hidden inside other components or navigators need a shared host wrapper arranged before init. For an installed root, remove the owned integration before restructuring the host root, then reinstall; config, overrides and identity history survive. Do not hand-edit personalize/root.tsx. Keep options and custom bindings stable/memoized to avoid unnecessary runtime resets or data reloads.
+The generated root merges custom sources, components and items over generated bindings. `bindings.navigate` can replace generated navigation. Custom hooks must be under their required providers. The CLI preserves visible outer JSX provider chains whose names end in Provider (including Context.Provider). Providers hidden inside other components or navigators need a shared host wrapper arranged before init. Edit an installed host root normally while retaining its PersonalizationRoot boundary; refresh preserves the changes and recalculates supported provider placement. Do not hand-edit personalize/root.tsx. Keep options and custom bindings stable/memoized to avoid unnecessary runtime resets or data reloads.
 
 ## 4. Connect the assistant
 
@@ -160,7 +175,9 @@ Then run the host's lint, tests and bundle commands. Doctor's typecheck is stati
 
 Report the actual connected source/component/route names, storage, account scope, planner status, checks and manual deployment/device work. Commit generated files, overrides, config and bindings.lock.json together. Subsequent app changes use refresh, not a new manually written registry.
 
-The generated My space initially displays a welcome message. Registering sources, cards and routes makes them available for proposals; it does not automatically insert them into a saved layout. Appearance controls work immediately without a planner. See [testing](testing.md) for a deterministic proposal that exercises data/card/navigation integration without buying model credits, and for the native Jest setup. Do not ship the test planner as a natural-language assistant.
+For selected existing screens, exercise each original route, customize its layout, hide/show a section containing local state, apply, restart, undo, and restore. Confirm the app's existing callbacks and provider context still work. Check native layout, keyboard/focus and accessibility because section wrappers can affect flex geometry. Text scaling applies only to explicit fontSize/lineHeight values in connected Text nodes, and compact spacing scales numeric gap/rowGap/columnGap values. It does not restyle imported custom component internals.
+
+When no screens are selected, the generated My space initially displays a welcome message. Registering sources, cards and routes makes them available for proposals; it does not automatically insert them into a saved layout. Appearance controls work immediately without a planner. See [testing](testing.md) for a deterministic proposal that exercises data/card/navigation integration without buying model credits, and for the native Jest setup. Do not ship the test planner as a natural-language assistant.
 
 When react-native-safe-area-context is already installed, generation connects its provider/insets to the SDK shell automatically. Personal panels and shell buttons stay inside the safe area while the original navigator retains its own layout. The SDK itself has no mandatory safe-area dependency; custom hosts can pass insets directly to PersonalizationHost.
 
@@ -292,6 +309,53 @@ React Navigation discovery reads explicit TypeScript type aliases ending in Para
 
 For details, source detailDestination references an enabled route selector or stable ID. Automatic row-to-route mapping supports exactly one parameter of the same scalar type as the ID. Multi-parameter destinations remain available as shortcuts but need a custom detail binding.
 
+## Existing screens
+
+`--screen <file#export>` opts a discovered function/arrow component into in-place customization, including a default-export App. The component can keep props, hooks, closures, session context and existing callbacks: its JSX remains in the original lexical scope. This is separate from `--component`, which registers reusable content for composed surfaces.
+
+Supported automatic structure:
+
+```tsx
+export function Home() {
+  const account = useAccount();
+  return (
+    <ScrollView contentContainerStyle={{ gap: 16 }}>
+      <AccountHeader key="account" account={account} />
+      <View key="recommendations">
+        {account.showRecommendations && <Recommendations />}
+      </View>
+      <CheckoutButton key="checkout" onPress={account.checkout} />
+    </ScrollView>
+  );
+}
+```
+
+The CLI derives a `kind: "screen"` surface and a stable node for each section. Identity comes from a static string key, then a static testID, then a unique JSX tag. Repeated identities are rejected rather than assigned array-index identities. Do not change these identities to repurpose saved sections. Mark non-hideable controls in developer-owned overrides:
+
+```json
+{
+  "version": 1,
+  "screens": {
+    "src/screens/Home.tsx#Home": {
+      "enabled": true,
+      "requiredSections": ["checkout"]
+    }
+  }
+}
+```
+
+The SDK cannot infer business-critical controls; unmarked sections can be hidden. Required sections can move but cannot be omitted or changed. Core validation permits only exact existing nodes, reordered or with optional nodes omitted. It rejects new section identities, duplicate sections, changed props, and injected components. Screen-specific planner requests carry `surfaceId`; both client and server reject changes to other layouts or navigation. Declared theme preferences remain shared across connected screens.
+
+Generated JSX uses `CustomizableLayout` with a screen ID, generated sectionIds map and one ordinary JSX container child. Developers edit the container's keyed JSX children, hooks, callbacks and styles directly. The CLI adds stable React keys to initially unkeyed sections. CustomizableLayout maps those keys to registered nodes and delegates to the lower-level CustomizableScreen (sections map plus render-function child). It clones the container to supply ordered content while retaining its original type, props and ref. Each section gets a stable native View wrapper. Hidden sections stay mounted with display:none and accessibility exclusion, preserving local state and host subscriptions. Hiding is presentation only, not authorization or suspension of background work. The editor is rendered inside the original container; use a scrollable host when content/controls can exceed the viewport.
+
+Content/style edits work immediately. Add/remove/default-order changes need refresh or watch --apply to regenerate the registry; identities of unchanged keyed sections survive. While JSX keys and registry nodes differ, CustomizableLayout renders the current host container with customization temporarily unavailable. Structural saves during development can remount sections. This fallback does not synchronize a production server manifest; refresh and deploy matching manifests before releasing the app. See [maintenance](maintenance.md).
+
+Directly referenced React Native Text/View/ScrollView primitives inside the selected JSX are connected to ScreenText/ScreenView/ScreenScrollView. Props, refs and styles are forwarded. Explicit fontSize/lineHeight numbers scale with type.scale; numeric gap/rowGap/columnGap values scale to 65% for compact density. Until a user chooses a preference, original values remain. Colors, images, padding, absolute positioning, custom fonts and opaque component internals are not inferred or restyled. These require a host theme bridge or custom integration. The inline generator therefore declares text-scale and density tokens, not the SDK light/dark palettes.
+
+Limits: 1–40 static direct JSX sections, a single unconditional return, and a directly imported vertical View/ScrollView container. Wrap conditional/mapped contents in a stable section. Conditional root returns, FlatList/SectionList roots, horizontal/custom containers, stickyHeaderIndices, maintainVisibleContentPosition and ambiguous sections need a host integration. Added section wrappers may change flex-dependent layouts, sticky-header indexing, clipping or native focus behavior; validate actual device geometry before release. Screens with such container contracts should use a reviewed custom integration. Shared visible provider chains remain above the SDK provider; hidden providers still need host review.
+
+Screen selection adds no data loaders and exposes no JSX bodies, records or callbacks to the model. Natural language still needs a configured planner. Manual layout and appearance controls work offline. Persistence and account isolation follow the existing storage/scope contracts.
+
 
 ---
 
@@ -301,20 +365,29 @@ For details, source detailDestination references an enabled route selector or st
 
 ## File ownership
 
-| File                             | Owner     | Behavior                                                                 |
-| -------------------------------- | --------- | ------------------------------------------------------------------------ |
-| personalize/config.ts            | Developer | Created once; never overwritten or removed by refresh/remove             |
-| personalize/overrides.json       | Developer | Created once; CLI selection flags explicitly merge requested decisions   |
-| personalize/bindings.lock.json   | Installer | Stable IDs and previous selectors; retained on removal; commit this file |
-| personalize/capabilities.json    | Installer | Mobile registry generated from discovery plus overrides                  |
-| personalize/server-manifest.json | Installer | Matching backend registry; deploy with planner                           |
-| personalize/sources.ts           | Installer | Data adapter bindings                                                    |
-| personalize/components.tsx       | Installer | Host/item wrappers                                                       |
-| personalize/navigation.ts        | Installer | Approved destination closures                                            |
-| personalize/root.tsx             | Installer | Provider/shell integration and custom binding merge                      |
-| .customitin/ownership.json       | Installer | Generated hashes and original root bytes for drift checks/removal        |
+| File                               | Owner                       | Behavior                                                                            |
+| ---------------------------------- | --------------------------- | ----------------------------------------------------------------------------------- |
+| personalize/config.ts              | Developer                   | Created once; never overwritten or removed by refresh/remove                        |
+| personalize/overrides.json         | Developer                   | Created once; CLI selection flags explicitly merge requested decisions              |
+| personalize/bindings.lock.json     | Installer                   | Stable IDs and previous selectors; retained on removal; commit this file            |
+| personalize/capabilities.json      | Installer                   | Mobile registry generated from discovery plus overrides                             |
+| personalize/server-manifest.json   | Installer                   | Matching backend registry; deploy with planner                                      |
+| personalize/sources.ts             | Installer                   | Data adapter bindings                                                               |
+| personalize/components.tsx         | Installer                   | Host/item wrappers                                                                  |
+| personalize/navigation.ts          | Installer                   | Approved destination closures                                                       |
+| personalize/root.tsx               | Installer                   | Provider/shell integration and custom binding merge                                 |
+| .customitin/ownership.json         | Installer                   | Generated hashes, reversible host bindings and unwrapped host snapshots             |
+| Root and selected screen TSX files | Developer with SDK wrappers | Host code stays editable; only recognized SDK imports/props/wrappers are maintained |
 
-Do not edit installer-owned files to customize behavior. Change overrides or supply runtime bindings through config.ts, then refresh. Existing generated-file edits block replacement/removal rather than being silently discarded. Removal restores original root bytes and removes owned generated files only when every tracked file is unchanged. Developer config, overrides and the identity lock remain. Retaining the lock keeps moved/renamed selector overrides usable if the integration is installed again. Reinstall with init --apply after reviewing its dry-run.
+Do not edit installer-owned files to customize behavior. Change overrides or supply runtime bindings through config.ts, then refresh. Existing generated-file edits block replacement/removal rather than being silently discarded. Developer config, overrides and the identity lock remain on removal. Retaining the lock keeps moved/renamed selector overrides usable if the integration is installed again.
+
+Edit selected screens and the app root normally: JSX content, props, styles, hooks, callbacks, imports and surrounding providers belong to the developer. Generated screens keep ordinary nested JSX inside CustomizableLayout. The CLI supplies a static sectionIds map and adds stable React keys where missing. Keep section keys stable; an added key remains ordinary host code if an edited screen is later removed from the integration.
+
+Discovery and refresh unwrap recognized SDK syntax from the **current** file, retain host edits and regenerate the bindings. Formatting changes are accepted. Removing the integration or disabling a screen strips only SDK instrumentation from the latest source; an unchanged host file is restored byte-for-byte from its unwrapped snapshot. Root edits are preserved too. Removing a section, adding a section, or changing its default order requires regeneration, while content/style/handler changes work immediately through normal Fast Refresh.
+
+Do not hand-edit generated wrapper imports, aliases, IDs or sectionIds. Changes to those boundaries stop refresh/removal with diagnostics and no writes. Restore the indicated SDK syntax; there is no need to remove/reinstall the integration. Ordinary generated adapters under personalize/ retain whole-file drift protection. Never edit ownership hashes to bypass checks. Older installations without reversible host metadata upgrade on a refresh when their tracked host files are unchanged; if already modified, preserve those edits and restore the last generated host version before upgrading, then reapply the edits.
+
+A moved screen is recognized only when its original path is absent and exactly one new file retains its complete SDK wrapper. A unique unchanged export name keeps the existing identity; use an explicit symbol override for renames. Ambiguous copies, splitting/merging instrumented files and modified wrapper aliases need deliberate host wiring or restoring the known SDK boundaries first. No move is inferred from a partial match.
 
 ## Complete override example
 
@@ -378,7 +451,17 @@ Pre-lock installations import matching original source IDs when possible. If a l
 
 ## Refresh workflow
 
-1. Update the host code.
+For normal development, run this alongside the app's existing Metro/Expo/dev command, or add it as a parallel process to an existing development script:
+
+```sh
+npx --no-install customitin watch --apply
+```
+
+Watch requires an installed integration. It polls bounded source files, overrides, config and tracked output once per second, serializes regeneration and reports changed files or actionable issues as JSON lines. It never runs host scripts or invokes installer AI. Without --apply it only reports plans; --dry-run takes precedence. Stop with Ctrl+C. Edits arriving during planning cause that plan to be skipped and retried on a later poll. Unsupported JSX or altered SDK boundaries keep the last generated integration intact; save a supported correction and watch resumes. Newly added/removed sections show the host container without customization controls while registration is stale, so a save does not hide new UI or throw a section mismatch error. Structural changes can remount sections during this development transition.
+
+Watch is optional. A one-shot workflow is also supported:
+
+1. Update the host code directly; keep section keys stable.
 2. Run inspect; compare actual signatures and fields.
 3. Update only overrides/config as needed.
 4. Run refresh --dry-run and review changed files, unresolved items and conflicts.
@@ -387,7 +470,7 @@ Pre-lock installations import matching original source IDs when possible. If a l
 7. Exercise a previously saved profile and any changed data/navigation behavior.
 8. Deploy matching backend manifests before requiring them in a new app build.
 
-If the root or a generated file has developer edits, move the intended behavior into developer-owned code before refreshing. Do not edit ownership hashes to bypass the conflict check.
+Before a release, run refresh --apply, doctor --typecheck and the app's checks even if watch was running. Review and commit source/generated changes together, including .customitin/ownership.json and bindings.lock.json. Deploy matching server manifests when capability semantics change. Do not run multiple applying CLI processes against the same app at once.
 
 ## What refresh does not do
 
@@ -421,6 +504,8 @@ The CLI formats generated TypeScript and the root wrapper before recording owner
 | Planner unavailable                  | No endpoint, invalid session, revision mismatch or provider failure     | Verify backend configuration and matching manifest; inspect safe server diagnostics |
 | Refresh required                     | Source/override/template changed                                        | Review refresh --dry-run, then apply and recheck                                    |
 | Drift                                | Someone edited an owned file                                            | Preserve those edits in config/host code; resolve deliberately before regeneration  |
+| SDK wrapper props/imports changed    | A generated host boundary was altered                                   | Restore the indicated SDK syntax; ordinary host JSX/logic can remain edited         |
+| Project changed while planning       | A new save arrived during regeneration                                  | Let watch retry after the next save settles, or rerun refresh                       |
 
 Generated sources and routes are typed but still depend on truthful host contracts. A passing typecheck does not prove completeness, correct filtering, authorization or visual quality.
 
@@ -467,6 +552,14 @@ State which sources, components and routes were connected; whether storage is pe
 # Verify a real consuming app
 
 Use the app's actual installed packages, native types and scripts. A workspace test with TypeScript path aliases does not prove that the published artifacts work. Do not hand-edit generated code to get a test passing: fix the SDK or developer-owned host configuration, then refresh.
+
+## Existing-screen acceptance
+
+Run `npm run check` in the SDK checkout. The screen consumer fixtures compile generated named/default/root-screen integrations with strict unused-import checks. Generated-screen interaction tests execute the instrumented app with React Native Web: existing provider context and callbacks, reorder/hide/show, retained form drafts, in-place typography previews, discard/apply, restart restoration, undo and restoring the original layout. Core/server tests reject replacement section IDs, changed props, duplicate/required-node removal and planner changes outside the requested screen. These are deterministic component tests, not native-device or live-model acceptance.
+
+Editable-host fixtures cover JSX/handler/style edits, added/removed sections, stable IDs, formatter changes, a moved screen, removal/disable preserving unrefreshed edits, and refusing changed SDK boundaries or unsupported containers. Watch tests cover applied saves, dry-run without writes and cancellation. A generated-consumer interaction test shows new UI while the registry is stale, then hides/shows the new section after refresh. On devices, also verify the real Metro/Expo Fast Refresh sequence while watch is running; the component test rebuilds bundles and does not claim to emulate the dev server.
+
+For an actual --screen integration, exercise the same actions on iOS and Android. Verify original geometry (especially flex-dependent children), scrolling with the inline editor open, sticky headers, keyboard focus when hiding forms, accessibility exclusion of hidden sections, account switching, storage failures and the original navigation. Hidden sections remain mounted, so subscriptions/effects continue. No physical-device, performance or live-provider claim is implied by the fixture suite. Deploy the new matching manifest and server package before using surfaceId-aware planner requests.
 
 ## Reproduce the fresh-app acceptance test
 
@@ -624,6 +717,7 @@ Run `customitin` from a built/installed CLI package. In this repository use `npm
 | inspect | JSON report: framework, entry, versions, symbols, routes/routeDetails, unresolved items, context digest |
 | init    | Installation plan, dry-run unless --apply                                                               |
 | refresh | Regenerated plan using persistent overrides and binding identity, dry-run unless --apply                |
+| watch   | Continuously refresh an installed integration after local edits; dry-run unless --apply; Ctrl+C stops   |
 | doctor  | JSON issues, recommendations, coverage and suggested checks; exits nonzero for issues                   |
 | remove  | Owned-file removal/root restoration plan, dry-run unless --apply; config/overrides/identity lock remain |
 | schema  | JSON Schema for personalize/overrides.json; no host project required                                    |
@@ -634,10 +728,11 @@ Run `customitin` from a built/installed CLI package. In this repository use `npm
 | Flag                      | Meaning                                                                                           |
 | ------------------------- | ------------------------------------------------------------------------------------------------- |
 | --dry-run                 | Preview only; takes precedence over --apply                                                       |
-| --apply                   | Write planned changes if there are no ownership conflicts                                         |
+| --apply                   | Write planned changes if there are no ownership conflicts or integration issues                   |
 | --context                 | For inspect, include the exact bounded metadata eligible for optional AI analysis                 |
 | --complete SELECTOR       | Confirm a discovered complete array/query-options source; repeatable; saved to overrides on apply |
 | --component SELECTOR      | Enable a discovered component; repeatable; saved to overrides                                     |
+| --screen SELECTOR         | Instrument an existing screen in place; repeatable; saved to overrides                            |
 | --route SELECTOR          | Enable a discovered route; repeatable; saved to overrides                                         |
 | --detail SOURCE=ROUTE     | Connect row details and enable the route; repeatable; does not assert completeness                |
 | --query-client SELECTOR   | Choose an existing exported QueryClient                                                           |
@@ -652,7 +747,11 @@ Selectors are printed by inspect. Symbols use `file.ts#exportName` or `file.ts#r
 
 ## Machine-readable plan
 
-init/refresh print mode, changes, conflicts, unresolved, issues, generated, developerOwnedSetup and contextDigest. generated contains the exact proposed contents of installer-owned files. developerOwnedSetup contains new config/override files or an explicitly requested override merge. Unresolved includes informational discovery gaps; issues identifies actionable integration problems. A dry-run writes none of them. Existing config is never overwritten. init/refresh exit nonzero for actionable integration issues as well as conflicts; inspect the report even if some generated files were written. Unknown CLI selectors fail before writing.
+init/refresh print mode, changes, conflicts, unresolved, issues, generated, developerOwnedSetup and contextDigest. generated contains the exact proposed contents of installer-owned files. developerOwnedSetup contains new config/override files or an explicitly requested override merge. Unresolved includes informational discovery gaps; issues identifies actionable integration problems. A dry-run writes none of them. Existing config is never overwritten. init/refresh exit nonzero and write nothing for actionable integration issues or conflicts. Unknown CLI selectors fail before writing.
+
+Screen candidates appear on discovered component symbols as screen.sections, with stable section keys/titles. Ineligible components expose screenIssue. --screen uses the same file#export selector as the component and preserves its stable identity; it does not require enabling --component. Enabled screen selections replace generated My space shell wiring with a provider around the original app. The planner endpoint and persistence remain optional/host-configured as documented in the integration guide.
+
+`watch --apply` runs alongside the host's normal development command. It reuses persisted selections and emits JSON lines containing mode, changes, conflicts, issues and applied. Unsupported edits are reported without replacing output; watch resumes after a corrected save. It does not accept new selections or invoke AI; use init/refresh or overrides for those decisions. Ordinary host code is editable, while generated wrapper imports/props retain structural checks. Watch handles atomic saves and new source files by polling once per second; it does not execute package scripts or modify the host's dev command. Run refresh --apply and doctor --typecheck before a release.
 
 Writes preserve an ownership manifest and roll back known files if a write fails. The manifest supports diagnosing a process interruption. Conflicts prevent the entire apply. remove similarly refuses to proceed if any tracked file has drifted.
 

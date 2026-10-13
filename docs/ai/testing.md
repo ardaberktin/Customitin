@@ -2,6 +2,14 @@
 
 Use the app's actual installed packages, native types and scripts. A workspace test with TypeScript path aliases does not prove that the published artifacts work. Do not hand-edit generated code to get a test passing: fix the SDK or developer-owned host configuration, then refresh.
 
+## Existing-screen acceptance
+
+Run `npm run check` in the SDK checkout. The screen consumer fixtures compile generated named/default/root-screen integrations with strict unused-import checks. Generated-screen interaction tests execute the instrumented app with React Native Web: existing provider context and callbacks, reorder/hide/show, retained form drafts, in-place typography previews, discard/apply, restart restoration, undo and restoring the original layout. Core/server tests reject replacement section IDs, changed props, duplicate/required-node removal and planner changes outside the requested screen. These are deterministic component tests, not native-device or live-model acceptance.
+
+Editable-host fixtures cover JSX/handler/style edits, added/removed sections, stable IDs, formatter changes, a moved screen, removal/disable preserving unrefreshed edits, and refusing changed SDK boundaries or unsupported containers. Watch tests cover applied saves, dry-run without writes and cancellation. A generated-consumer interaction test shows new UI while the registry is stale, then hides/shows the new section after refresh. On devices, also verify the real Metro/Expo Fast Refresh sequence while watch is running; the component test rebuilds bundles and does not claim to emulate the dev server.
+
+For an actual --screen integration, exercise the same actions on iOS and Android. Verify original geometry (especially flex-dependent children), scrolling with the inline editor open, sticky headers, keyboard focus when hiding forms, accessibility exclusion of hidden sections, account switching, storage failures and the original navigation. Hidden sections remain mounted, so subscriptions/effects continue. No physical-device, performance or live-provider claim is implied by the fixture suite. Deploy the new matching manifest and server package before using surfaceId-aware planner requests.
+
 ## Reproduce the fresh-app acceptance test
 
 From a Customitin checkout with dependencies installed:

@@ -8,6 +8,9 @@ import { discoverSymbols } from './symbols';
 import { discoverRoutes } from './routes';
 import { discoverNavigation } from './navigation';
 import type { DiscoveryReport } from './types';
+import { screenStructure } from './screen-structure';
+import { readHostOwnership } from '../commands/host-ownership';
+import { restoreHost } from '../generation/restore-host';
 export type {
   DiscoveredSymbol,
   DiscoveryReport,
@@ -30,10 +33,20 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
     skipAddingFilesFromTsConfig: true,
   });
   const paths = await sourceFiles(root);
+  const ownership = await readHostOwnership(root);
   let excludedFiles = 0;
   const allowed: string[] = [];
   for (const file of paths) {
-    const text = await readFile(file, 'utf8');
+    const current = await readFile(file, 'utf8');
+    const owned = ownership?.files.find(
+      (entry) => entry.path === relative(root, file).replaceAll('\\', '/'),
+    );
+    let text = current;
+    try {
+      text = restoreHost(file, current, owned);
+    } catch {
+      /* Planning reports ownership errors; discovery still returns other capabilities. */
+    }
     if (secretContent.test(text)) {
       excludedFiles++;
       continue;
@@ -45,6 +58,19 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
   const symbols = allowed.flatMap((file) =>
     discoverSymbols(root, project.getSourceFileOrThrow(file)),
   );
+  for (const symbol of symbols.filter((item) => item.kind === 'component')) {
+    try {
+      const structure = screenStructure(
+        project.getSourceFileOrThrow(join(root, symbol.file)),
+        symbol.exportName,
+      );
+      symbol.screen = {
+        sections: structure.sections.map(({ key, title }) => ({ key, title })),
+      };
+    } catch (error) {
+      symbol.screenIssue = (error as Error).message;
+    }
+  }
   const framework = versions['expo-router']
     ? 'expo-router'
     : versions['@react-navigation/native']

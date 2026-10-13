@@ -65,6 +65,7 @@ export const registrySchema = z
         z
           .object({
             ...capability,
+            kind: z.literal('screen').optional(),
             defaultLayout: z.array(nodeSchema).max(40),
             requiredNodeIds: z.array(idSchema).max(10),
             allowedComponentIds: z.array(idSchema).max(100),

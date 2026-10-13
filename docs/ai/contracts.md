@@ -120,3 +120,50 @@ Expo Router discovery reads app/ or src/app/ TSX routes, skips layouts and speci
 React Navigation discovery reads explicit TypeScript type aliases ending in ParamList. Export the existing createNavigationContainerRef result and ensure it is attached to the host container. With one discovered ref it is selected automatically; otherwise use navigationRef/--navigation-ref. Generated closures check isReady and call the existing ref with typed screen names/params. Nested NavigatorScreenParams and arbitrary navigation hooks require host code.
 
 For details, source detailDestination references an enabled route selector or stable ID. Automatic row-to-route mapping supports exactly one parameter of the same scalar type as the ID. Multi-parameter destinations remain available as shortcuts but need a custom detail binding.
+
+## Existing screens
+
+`--screen <file#export>` opts a discovered function/arrow component into in-place customization, including a default-export App. The component can keep props, hooks, closures, session context and existing callbacks: its JSX remains in the original lexical scope. This is separate from `--component`, which registers reusable content for composed surfaces.
+
+Supported automatic structure:
+
+```tsx
+export function Home() {
+  const account = useAccount();
+  return (
+    <ScrollView contentContainerStyle={{ gap: 16 }}>
+      <AccountHeader key="account" account={account} />
+      <View key="recommendations">
+        {account.showRecommendations && <Recommendations />}
+      </View>
+      <CheckoutButton key="checkout" onPress={account.checkout} />
+    </ScrollView>
+  );
+}
+```
+
+The CLI derives a `kind: "screen"` surface and a stable node for each section. Identity comes from a static string key, then a static testID, then a unique JSX tag. Repeated identities are rejected rather than assigned array-index identities. Do not change these identities to repurpose saved sections. Mark non-hideable controls in developer-owned overrides:
+
+```json
+{
+  "version": 1,
+  "screens": {
+    "src/screens/Home.tsx#Home": {
+      "enabled": true,
+      "requiredSections": ["checkout"]
+    }
+  }
+}
+```
+
+The SDK cannot infer business-critical controls; unmarked sections can be hidden. Required sections can move but cannot be omitted or changed. Core validation permits only exact existing nodes, reordered or with optional nodes omitted. It rejects new section identities, duplicate sections, changed props, and injected components. Screen-specific planner requests carry `surfaceId`; both client and server reject changes to other layouts or navigation. Declared theme preferences remain shared across connected screens.
+
+Generated JSX uses `CustomizableLayout` with a screen ID, generated sectionIds map and one ordinary JSX container child. Developers edit the container's keyed JSX children, hooks, callbacks and styles directly. The CLI adds stable React keys to initially unkeyed sections. CustomizableLayout maps those keys to registered nodes and delegates to the lower-level CustomizableScreen (sections map plus render-function child). It clones the container to supply ordered content while retaining its original type, props and ref. Each section gets a stable native View wrapper. Hidden sections stay mounted with display:none and accessibility exclusion, preserving local state and host subscriptions. Hiding is presentation only, not authorization or suspension of background work. The editor is rendered inside the original container; use a scrollable host when content/controls can exceed the viewport.
+
+Content/style edits work immediately. Add/remove/default-order changes need refresh or watch --apply to regenerate the registry; identities of unchanged keyed sections survive. While JSX keys and registry nodes differ, CustomizableLayout renders the current host container with customization temporarily unavailable. Structural saves during development can remount sections. This fallback does not synchronize a production server manifest; refresh and deploy matching manifests before releasing the app. See [maintenance](maintenance.md).
+
+Directly referenced React Native Text/View/ScrollView primitives inside the selected JSX are connected to ScreenText/ScreenView/ScreenScrollView. Props, refs and styles are forwarded. Explicit fontSize/lineHeight numbers scale with type.scale; numeric gap/rowGap/columnGap values scale to 65% for compact density. Until a user chooses a preference, original values remain. Colors, images, padding, absolute positioning, custom fonts and opaque component internals are not inferred or restyled. These require a host theme bridge or custom integration. The inline generator therefore declares text-scale and density tokens, not the SDK light/dark palettes.
+
+Limits: 1–40 static direct JSX sections, a single unconditional return, and a directly imported vertical View/ScrollView container. Wrap conditional/mapped contents in a stable section. Conditional root returns, FlatList/SectionList roots, horizontal/custom containers, stickyHeaderIndices, maintainVisibleContentPosition and ambiguous sections need a host integration. Added section wrappers may change flex-dependent layouts, sticky-header indexing, clipping or native focus behavior; validate actual device geometry before release. Screens with such container contracts should use a reviewed custom integration. Shared visible provider chains remain above the SDK provider; hidden providers still need host review.
+
+Screen selection adds no data loaders and exposes no JSX bodies, records or callbacks to the model. Natural language still needs a configured planner. Manual layout and appearance controls work offline. Persistence and account isolation follow the existing storage/scope contracts.

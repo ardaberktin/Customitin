@@ -56,6 +56,17 @@ export const overridesSchema = z
       )
       .default({}),
     routes: z.record(z.string(), z.object(selection).strict()).default({}),
+    screens: z
+      .record(
+        z.string(),
+        z
+          .object({
+            ...selection,
+            requiredSections: z.array(z.string()).max(40).default([]),
+          })
+          .strict(),
+      )
+      .default({}),
     queryClient: z.string().optional(),
     navigationRef: z.string().optional(),
   })

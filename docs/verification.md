@@ -2,6 +2,36 @@
 
 Recorded October 11, 2026 on macOS arm64 with Node 24.15.0. This is a functional alpha verification record, not a public-release certification. The supplied specification is preserved in [original-plan.md](original-plan.md).
 
+## Editable screens and development watch — October 12, 2026
+
+Selected screens now retain ordinary nested JSX through CustomizableLayout. Refresh reads current host code, validates SDK boundaries and regenerates section bindings without removing/reinstalling the integration. Root edits, current screen edits, stable section IDs, developer configuration and recognized file moves are preserved. Removal/disable strips SDK syntax from edited host files. The optional local watch command runs alongside the existing dev server, reports unsupported saves and resumes after corrections; input snapshots prevent applying a plan after a save during planning.
+
+Verified for this change:
+
+- `npm run check`: 82 tests across 19 files, strict TypeScript, zero-warning lint, formatting, package/declaration builds, domain boundaries and AI documentation freshness.
+- Compiling consumer tests cover JSX/handler/style edits, added/removed sections, deleted unused imports, formatter changes, stable IDs after a move, removal/disable preserving current edits, and protected SDK boundary failures.
+- Watch tests cover automatic regeneration, dry-run without writes, cancellation, unsupported saves without output writes and recovery after a correction.
+- Generated-consumer interactions cover original screen behavior and form state, plus rendering new UI while registration is stale and customizing the added section after refresh.
+- Three cross-app Playwright regressions passed with local Expo servers and installed Chromium revision 1223. Offline dependency-validation notices are expected for these fixtures.
+- Built CLI help exposes watch. No package publication or backend deployment was performed.
+
+These fixtures use source aliases and React Native Web. This change did not rerun packed fresh-native-consumer acceptance, native-device/simulator Fast Refresh, or live-model checks. Exercise real Metro/Expo saves, section geometry, keyboard/focus and accessibility on iOS/Android before shipping. Structural updates may remount sections while registration catches up. Publish/update the local SDK packages for consuming apps once, refresh their integration, and deploy matching planner manifests when registry semantics change; regular screen edits then use watch or refresh without reinstalling.
+
+## Existing-screen personalization — October 12, 2026 (earlier run)
+
+Added opt-in `--screen` instrumentation for supported existing View/ScrollView screens, provider-only root wiring, stable section identities, in-place layout controls and connected text/gap preferences. The original JSX, callbacks, provider context and local section state remain in the host. Screen-scoped planning is validated on both client and server; no data source registration or live planner is needed for manual changes.
+
+Verified for this change:
+
+- `npm run check`: 72 tests across 16 files; strict TypeScript; zero-warning lint; formatting; all package builds; domain boundaries; regenerated AI documentation freshness.
+- New consumer fixtures compile named/default/root screens, multiple screens per file and imported-native aliases/shadowed names. Lifecycle tests cover no-op refresh, exact restoration on remove/disable, required sections, unsupported structures and drift protection.
+- Two generated-consumer interaction scenarios run the instrumented app through React Native Web. They cover host context and existing actions, section order/visibility, retaining typed form state while hidden, typography preview/discard/apply, persistence across remount, undo and restoring the layout.
+- Contract/runtime/server checks cover duplicate/replaced/modified sections, required controls, migration after a removed section, account-switch preview cancellation, and rejecting planner changes outside the requested screen, including the repair attempt.
+- All three existing cross-app Playwright regressions passed using installed Chromium revision 1223. The first sandboxed attempt could not bind Expo ports; the successful retry used local server/browser permissions. Expo's offline dependency-validation notices are expected in this test configuration.
+- The built CLI exposes --screen in its help. No packages were published and no backend was deployed.
+
+This run did not exercise the new path on native devices/simulators, rerun packed fresh-native-consumer acceptance, or call a live model. Section wrapper geometry, flex-dependent children, scrolling/editor reachability, keyboard/focus, accessibility and host account/storage integration still require device checks. Inline appearance only connects explicit text metrics and numeric gaps; it does not migrate arbitrary host styling. See [screen contracts](ai/contracts.md#existing-screens) and [ownership workflow](ai/maintenance.md).
+
 ## Fresh-app acceptance — October 12, 2026
 
 The follow-up [fresh React Native verification](fresh-app-verification.md) used actual tarballs and the packaged CLI in independent official templates. It passed the 58-test SDK check, three native consumer interaction tests, both platform Metro bundles, lifecycle/override checks, three browser regressions, an iOS simulator build and interactive native customization/data/navigation checks. It fixed native package resolution, shared-provider placement, safe areas, generated lint/formatting, offline diagnostics and reinstall identity. No live provider or physical device was used.

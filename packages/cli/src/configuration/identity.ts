@@ -58,6 +58,7 @@ export function preserveIdentity(
       ...overrides.sources,
       ...overrides.components,
       ...overrides.routes,
+      ...overrides.screens,
     }).find(([, o]) => o.symbol === value.selector)?.[0];
     let match = bindings.find(
       (b) =>

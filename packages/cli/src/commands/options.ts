@@ -13,6 +13,7 @@ export interface SelectionFlags {
   component?: string[];
   route?: string[];
   detail?: string[];
+  screen?: string[];
   'query-client'?: string;
   'navigation-ref'?: string;
 }
@@ -25,6 +26,7 @@ export async function selectedOverrides(
     !flags.component?.length &&
     !flags.route?.length &&
     !flags.detail?.length &&
+    !flags.screen?.length &&
     !flags['query-client'] &&
     !flags['navigation-ref']
   )
@@ -66,6 +68,14 @@ export async function selectedOverrides(
     const key = keyFor(overrides.routes, selector);
     overrides.routes[key] = {
       ...overrides.routes[key],
+      enabled: true,
+    };
+  }
+  for (const selector of flags.screen ?? []) {
+    const key = keyFor(overrides.screens, selector);
+    overrides.screens[key] = {
+      requiredSections: [],
+      ...overrides.screens[key],
       enabled: true,
     };
   }

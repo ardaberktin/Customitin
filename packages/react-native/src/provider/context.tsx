@@ -84,7 +84,7 @@ export function ProfilePreview({
   profile,
   children,
 }: {
-  profile: Profile;
+  profile: Profile | null;
   children: ReactNode;
 }) {
   return (

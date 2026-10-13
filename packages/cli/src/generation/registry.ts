@@ -8,6 +8,7 @@ import {
 import type { DiscoveryReport } from '../discovery/types';
 import type { ResolvedIntegration } from '../configuration/resolve';
 import { sourceDescriptor } from './source-descriptor';
+import { screenCapabilities } from './screens';
 
 export function generateRegistry(
   report: DiscoveryReport,
@@ -18,6 +19,7 @@ export function generateRegistry(
     evidence: 'Installer template',
     status: 'proposed',
   };
+  const screens = screenCapabilities(integration.screens);
   const generic = [
     {
       id: 'welcome',
@@ -67,29 +69,32 @@ export function generateRegistry(
     components: [
       ...generic.map((c) => ({ ...c, provenance, acceptsChildren: false })),
       ...components,
+      ...screens.components,
     ],
-    surfaces: [
-      {
-        id: 'home',
-        title: 'Personal home',
-        provenance,
-        defaultLayout: [
+    surfaces: screens.surfaces.length
+      ? screens.surfaces
+      : [
           {
-            id: 'intro',
-            componentId: 'welcome',
-            props: { text: 'Your personal space' },
-            children: [],
+            id: 'home',
+            title: 'Personal home',
+            provenance,
+            defaultLayout: [
+              {
+                id: 'intro',
+                componentId: 'welcome',
+                props: { text: 'Your personal space' },
+                children: [],
+              },
+            ],
+            requiredNodeIds: [],
+            allowedComponentIds: [
+              'welcome',
+              'collection',
+              'shortcut',
+              ...components.filter((c) => c.kind === 'host').map((c) => c.id),
+            ],
           },
         ],
-        requiredNodeIds: [],
-        allowedComponentIds: [
-          'welcome',
-          'collection',
-          'shortcut',
-          ...components.filter((c) => c.kind === 'host').map((c) => c.id),
-        ],
-      },
-    ],
     sources: integration.sources.map((s) => sourceDescriptor(s, integration)),
     destinations: [
       {
@@ -118,24 +123,32 @@ export function generateRegistry(
       },
     ],
     themeTokens: {
-      'appearance.mode': {
-        type: 'string',
-        values: ['light', 'dark'],
-        default: 'light',
-        consumers: ['SDK surfaces'],
-      },
+      ...(screens.surfaces.length
+        ? {}
+        : {
+            'appearance.mode': {
+              type: 'string',
+              values: ['light', 'dark'],
+              default: 'light',
+              consumers: ['SDK surfaces'],
+            },
+          }),
       'type.scale': {
         type: 'number',
         min: 1,
         max: 1.4,
         default: 1,
-        consumers: ['SDK text'],
+        consumers: screens.surfaces.length
+          ? ['Connected screen text with explicit font sizes']
+          : ['SDK text'],
       },
       'layout.density': {
         type: 'string',
         values: ['comfortable', 'compact'],
         default: 'comfortable',
-        consumers: ['SDK collections'],
+        consumers: screens.surfaces.length
+          ? ['Connected screen numeric gaps']
+          : ['SDK collections'],
       },
     },
     limits: { depth: 5, nodes: 40, tabs: 4, sources: 3 },

@@ -20,6 +20,8 @@ export interface DiscoveredSymbol {
   itemProp?: string;
   itemFields?: Record<string, ValueRule>;
   pressProp?: string;
+  screen?: { sections: { key: string; title: string }[] };
+  screenIssue?: string;
 }
 export interface DiscoveredRoute {
   id: string;

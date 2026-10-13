@@ -9,27 +9,46 @@ import {
 } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { z } from 'zod';
+import { hostBindingsSchema } from '../generation/host-bindings';
 export const hash = (text: string) =>
   createHash('sha256').update(text).digest('hex');
 export const manifestPath = '.customitin/ownership.json';
 const ownedFile = z
-  .object({ path: z.string(), hash: z.string(), before: z.string().nullable() })
+  .object({
+    path: z.string(),
+    hash: z.string(),
+    before: z.string().nullable(),
+    host: hostBindingsSchema.optional(),
+  })
   .strict();
 export const ownershipSchema = z
   .object({
     version: z.literal(1),
     registryRevision: z.string(),
     contextDigest: z.string(),
-    files: z.array(ownedFile).max(30),
+    files: z.array(ownedFile).max(80),
   })
   .strict();
 export type Ownership = z.infer<typeof ownershipSchema>;
 export async function safePath(root: string, path: string): Promise<string> {
+  const screenPath =
+    path.endsWith('.tsx') &&
+    !path
+      .split(/[\\/]/)
+      .some((part) =>
+        /^(\.|node_modules$|dist$|build$|coverage$|ios$|android$|fixtures$|__tests__$)/.test(
+          part,
+        ),
+      ) &&
+    !/(secret|credential|token|private|\.test\.|\.spec\.)/i.test(path);
   if (
     isAbsolute(path) ||
     path.split(/[\\/]/).some((s) => s === '..') ||
-    !/^(personalize\/|src\/app\/_layout\.tsx$|app\/_layout\.tsx$|App\.tsx$|src\/App\.tsx$|\.customitin\/ownership\.json$)/.test(
-      path,
+    !(
+      screenPath ||
+      /^(personalize\/|src\/app\/_layout\.tsx$|app\/_layout\.tsx$|App\.tsx$|src\/App\.tsx$|\.customitin\/ownership\.json$)/.test(
+        path,
+      )
     )
   )
     throw new Error('Unowned integration path');

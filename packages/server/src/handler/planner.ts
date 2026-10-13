@@ -4,6 +4,7 @@ import {
   plannerRequestSchema,
   plannerResponseSchema,
   validateProfile,
+  validatePlanningTarget,
   type CapabilityRegistry,
   type PlannerRequest,
 } from '@customitin/core';
@@ -121,6 +122,7 @@ export function createPlannerHandler(
       const profile = currentProfile(request);
       try {
         validateProfile(profile, registry);
+        validatePlanningTarget(registry, request.surfaceId);
       } catch {
         return json(
           { kind: 'rejected', message: 'Your layout needs to be refreshed.' },
@@ -150,6 +152,11 @@ export function createPlannerHandler(
                 if (response.proposal.requestId !== request.requestId)
                   throw new Error('Request mismatch');
                 applyProposal(profile, response.proposal, registry);
+                validatePlanningTarget(
+                  registry,
+                  request.surfaceId,
+                  response.proposal.operations,
+                );
               }
               return response;
             } catch {

@@ -2,20 +2,29 @@
 
 ## File ownership
 
-| File                             | Owner     | Behavior                                                                 |
-| -------------------------------- | --------- | ------------------------------------------------------------------------ |
-| personalize/config.ts            | Developer | Created once; never overwritten or removed by refresh/remove             |
-| personalize/overrides.json       | Developer | Created once; CLI selection flags explicitly merge requested decisions   |
-| personalize/bindings.lock.json   | Installer | Stable IDs and previous selectors; retained on removal; commit this file |
-| personalize/capabilities.json    | Installer | Mobile registry generated from discovery plus overrides                  |
-| personalize/server-manifest.json | Installer | Matching backend registry; deploy with planner                           |
-| personalize/sources.ts           | Installer | Data adapter bindings                                                    |
-| personalize/components.tsx       | Installer | Host/item wrappers                                                       |
-| personalize/navigation.ts        | Installer | Approved destination closures                                            |
-| personalize/root.tsx             | Installer | Provider/shell integration and custom binding merge                      |
-| .customitin/ownership.json       | Installer | Generated hashes and original root bytes for drift checks/removal        |
+| File                               | Owner                       | Behavior                                                                            |
+| ---------------------------------- | --------------------------- | ----------------------------------------------------------------------------------- |
+| personalize/config.ts              | Developer                   | Created once; never overwritten or removed by refresh/remove                        |
+| personalize/overrides.json         | Developer                   | Created once; CLI selection flags explicitly merge requested decisions              |
+| personalize/bindings.lock.json     | Installer                   | Stable IDs and previous selectors; retained on removal; commit this file            |
+| personalize/capabilities.json      | Installer                   | Mobile registry generated from discovery plus overrides                             |
+| personalize/server-manifest.json   | Installer                   | Matching backend registry; deploy with planner                                      |
+| personalize/sources.ts             | Installer                   | Data adapter bindings                                                               |
+| personalize/components.tsx         | Installer                   | Host/item wrappers                                                                  |
+| personalize/navigation.ts          | Installer                   | Approved destination closures                                                       |
+| personalize/root.tsx               | Installer                   | Provider/shell integration and custom binding merge                                 |
+| .customitin/ownership.json         | Installer                   | Generated hashes, reversible host bindings and unwrapped host snapshots             |
+| Root and selected screen TSX files | Developer with SDK wrappers | Host code stays editable; only recognized SDK imports/props/wrappers are maintained |
 
-Do not edit installer-owned files to customize behavior. Change overrides or supply runtime bindings through config.ts, then refresh. Existing generated-file edits block replacement/removal rather than being silently discarded. Removal restores original root bytes and removes owned generated files only when every tracked file is unchanged. Developer config, overrides and the identity lock remain. Retaining the lock keeps moved/renamed selector overrides usable if the integration is installed again. Reinstall with init --apply after reviewing its dry-run.
+Do not edit installer-owned files to customize behavior. Change overrides or supply runtime bindings through config.ts, then refresh. Existing generated-file edits block replacement/removal rather than being silently discarded. Developer config, overrides and the identity lock remain on removal. Retaining the lock keeps moved/renamed selector overrides usable if the integration is installed again.
+
+Edit selected screens and the app root normally: JSX content, props, styles, hooks, callbacks, imports and surrounding providers belong to the developer. Generated screens keep ordinary nested JSX inside CustomizableLayout. The CLI supplies a static sectionIds map and adds stable React keys where missing. Keep section keys stable; an added key remains ordinary host code if an edited screen is later removed from the integration.
+
+Discovery and refresh unwrap recognized SDK syntax from the **current** file, retain host edits and regenerate the bindings. Formatting changes are accepted. Removing the integration or disabling a screen strips only SDK instrumentation from the latest source; an unchanged host file is restored byte-for-byte from its unwrapped snapshot. Root edits are preserved too. Removing a section, adding a section, or changing its default order requires regeneration, while content/style/handler changes work immediately through normal Fast Refresh.
+
+Do not hand-edit generated wrapper imports, aliases, IDs or sectionIds. Changes to those boundaries stop refresh/removal with diagnostics and no writes. Restore the indicated SDK syntax; there is no need to remove/reinstall the integration. Ordinary generated adapters under personalize/ retain whole-file drift protection. Never edit ownership hashes to bypass checks. Older installations without reversible host metadata upgrade on a refresh when their tracked host files are unchanged; if already modified, preserve those edits and restore the last generated host version before upgrading, then reapply the edits.
+
+A moved screen is recognized only when its original path is absent and exactly one new file retains its complete SDK wrapper. A unique unchanged export name keeps the existing identity; use an explicit symbol override for renames. Ambiguous copies, splitting/merging instrumented files and modified wrapper aliases need deliberate host wiring or restoring the known SDK boundaries first. No move is inferred from a partial match.
 
 ## Complete override example
 
@@ -79,7 +88,17 @@ Pre-lock installations import matching original source IDs when possible. If a l
 
 ## Refresh workflow
 
-1. Update the host code.
+For normal development, run this alongside the app's existing Metro/Expo/dev command, or add it as a parallel process to an existing development script:
+
+```sh
+npx --no-install customitin watch --apply
+```
+
+Watch requires an installed integration. It polls bounded source files, overrides, config and tracked output once per second, serializes regeneration and reports changed files or actionable issues as JSON lines. It never runs host scripts or invokes installer AI. Without --apply it only reports plans; --dry-run takes precedence. Stop with Ctrl+C. Edits arriving during planning cause that plan to be skipped and retried on a later poll. Unsupported JSX or altered SDK boundaries keep the last generated integration intact; save a supported correction and watch resumes. Newly added/removed sections show the host container without customization controls while registration is stale, so a save does not hide new UI or throw a section mismatch error. Structural changes can remount sections during this development transition.
+
+Watch is optional. A one-shot workflow is also supported:
+
+1. Update the host code directly; keep section keys stable.
 2. Run inspect; compare actual signatures and fields.
 3. Update only overrides/config as needed.
 4. Run refresh --dry-run and review changed files, unresolved items and conflicts.
@@ -88,7 +107,7 @@ Pre-lock installations import matching original source IDs when possible. If a l
 7. Exercise a previously saved profile and any changed data/navigation behavior.
 8. Deploy matching backend manifests before requiring them in a new app build.
 
-If the root or a generated file has developer edits, move the intended behavior into developer-owned code before refreshing. Do not edit ownership hashes to bypass the conflict check.
+Before a release, run refresh --apply, doctor --typecheck and the app's checks even if watch was running. Review and commit source/generated changes together, including .customitin/ownership.json and bindings.lock.json. Deploy matching server manifests when capability semantics change. Do not run multiple applying CLI processes against the same app at once.
 
 ## What refresh does not do
 

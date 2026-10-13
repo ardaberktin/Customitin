@@ -21,6 +21,10 @@ export interface ResolvedIntegration {
   sources: SelectedSource[];
   components: SelectedComponent[];
   routes: { route: DiscoveredRoute; title: string }[];
+  screens: {
+    symbol: DiscoveredSymbol;
+    options: IntegrationOverrides['screens'][string];
+  }[];
   queryClient?: DiscoveredSymbol;
   navigationRef?: DiscoveredSymbol;
   issues: string[];
@@ -47,6 +51,20 @@ export function resolveIntegration(
       : undefined;
   const sources = selectSources(report, overrides, lock, queryClient, issues);
   const components = selectComponents(report, overrides, lock, sources, issues);
+  const screens = report.symbols.flatMap((symbol) => {
+    const options = lookupOverride(overrides.screens, symbol, lock);
+    if (!options?.enabled) return [];
+    if (!symbol.screen) {
+      issues.push(
+        `${symbol.selector}: ${symbol.screenIssue ?? 'Not a supported screen.'}`,
+      );
+      return [];
+    }
+    for (const key of options.requiredSections)
+      if (!symbol.screen.sections.some((section) => section.key === key))
+        throw new Error(`${symbol.selector}: unknown required section ${key}`);
+    return [{ symbol, options }];
+  });
   const routes = report.routeDetails.flatMap((route) => {
     const options = lookupOverride(overrides.routes, route, lock);
     if (!options?.enabled) return [];
@@ -68,6 +86,7 @@ export function resolveIntegration(
     sources: overrides.sources,
     components: overrides.components,
     routes: overrides.routes,
+    screens: overrides.screens,
   })) {
     const seen = new Set<string>();
     for (const key of Object.keys(entries)) {
@@ -85,7 +104,12 @@ export function resolveIntegration(
       if (
         binding &&
         binding.kind !==
-          { sources: 'source', components: 'component', routes: 'route' }[kind]
+          {
+            sources: 'source',
+            components: 'component',
+            routes: 'route',
+            screens: 'component',
+          }[kind]
       )
         throw new Error(`${key}: override is in the wrong category (${kind})`);
       if (binding && seen.has(binding.id))
@@ -105,5 +129,13 @@ export function resolveIntegration(
         );
     }
   }
-  return { sources, components, routes, queryClient, navigationRef, issues };
+  return {
+    sources,
+    components,
+    routes,
+    screens,
+    queryClient,
+    navigationRef,
+    issues,
+  };
 }

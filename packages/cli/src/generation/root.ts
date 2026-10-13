@@ -1,11 +1,12 @@
 import type { DiscoveryReport } from '../discovery/types';
 
-export function generateRoot(report: DiscoveryReport): string {
-  const safeArea = !!report.versions['react-native-safe-area-context'];
+export function generateRoot(report: DiscoveryReport, inline = false): string {
+  const safeArea =
+    !inline && !!report.versions['react-native-safe-area-context'];
   return `import { useMemo, type ReactNode } from 'react';
 ${safeArea ? "import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';" : ''}
 import { registrySchema } from '@customitin/core';
-import { PersonalizationHost, type RuntimeBindings, type RuntimeOptions } from '@customitin/react-native';
+import { ${inline ? 'CustomizationProvider' : 'PersonalizationHost'}, type RuntimeBindings, type RuntimeOptions } from '@customitin/react-native';
 import capabilities from './capabilities.json';
 import { sources } from './sources';
 import { components, items } from './components';
@@ -22,11 +23,11 @@ ${
 function ConnectedRoot`
     : 'export function PersonalizationRoot'
 }({ children }: { children: ReactNode }) {
-  ${safeArea ? 'const insets = useSafeAreaInsets();' : ''}
+  ${safeArea && !inline ? 'const insets = useSafeAreaInsets();' : ''}
   const host: HostConfiguration = useHostConfiguration();
   const custom = host.bindings;
   const bindings = useMemo(() => ({ ...custom, sources: { ...sources, ...custom?.sources }, components: { ...components, ...custom?.components }, items: { ...items, ...custom?.items }, navigate: custom?.navigate ?? navigate }), [custom]);
-  return <PersonalizationHost ${safeArea ? 'insets={insets}' : ''} options={{ registry, storage: host.storage ?? config.storage, scope: host.scope ?? config.scope, planner: host.planner ?? config.planner }} bindings={bindings}>{children}</PersonalizationHost>;
+  return <${inline ? 'CustomizationProvider' : 'PersonalizationHost'} ${safeArea && !inline ? 'insets={insets}' : ''} options={{ registry, storage: host.storage ?? config.storage, scope: host.scope ?? config.scope, planner: host.planner ?? config.planner }} bindings={bindings}>{children}</${inline ? 'CustomizationProvider' : 'PersonalizationHost'}>;
 }
 `;
 }

@@ -5,6 +5,7 @@ import {
   invariant,
   makeProposal,
   plannerResponseSchema,
+  validatePlanningTarget,
   type CapabilityRegistry,
   type Operation,
   type PlannerRequest,
@@ -21,6 +22,7 @@ export interface PlannerTransport {
 export interface RuntimeState {
   profile?: Profile;
   preview?: Profile;
+  previewSurfaceId?: string;
   proposal?: Proposal;
   busy: boolean;
   loading: boolean;
@@ -121,13 +123,19 @@ export class CustomizationRuntime {
     this.publish({
       proposal: undefined,
       preview: undefined,
+      previewSurfaceId: undefined,
       busy: false,
       message: undefined,
     });
   }
-  previewOperations(operations: Operation[], summary: string): void {
+  previewOperations(
+    operations: Operation[],
+    summary: string,
+    surfaceId?: string,
+  ): void {
     const current = this.state.profile;
     invariant(current, 'Your space is still loading');
+    validatePlanningTarget(this.registry, surfaceId, operations);
     this.pendingPlan?.abort();
     const proposal = makeProposal(
       current,
@@ -137,14 +145,16 @@ export class CustomizationRuntime {
     );
     this.publish({
       preview: applyProposal(current, proposal, this.registry),
+      previewSurfaceId: surfaceId,
       proposal,
       message: undefined,
       busy: false,
     });
   }
-  async request(instruction: string): Promise<void> {
+  async request(instruction: string, surfaceId?: string): Promise<void> {
     const current = this.state.profile;
     invariant(current, 'Your space is still loading');
+    validatePlanningTarget(this.registry, surfaceId);
     if (!this.options.planner) {
       this.publish({
         message:
@@ -164,6 +174,7 @@ export class CustomizationRuntime {
       busy: true,
       message: undefined,
       preview: undefined,
+      previewSurfaceId: undefined,
       proposal: undefined,
     });
     try {
@@ -176,6 +187,7 @@ export class CustomizationRuntime {
               registryRevision: this.registry.revision,
               baseRevision: current.revision,
               instruction,
+              ...(surfaceId ? { surfaceId } : {}),
               configuration: configurationSchema.parse({
                 theme: current.theme,
                 views: current.views,
@@ -199,8 +211,17 @@ export class CustomizationRuntime {
       );
       const profile = this.state.profile;
       invariant(profile, 'Your space is still loading');
+      validatePlanningTarget(
+        this.registry,
+        surfaceId,
+        response.proposal.operations,
+      );
       const preview = applyProposal(profile, response.proposal, this.registry);
-      this.publish({ proposal: response.proposal, preview });
+      this.publish({
+        proposal: response.proposal,
+        preview,
+        previewSurfaceId: surfaceId,
+      });
     } catch {
       if (epoch === this.epoch && this.pendingPlan === controller)
         this.publish({
@@ -226,6 +247,7 @@ export class CustomizationRuntime {
           this.publish({
             profile: record.current,
             preview: undefined,
+            previewSurfaceId: undefined,
             proposal: undefined,
             message: undefined,
             canUndo: record.history.length > 0,

@@ -2,7 +2,7 @@ import { unlink } from 'node:fs/promises';
 import { inspectProject, type DiscoveryReport } from '../discovery/scan';
 import { generateRegistry } from '../generation/registry';
 import { generateFiles, initialConfig } from '../generation/templates';
-import { wrapEntry } from '../generation/transform';
+import { generateHostFiles } from './host-files';
 import { formatGenerated } from '../generation/format';
 import {
   identityPath,
@@ -18,12 +18,13 @@ import {
 } from '../configuration/overrides';
 import { resolveIntegration } from '../configuration/resolve';
 import { importLegacyIdentity } from '../configuration/legacy';
+import { projectSnapshot } from './snapshot';
+import { readHostOwnership } from './host-ownership';
 import {
   atomicWrite,
   hash,
   manifestPath,
   readOptional,
-  readOwnership,
   safePath,
   type Ownership,
 } from './files';
@@ -42,7 +43,7 @@ export async function planInstall(
   requestedOverrides?: IntegrationOverrides,
 ): Promise<InstallPlan> {
   const report = await inspectProject(root);
-  const previous = await readOwnership(root);
+  const previous = await readHostOwnership(root);
   const overrides = overridesSchema.parse(
     requestedOverrides ?? (await readOverrides(root)),
   );
@@ -84,23 +85,10 @@ export async function planInstall(
     setup[overridesPath] =
       JSON.stringify(requestedOverrides ?? emptyOverrides(), null, 2) + '\n';
   const conflicts: string[] = [];
-  if (report.entry) {
-    const current = await readOptional(await safePath(root, report.entry));
-    const owned = previous?.files.find((f) => f.path === report.entry);
-    if (current !== null) {
-      try {
-        files[report.entry] = wrapEntry(report.entry, owned?.before ?? current);
-      } catch (error) {
-        report.unresolved.push((error as Error).message);
-        integration.issues.push((error as Error).message);
-      }
-    }
-  }
-  if (!report.entry)
-    integration.issues.push(
-      'No supported root found; mount PersonalizationRoot inside the host provider tree.',
-    );
+  const host = await generateHostFiles(root, report, integration, previous);
+  Object.assign(files, host.files);
   await formatGenerated(root, files);
+  Object.assign(files, host.restored);
   await formatGenerated(root, setup);
   const ownership: Ownership = {
     version: 1,
@@ -115,16 +103,21 @@ export async function planInstall(
     if (
       current !== null &&
       current !== content &&
-      ((!owned && path !== report.entry && path !== identityPath) ||
-        (owned && hash(current) !== owned.hash))
+      ((!owned &&
+        !host.selected.has(path) &&
+        path !== report.entry &&
+        path !== identityPath) ||
+        (owned && !(path in host.before) && hash(current) !== owned.hash))
     )
       conflicts.push(path);
     if (current !== content) changes.push(path);
-    ownership.files.push({
-      path,
-      hash: hash(content),
-      before: owned ? owned.before : current,
-    });
+    if (!(path in host.restored))
+      ownership.files.push({
+        path,
+        hash: hash(content),
+        before: host.before[path] ?? (owned ? owned.before : current),
+        ...(host.bindings[path] ? { host: host.bindings[path] } : {}),
+      });
   }
   return {
     report,
@@ -148,8 +141,15 @@ export async function installProject(
     overrides?: IntegrationOverrides;
   } = {},
 ) {
+  const snapshot = dryRun ? undefined : await projectSnapshot(root);
   const plan = await planInstall(root, selectedIds, overrides);
-  if (dryRun || plan.conflicts.length) return plan;
+  if (dryRun || plan.conflicts.length || plan.issues.length) return plan;
+  if (snapshot !== (await projectSnapshot(root))) {
+    plan.issues.push(
+      'Project changed while planning. Retry refresh after saving your edits.',
+    );
+    return plan;
+  }
   const priorManifest = await readOptional(await safePath(root, manifestPath));
   const backup = new Map<string, string | null>();
   for (const path of [...plan.changes, ...Object.keys(plan.setup)])

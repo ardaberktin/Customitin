@@ -4,6 +4,7 @@ export * from './schema/registry';
 export * from './validation/values';
 export * from './validation/query';
 export * from './validation/profile';
+export * from './validation/planning';
 export * from './patches/apply';
 export * from './data/source';
 export * from './migrations/reconcile';

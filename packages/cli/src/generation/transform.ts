@@ -1,7 +1,16 @@
 import { Node, Project, SyntaxKind } from 'ts-morph';
 import { relativeImport } from './imports';
+import {
+  emptyHostBindings,
+  syntaxHash,
+  type HostBindings,
+} from './host-bindings';
 
-export function wrapEntry(path: string, text: string): string {
+export function wrapEntry(
+  path: string,
+  text: string,
+  bindings: HostBindings = emptyHostBindings(),
+): string {
   const project = new Project({ useInMemoryFileSystem: true });
   const source = project.createSourceFile(path, text);
   if (
@@ -103,6 +112,16 @@ export function wrapEntry(path: string, text: string): string {
   source.addImportDeclaration({
     namedImports: ['PersonalizationRoot'],
     moduleSpecifier: relativeImport(path, 'personalize/root.tsx'),
+  });
+  bindings.imports.push({
+    module: relativeImport(path, 'personalize/root.tsx'),
+    name: 'PersonalizationRoot',
+    local: 'PersonalizationRoot',
+  });
+  bindings.wrappers.push({
+    local: 'PersonalizationRoot',
+    attributes: syntaxHash(''),
+    singleChild: false,
   });
   return source.getFullText();
 }

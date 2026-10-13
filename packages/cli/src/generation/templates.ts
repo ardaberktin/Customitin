@@ -19,7 +19,10 @@ export function generateFiles(
     'personalize/sources.ts': generateSources(integration),
     'personalize/components.tsx': generateComponents(integration),
     'personalize/navigation.ts': generateNavigation(report, integration),
-    'personalize/root.tsx': generateRoot(report),
+    'personalize/root.tsx': generateRoot(
+      report,
+      integration.screens.length > 0,
+    ),
     'personalize/README.md': `# Generated Customitin integration
 
 Connected sources: ${registry.sources.map((s) => s.title).join(', ') || 'none yet'}.
@@ -30,7 +33,7 @@ Edit overrides.json for capability decisions; edit config.ts for host storage, s
 
 Run customitin inspect --cwd <app> for selectors. Edit overrides, run customitin refresh --dry-run, review, then refresh --apply. Run customitin doctor and your application checks. Run customitin guide for bundled AI documentation and customitin guide --topic testing for consumer checks.
 
-Original screens stay mounted. Generated UI adds Original app, My space and Customize. Saved view navigation is handled within My space. SDK appearance affects SDK surfaces; existing styles and provider dependencies require a host bridge. Use a user-specific scope on login/account changes. Deploy the matching server-manifest.json with the developer-owned planner. Provider keys belong on the server.
+${integration.screens.length ? 'Selected existing screens have inline customization controls. Edit their ordinary JSX, hooks, styles and callbacks directly; keep section keys stable and generated wrapper imports/props intact. Run customitin watch --apply alongside the dev server to update section registration after saves, or refresh --apply on demand. Removal and refresh preserve current host edits. Text-size and numeric-gap preferences affect connected primitives. Required sections are configured in overrides.' : 'Original screens stay mounted. Generated UI adds Original app, My space and Customize. Saved view navigation is handled within My space. SDK appearance affects SDK surfaces; existing styles and provider dependencies require a host bridge.'} Use a user-specific scope on login/account changes. Deploy the matching server-manifest.json with the developer-owned planner. Provider keys belong on the server.
 `,
   };
 }

@@ -139,6 +139,7 @@ export const plannerRequestSchema = z
     registryRevision: idSchema,
     baseRevision: z.number().int().nonnegative(),
     instruction: z.string().trim().min(1).max(2000),
+    surfaceId: idSchema.optional(),
     configuration: configurationSchema,
   })
   .strict();
