@@ -2,23 +2,27 @@
 
 ## Read the diagnostic, then inspect its evidence
 
-| Symptom                              | Likely cause                                                            | Action                                                                              |
-| ------------------------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Source listed but not generated      | Completeness is unknown                                                 | Verify the repository, then use --complete or a completeness override               |
-| Query factory skipped                | No unique exported QueryClient                                          | Export/select the existing client; do not create a replacement cache                |
-| Hook requires adapter                | Discovery found useSomething                                            | Expose an underlying query factory or provide a React-safe host binding             |
-| Card has no unique source            | More than one matching row shape, or required fields excluded           | Set component.source or correct the field selection                                 |
-| Component requires unsupported props | Callback, children, object or provider dependency cannot be synthesized | Export a small wrapper with a supported interface                                   |
-| Remote filters unavailable           | No explicit server operator contract                                    | Declare supported filters/sort fields after verifying endpoint behavior             |
-| Detail parameter mismatch            | Row ID and route parameter differ in type/count                         | Use compatible schema or a custom navigation/data binding                           |
-| No navigation ref                    | React Navigation ref is absent or ambiguous                             | Export/select the ref already attached to the root navigator                        |
-| Root needs manual integration        | HOC, conditional return or unsupported root expression                  | Place PersonalizationRoot in the appropriate existing provider tree                 |
-| Settings vanish on restart           | Memory storage                                                          | Install/connect persistent host storage                                             |
-| Planner unavailable                  | No endpoint, invalid session, revision mismatch or provider failure     | Verify backend configuration and matching manifest; inspect safe server diagnostics |
-| Refresh required                     | Source/override/template changed                                        | Review refresh --dry-run, then apply and recheck                                    |
-| Drift                                | Someone edited an owned file                                            | Preserve those edits in config/host code; resolve deliberately before regeneration  |
-| SDK wrapper props/imports changed    | A generated host boundary was altered                                   | Restore the indicated SDK syntax; ordinary host JSX/logic can remain edited         |
-| Project changed while planning       | A new save arrived during regeneration                                  | Let watch retry after the next save settles, or rerun refresh                       |
+| Symptom                                  | Likely cause                                                            | Action                                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Source listed but not generated          | Completeness is unknown                                                 | Verify the repository, then use --complete or a completeness override               |
+| Query factory skipped                    | No unique exported QueryClient                                          | Export/select the existing client; do not create a replacement cache                |
+| Hook requires adapter                    | Discovery found useSomething                                            | Expose an underlying query factory or provide a React-safe host binding             |
+| Card has no unique source                | More than one matching row shape, or required fields excluded           | Set component.source or correct the field selection                                 |
+| Component requires unsupported props     | Callback, children, object or provider dependency cannot be synthesized | Export a small wrapper with a supported interface                                   |
+| Remote filters unavailable               | No explicit server operator contract                                    | Declare supported filters/sort fields after verifying endpoint behavior             |
+| Detail parameter mismatch                | Row ID and route parameter differ in type/count                         | Use compatible schema or a custom navigation/data binding                           |
+| No navigation ref                        | React Navigation ref is absent or ambiguous                             | Export/select the ref already attached to the root navigator                        |
+| Root needs manual integration            | HOC, conditional return or unsupported root expression                  | Place PersonalizationRoot in the appropriate existing provider tree                 |
+| Settings vanish on restart               | Memory storage                                                          | Install/connect persistent host storage                                             |
+| Planner unavailable                      | No endpoint, invalid session, revision mismatch or provider failure     | Verify backend configuration and matching manifest; inspect safe server diagnostics |
+| Refresh required                         | Source/override/template changed                                        | Review refresh --dry-run, then apply and recheck                                    |
+| Drift                                    | Someone edited an owned file                                            | Preserve those edits in config/host code; resolve deliberately before regeneration  |
+| SDK wrapper props/imports changed        | A generated host boundary was altered                                   | Restore the indicated SDK syntax; ordinary host JSX/logic can remain edited         |
+| Project changed while planning           | A new save arrived during regeneration                                  | Let watch retry after the next save settles, or rerun refresh                       |
+| Development script not wired             | Custom launcher or installation predating automatic script wiring       | Run refresh --dev-script NAME --apply once, then use the original app command       |
+| Script wrapper/helper missing or changed | Generated package-script boundary changed                               | Restore the wrapper; edit customitin:host:NAME to change the host command           |
+| Reserved helper already exists           | Host script uses a reserved helper or helper lifecycle name             | Resolve that name collision before applying; the CLI never overwrites it            |
+| Watcher already applying changes         | A standalone applying watch is started while another owns the app       | Use the watcher started by the dev command, or stop the existing watcher first      |
 
 Generated sources and routes are typed but still depend on truthful host contracts. A passing typecheck does not prove completeness, correct filtering, authorization or visual quality.
 
@@ -28,6 +32,7 @@ Run `npm run check` after changes. It includes strict TypeScript, zero-warning l
 
 - installer-discovery: compile real consumer integrations against installed framework types.
 - installer-overrides: field exposure, identity through moves/renames, selection persistence and conflict preservation.
+- dev-scripts/dev-process/watch-lock: script ownership, actual command startup/regeneration, arguments/hooks, shutdown and exclusive watching.
 - query-adapters: remote query/cursor forwarding, row projection, cache notifications and cancellation.
 - host-ui: preview/apply, saved-view navigation, detail navigation and original-screen state preservation.
 - installer: baseline install/idempotency/remove, context exclusion and ownership behavior.

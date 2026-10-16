@@ -20,6 +20,7 @@ import { resolveIntegration } from '../configuration/resolve';
 import { importLegacyIdentity } from '../configuration/legacy';
 import { projectSnapshot } from './snapshot';
 import { readHostOwnership } from './host-ownership';
+import { planDevScripts } from '../development/scripts';
 import {
   atomicWrite,
   hash,
@@ -90,16 +91,30 @@ export async function planInstall(
   await formatGenerated(root, files);
   Object.assign(files, host.restored);
   await formatGenerated(root, setup);
+  const development = await planDevScripts(
+    root,
+    previous?.devScripts,
+    overrides.devScripts,
+  );
+  conflicts.push(...development.conflicts);
+  if (development.changed) files['package.json'] = development.content;
   const ownership: Ownership = {
     version: 1,
     contextDigest: report.contextDigest,
     registryRevision: registry.revision,
     files: [],
+    ...(development.bindings.length
+      ? { devScripts: development.bindings }
+      : {}),
   };
   const changes: string[] = [];
   for (const [path, content] of Object.entries(files)) {
     const current = await readOptional(await safePath(root, path));
     const owned = previous?.files.find((f) => f.path === path);
+    if (path === 'package.json') {
+      if (current !== content) changes.push(path);
+      continue;
+    }
     if (
       current !== null &&
       current !== content &&

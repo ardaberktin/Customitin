@@ -10,6 +10,12 @@ Editable-host fixtures cover JSX/handler/style edits, added/removed sections, st
 
 For an actual --screen integration, exercise the same actions on iOS and Android. Verify original geometry (especially flex-dependent children), scrolling with the inline editor open, sticky headers, keyboard focus when hiding forms, accessibility exclusion of hidden sections, account switching, storage failures and the original navigation. Hidden sections remain mounted, so subscriptions/effects continue. No physical-device, performance or live-provider claim is implied by the fixture suite. Deploy the new matching manifest and server package before using surfaceId-aware planner requests.
 
+## Automatic development command acceptance
+
+Script fixtures cover dry-run, automatic Expo/Metro selection, custom script selection, compiling the generated consumer, no-op refresh, preserved helper edits/unrelated package fields, opt-out/removal and ownership conflicts. Real npm processes exercise the existing command, literal forwarded arguments, environment, pre/post hooks, source regeneration, nested scripts, host failures, SIGINT/SIGTERM and descendant cleanup. Lock tests verify one applying writer, takeover, aborted waits and stale-process recovery. These tests build the CLI from source and run on the test host; they are not packed-package or native-device acceptance.
+
+For a consuming app, update the CLI once, review/apply refresh and run its usual development command. Add a supported section while Metro/Expo is running; verify automatic regeneration and Fast Refresh. Check terminal shortcuts, Ctrl+C, restarting and simultaneous app commands. Validate the same workflow on each supported OS/package manager. Do not infer yarn/pnpm/Bun/Windows behavior from the npm/macOS checks.
+
 ## Reproduce the fresh-app acceptance test
 
 From a Customitin checkout with dependencies installed:

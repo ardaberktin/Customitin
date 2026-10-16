@@ -2,6 +2,20 @@
 
 Recorded October 11, 2026 on macOS arm64 with Node 24.15.0. This is a functional alpha verification record, not a public-release certification. The supplied specification is preserved in [original-plan.md](original-plan.md).
 
+## Automatic development command watcher — October 16, 2026
+
+Init/refresh now wraps recognized Expo/Metro package scripts so the existing app command starts its host process and applying watcher together. Custom launchers have a persistent --dev-script selection; --no-dev-watch restores current host commands. Script ownership covers individual wrapper/helper entries and preserves unrelated package fields and developer edits to helper commands. Nested commands share one watcher, and separate dev commands coordinate through a temporary per-app writer lock.
+
+Verified for this change on macOS with npm:
+
+- `npm run check`: 95 tests across 22 files, strict TypeScript, zero-warning lint, formatting, all package/declaration builds, domain boundaries and regenerated AI documentation freshness.
+- Script integration fixtures compile the consumer and cover dry-run, automatic/custom selection, idempotent refresh, host-command edits, opt-out/removal and conflicts without clobbering package settings.
+- Real processes run the built-from-source CLI through npm and verify argument quoting, inherited environment, pre/post hooks, automatic regeneration, nested scripts, failed host exit codes and SIGINT/SIGTERM cleanup of direct/nested app descendants.
+- Watcher lock tests cover exclusive ownership, takeover, cancelled waiting and recovery of a dead process's lock.
+- A built CLI smoke test under a pseudo-terminal reported both input/output as TTYs, accepted raw key input and exited cleanly on the host's quit key. Built command help exposes dev and the script-selection/opt-out flags.
+
+No packages were published or backend deployed. Existing consuming apps must update the CLI package and apply refresh once; normal screen edits then use the original development command. This run did not repeat packed fresh-native-consumer, cross-app Playwright, real Metro/Expo shortcut, native-device/simulator, Windows, yarn/pnpm/Bun or live-model acceptance. Verify those environments before shipping claims for them. The host command runs under its helper lifecycle name; scripts that inspect npm_lifecycle_event need review or opt-out. Stop development commands before one-shot applying integration operations and release checks.
+
 ## Editable screens and development watch — October 12, 2026
 
 Selected screens now retain ordinary nested JSX through CustomizableLayout. Refresh reads current host code, validates SDK boundaries and regenerates section bindings without removing/reinstalling the integration. Root edits, current screen edits, stable section IDs, developer configuration and recognized file moves are preserved. Removal/disable strips SDK syntax from edited host files. The optional local watch command runs alongside the existing dev server, reports unsupported saves and resumes after corrections; input snapshots prevent applying a plan after a save during planning.

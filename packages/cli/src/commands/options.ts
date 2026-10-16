@@ -16,6 +16,8 @@ export interface SelectionFlags {
   screen?: string[];
   'query-client'?: string;
   'navigation-ref'?: string;
+  'dev-script'?: string[];
+  'no-dev-watch'?: boolean;
 }
 export async function selectedOverrides(
   root: string,
@@ -28,10 +30,17 @@ export async function selectedOverrides(
     !flags.detail?.length &&
     !flags.screen?.length &&
     !flags['query-client'] &&
-    !flags['navigation-ref']
+    !flags['navigation-ref'] &&
+    !flags['dev-script']?.length &&
+    !flags['no-dev-watch']
   )
     return;
   const overrides = await readOverrides(root);
+  if (flags['no-dev-watch'] && flags['dev-script']?.length)
+    throw new Error('Use --dev-script or --no-dev-watch, not both.');
+  if (flags['no-dev-watch']) overrides.devScripts = false;
+  else if (flags['dev-script']?.length)
+    overrides.devScripts = flags['dev-script'];
   const lock = preserveIdentity(
     await inspectProject(root),
     await readIdentity(root),

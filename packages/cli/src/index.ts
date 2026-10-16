@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { overridesSchema } from './configuration/overrides';
 import { selectedOverrides } from './commands/options';
 import { readGuide } from './commands/guide';
+import { developmentCommand } from './development/cli';
 import {
   doctorProject,
   inspectProject,
@@ -14,6 +15,8 @@ import {
   watchProject,
 } from './api';
 async function main() {
+  if (process.argv[2] === 'dev')
+    return developmentCommand(process.argv.slice(3));
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
@@ -26,6 +29,8 @@ async function main() {
       complete: { type: 'string', multiple: true },
       component: { type: 'string', multiple: true },
       screen: { type: 'string', multiple: true },
+      'dev-script': { type: 'string', multiple: true },
+      'no-dev-watch': { type: 'boolean' },
       route: { type: 'string', multiple: true },
       detail: { type: 'string', multiple: true },
       'query-client': { type: 'string' },
@@ -38,8 +43,9 @@ async function main() {
   if (values.help || positionals[0] === 'help') {
     console.log(`Usage: customitin <command> [options]
 
-Commands: inspect, init, doctor, refresh, watch, remove, schema, guide
+Commands: inspect, init, doctor, refresh, watch, dev, remove, schema, guide
   watch --apply               Refresh an installed integration as host files change
+  dev --script NAME --        Run a wired host script with automatic watching
   --cwd <directory>           Select the host application
   --context                   Show the exact optional AI context
   --dry-run                   Preview changes (the default)
@@ -48,6 +54,8 @@ Commands: inspect, init, doctor, refresh, watch, remove, schema, guide
   --complete <selector>       Confirm a complete source (repeatable, saved in overrides)
   --component <selector>      Enable a discovered component (repeatable)
   --screen <selector>         Customize an existing screen in place (repeatable)
+  --dev-script <name>         Wire a custom package script (repeatable, saved)
+  --no-dev-watch              Disable automatic script wiring and restore originals
   --route <selector>          Enable a discovered route (repeatable)
   --detail <source=route>     Connect source rows to a detail route and enable it
   --query-client <selector>   Select an exported QueryClient
@@ -99,6 +107,8 @@ When both --apply and --dry-run are passed, --dry-run takes precedence.`);
           'complete',
           'component',
           'screen',
+          'dev-script',
+          'no-dev-watch',
           'route',
           'detail',
           'query-client',
@@ -167,7 +177,7 @@ When both --apply and --dry-run are passed, --dry-run takes precedence.`);
     if (result.conflicts.length || result.issues.length) process.exitCode = 1;
   } else
     throw new Error(
-      'Commands: inspect, init, doctor, refresh, watch, remove, schema, guide. Changes require --apply; use --cwd to select an application.',
+      'Commands: inspect, init, doctor, refresh, watch, dev, remove, schema, guide. Installation changes require --apply; use --cwd to select an application.',
     );
 }
 main().catch((error: unknown) => {

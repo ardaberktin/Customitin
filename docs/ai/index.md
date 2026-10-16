@@ -20,7 +20,7 @@ A capability registry describes approved components, sources, navigation destina
 
 To personalize existing UI, use `inspect` and enable supported screen selectors with `init --screen <selector>`. The CLI instruments the selected screen's existing JSX, registers its sections, and mounts a provider around the original app. Each selected screen gets its own customization controls; this mode does not add My space or replace navigation. Users can reorder/hide optional sections, preview/apply, undo, restore the layout, and change connected text sizes/spacing without a planner. Hooks, callbacks and data stay in host code. See [screen contracts](contracts.md#existing-screens).
 
-Without screen selections, generated integrations retain the separate My space/Customize shell. Neither mode migrates every existing screen or style. The CLI keeps visible outer JSX provider chains (names ending in Provider, including Context.Provider) above personalization. Providers hidden inside another component or navigator still need a shared host wrapper. Edit host screens/root normally and use watch --apply alongside the dev server to regenerate section bindings; refresh/remove preserve current host edits. Keep the generated SDK wrapper props/imports intact. See [maintenance](maintenance.md).
+Without screen selections, generated integrations retain the separate My space/Customize shell. Neither mode migrates every existing screen or style. The CLI keeps visible outer JSX provider chains (names ending in Provider, including Context.Provider) above personalization. Providers hidden inside another component or navigator still need a shared host wrapper. Edit host screens/root normally; init/refresh wires recognized Expo/Metro development scripts to start the watcher automatically. Keep using the app's existing command. Refresh/remove preserve current host edits. Keep the generated SDK wrapper props/imports intact. See [maintenance](maintenance.md) for custom scripts, opt-out and ownership.
 
 ## Working rules for integration agents
 
@@ -39,6 +39,7 @@ Without screen selections, generated integrations retain the separate My space/C
 - packages/cli/src/configuration: override schema, stable identities and selection rules.
 - packages/cli/src/generation: checked templates for manifests and bindings.
 - packages/cli/src/commands: planning, transactional writes, diagnostics and removal.
+- packages/cli/src/development: reversible package-script wiring, host process lifecycle and exclusive watcher ownership.
 - packages/react-native/src/adapters/query.ts: cache/remote adapter helpers; no TanStack dependency.
 - packages/react-native/src/composer/host.tsx: generated integration's shell.
 - packages/core/src/validation: authoritative runtime restrictions.

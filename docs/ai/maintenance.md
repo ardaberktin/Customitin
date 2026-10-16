@@ -2,19 +2,20 @@
 
 ## File ownership
 
-| File                               | Owner                       | Behavior                                                                            |
-| ---------------------------------- | --------------------------- | ----------------------------------------------------------------------------------- |
-| personalize/config.ts              | Developer                   | Created once; never overwritten or removed by refresh/remove                        |
-| personalize/overrides.json         | Developer                   | Created once; CLI selection flags explicitly merge requested decisions              |
-| personalize/bindings.lock.json     | Installer                   | Stable IDs and previous selectors; retained on removal; commit this file            |
-| personalize/capabilities.json      | Installer                   | Mobile registry generated from discovery plus overrides                             |
-| personalize/server-manifest.json   | Installer                   | Matching backend registry; deploy with planner                                      |
-| personalize/sources.ts             | Installer                   | Data adapter bindings                                                               |
-| personalize/components.tsx         | Installer                   | Host/item wrappers                                                                  |
-| personalize/navigation.ts          | Installer                   | Approved destination closures                                                       |
-| personalize/root.tsx               | Installer                   | Provider/shell integration and custom binding merge                                 |
-| .customitin/ownership.json         | Installer                   | Generated hashes, reversible host bindings and unwrapped host snapshots             |
-| Root and selected screen TSX files | Developer with SDK wrappers | Host code stays editable; only recognized SDK imports/props/wrappers are maintained |
+| File                               | Owner                       | Behavior                                                                                                 |
+| ---------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| personalize/config.ts              | Developer                   | Created once; never overwritten or removed by refresh/remove                                             |
+| personalize/overrides.json         | Developer                   | Created once; CLI selection flags explicitly merge requested decisions                                   |
+| personalize/bindings.lock.json     | Installer                   | Stable IDs and previous selectors; retained on removal; commit this file                                 |
+| personalize/capabilities.json      | Installer                   | Mobile registry generated from discovery plus overrides                                                  |
+| personalize/server-manifest.json   | Installer                   | Matching backend registry; deploy with planner                                                           |
+| personalize/sources.ts             | Installer                   | Data adapter bindings                                                                                    |
+| personalize/components.tsx         | Installer                   | Host/item wrappers                                                                                       |
+| personalize/navigation.ts          | Installer                   | Approved destination closures                                                                            |
+| personalize/root.tsx               | Installer                   | Provider/shell integration and custom binding merge                                                      |
+| .customitin/ownership.json         | Installer                   | Generated hashes, reversible host bindings and unwrapped host snapshots                                  |
+| Root and selected screen TSX files | Developer with SDK wrappers | Host code stays editable; only recognized SDK imports/props/wrappers are maintained                      |
+| package.json scripts               | Shared                      | Only selected script wrappers/helper entries are maintained; other package fields remain developer-owned |
 
 Do not edit installer-owned files to customize behavior. Change overrides or supply runtime bindings through config.ts, then refresh. Existing generated-file edits block replacement/removal rather than being silently discarded. Developer config, overrides and the identity lock remain on removal. Retaining the lock keeps moved/renamed selector overrides usable if the integration is installed again.
 
@@ -86,9 +87,38 @@ Bindings missing from the current scan remain in the lock as identity history. O
 
 Pre-lock installations import matching original source IDs when possible. If a legacy source moved or was renamed before the first upgrade refresh, review the old manifest and restore its selector first or perform an explicit reviewed migration. Do not delete the lock to resolve conflicts.
 
+## Development command integration
+
+Init/refresh automatically wraps recognized `start`, `dev`, `web`, `ios` and `android` scripts that directly run `expo start`, `react-native start` or `rnc-cli start`. Optional `npx`/`npx --no-install`, `pnpm exec` and `yarn exec` prefixes are recognized. Build/run-ios/run-android scripts and custom environment/launcher prefixes are not inferred. No process-runner dependency is added. Existing installations need one `refresh --apply` with the updated CLI.
+
+For example, an existing `"start": "expo start"` becomes:
+
+```json
+{
+  "start": "customitin dev --script start --",
+  "customitin:host:start": "expo start"
+}
+```
+
+Developers continue to use `npm start`, including arguments such as `npm start -- --port 8085`. The wrapper runs the saved host command through the invoking package manager, inherits its environment and terminal streams, starts an applying watcher, and shuts down both together. Host exit codes are retained; SIGINT/SIGTERM stop the host process tree. Existing pre/post hooks remain on the original script and run according to the package manager's normal rules. The host command's `npm_lifecycle_event` is the helper name; scripts that inspect it need adjustment or opt-out.
+
+To select a custom development script, or an exact set of scripts, use repeatable flags:
+
+```sh
+npx --no-install customitin refresh --dev-script develop --apply
+```
+
+This persists `"devScripts": ["develop"]` in overrides. Only those names are wired when an explicit list is present. `--no-dev-watch` persists `"devScripts": false`, restores current host commands and disables automatic wiring. Remove that override to return to automatic detection. Lifecycle hooks and scripts already running Customitin dev/watch cannot be selected.
+
+Edit `customitin:host:<name>` when changing a wrapped command's flags or launcher. The current helper value is preserved through refresh and restored to the original script on opt-out/removal. Unrelated package fields/scripts are preserved. Missing/modified wrappers and conflicting reserved helper or helper lifecycle names block writes with diagnostics; restore the recorded boundary before retrying. Package formatting may normalize when script entries change. Do not edit ownership metadata to bypass a conflict.
+
+Nested wrapped scripts share their parent watcher. Separate development commands for the same real app directory elect one applying watcher through a temporary OS-directory lock; another command can take over when its owner exits. An additional standalone applying watcher reports a conflict. Dead process locks are recovered automatically. Stop development processes before one-shot applying init/refresh/remove commands. Dry-run watchers do not acquire a writer lock.
+
+Only invoking the development command executes host scripts. Init, refresh, inspect, doctor and standalone watch retain static discovery. The real process tests cover npm on macOS; verify interactive Metro/Expo shortcuts, shutdown and argument forwarding on other package managers and operating systems before claiming support for them.
+
 ## Refresh workflow
 
-For normal development, run this alongside the app's existing Metro/Expo/dev command, or add it as a parallel process to an existing development script:
+Normally, use the app's wired development command. For an opted-out or externally managed dev server, the standalone command remains available:
 
 ```sh
 npx --no-install customitin watch --apply
@@ -107,7 +137,7 @@ Watch is optional. A one-shot workflow is also supported:
 7. Exercise a previously saved profile and any changed data/navigation behavior.
 8. Deploy matching backend manifests before requiring them in a new app build.
 
-Before a release, run refresh --apply, doctor --typecheck and the app's checks even if watch was running. Review and commit source/generated changes together, including .customitin/ownership.json and bindings.lock.json. Deploy matching server manifests when capability semantics change. Do not run multiple applying CLI processes against the same app at once.
+Before a release, stop development commands, run refresh --apply, doctor --typecheck and the app's checks even if watch was running. Review and commit source/generated changes together, including package.json, .customitin/ownership.json and bindings.lock.json. Deploy matching server manifests when capability semantics change. Do not run one-shot applying CLI operations concurrently with an applying watcher.
 
 ## What refresh does not do
 

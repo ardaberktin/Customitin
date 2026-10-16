@@ -10,6 +10,7 @@ import {
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { z } from 'zod';
 import { hostBindingsSchema } from '../generation/host-bindings';
+import { devScriptSchema } from '../development/schema';
 export const hash = (text: string) =>
   createHash('sha256').update(text).digest('hex');
 export const manifestPath = '.customitin/ownership.json';
@@ -27,6 +28,7 @@ export const ownershipSchema = z
     registryRevision: z.string(),
     contextDigest: z.string(),
     files: z.array(ownedFile).max(80),
+    devScripts: z.array(devScriptSchema).max(20).optional(),
   })
   .strict();
 export type Ownership = z.infer<typeof ownershipSchema>;
@@ -46,6 +48,7 @@ export async function safePath(root: string, path: string): Promise<string> {
     path.split(/[\\/]/).some((s) => s === '..') ||
     !(
       screenPath ||
+      path === 'package.json' ||
       /^(personalize\/|src\/app\/_layout\.tsx$|app\/_layout\.tsx$|App\.tsx$|src\/App\.tsx$|\.customitin\/ownership\.json$)/.test(
         path,
       )

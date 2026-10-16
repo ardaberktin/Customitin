@@ -12,6 +12,7 @@ import { integrationDiagnostics } from './diagnostics';
 import { identityPath } from '../configuration/identity';
 import { restoreHost } from '../generation/restore-host';
 import { readHostOwnership } from './host-ownership';
+import { planDevScripts } from '../development/scripts';
 export async function doctorProject(
   root: string,
   options: { typecheck?: boolean } = {},
@@ -92,6 +93,9 @@ export async function removeProject(root: string, dryRun = true) {
   const conflicts: string[] = [];
   const removed: string[] = [];
   const restored = new Map<string, string | null>();
+  const development = await planDevScripts(root, manifest.devScripts, false);
+  conflicts.push(...development.conflicts);
+  if (development.changed) removed.push('package.json');
   for (const file of manifest.files) {
     const path = await safePath(root, file.path);
     const current = await readOptional(path);
@@ -111,6 +115,8 @@ export async function removeProject(root: string, dryRun = true) {
   }
   // Preserve the complete integration if any part has user changes.
   if (!dryRun && conflicts.length === 0) {
+    if (development.changed)
+      await atomicWrite(root, 'package.json', development.content);
     for (const file of manifest.files.filter((f) => removed.includes(f.path))) {
       const content = restored.get(file.path)!;
       if (content === null) await unlink(await safePath(root, file.path));

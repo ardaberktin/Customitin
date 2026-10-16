@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { idSchema, scalarSchema } from '@customitin/core';
 import { readOptional, safePath } from '../commands/files';
+import { scriptNameSchema } from '../development/schema';
 
 const operators = z.enum([
   'eq',
@@ -69,6 +70,9 @@ export const overridesSchema = z
       .default({}),
     queryClient: z.string().optional(),
     navigationRef: z.string().optional(),
+    devScripts: z
+      .union([z.literal(false), z.array(scriptNameSchema).max(20)])
+      .optional(),
   })
   .strict();
 export type IntegrationOverrides = z.infer<typeof overridesSchema>;

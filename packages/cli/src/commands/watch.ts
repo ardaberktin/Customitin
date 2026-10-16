@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import { installProject } from './install';
 import { readOwnership } from './files';
 import { projectSnapshot } from './snapshot';
+import { acquireWatchLock } from '../development/watch-lock';
 
 export interface WatchUpdate {
   changes: string[];
@@ -14,15 +15,31 @@ export interface WatchOptions {
   dryRun?: boolean;
   intervalMs?: number;
   onUpdate: (result: WatchUpdate) => void | Promise<void>;
+  waitForLock?: boolean;
 }
 
 /** Local regeneration only: never executes host scripts or invokes installer AI. */
-export async function watchProject(
+export async function watchProject(root: string, options: WatchOptions) {
+  if (!(await readOwnership(root)))
+    throw new Error('Run init --apply before starting watch.');
+  if (options.dryRun !== false) return watchLoop(root, options);
+  const release = await acquireWatchLock(
+    root,
+    options.signal,
+    !!options.waitForLock,
+  );
+  if (!release) return;
+  try {
+    await watchLoop(root, options);
+  } finally {
+    await release();
+  }
+}
+
+async function watchLoop(
   root: string,
   { signal, onUpdate, dryRun = true, intervalMs = 1000 }: WatchOptions,
 ) {
-  if (!(await readOwnership(root)))
-    throw new Error('Run init --apply before starting watch.');
   let previous: string | undefined;
   let lastError: string | undefined;
   let previouslyBlocked = false;

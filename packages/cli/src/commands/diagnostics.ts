@@ -10,6 +10,7 @@ export async function integrationDiagnostics(
   try {
     const plan = await planInstall(root);
     issues.push(...plan.issues);
+    issues.push(...plan.conflicts);
     if (plan.changes.length)
       issues.push(`Refresh required: ${plan.changes.join(', ')}`);
   } catch (error) {
