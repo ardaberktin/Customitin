@@ -30,7 +30,8 @@
     "docs:build": "node scripts/build-ai-docs.mjs",
     "docs:check": "node scripts/build-ai-docs.mjs --check",
     "pack:local": "node scripts/pack-local.mjs",
-    "test:consumer": "node scripts/consumer/run.mjs"
+    "test:consumer": "node scripts/consumer/run.mjs",
+    "dev:web": "npm run dev -w @customitin/web-example"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

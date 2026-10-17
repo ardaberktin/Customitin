@@ -20,22 +20,6 @@ export function generateRegistry(
     status: 'proposed',
   };
   const screens = screenCapabilities(integration.screens);
-  const generic = [
-    {
-      id: 'welcome',
-      title: 'Welcome',
-      kind: 'text',
-      props: { text: { type: 'string', required: true } },
-    },
-    { id: 'collection', title: 'Collection', kind: 'collection', props: {} },
-    { id: 'item', title: 'Item card', kind: 'item', props: {} },
-    {
-      id: 'shortcut',
-      title: 'Shortcut',
-      kind: 'shortcut',
-      props: { label: { type: 'string', required: true } },
-    },
-  ];
   const components = integration.components.map(
     ({ symbol, options, sourceId }) => {
       validateValues(options.defaults, symbol.props, symbol.name, false);
@@ -44,7 +28,8 @@ export function generateRegistry(
         title: options.title ?? symbol.name,
         kind: sourceId ? 'item' : 'host',
         ...(sourceId ? { sourceIds: [sourceId] } : {}),
-        acceptsChildren: false,
+        acceptsChildren: symbol.acceptsChildren ?? false,
+        dataInputs: sourceId ? undefined : symbol.dataProps,
         props: sourceId
           ? {}
           : Object.fromEntries(
@@ -67,44 +52,15 @@ export function generateRegistry(
     appId: report.appId,
     revision: 'pending',
     components: [
-      ...generic.map((c) => ({ ...c, provenance, acceptsChildren: false })),
       ...components,
       ...screens.components,
+      ...integration.overrides.customComponents,
     ],
-    surfaces: screens.surfaces.length
-      ? screens.surfaces
-      : [
-          {
-            id: 'home',
-            title: 'Personal home',
-            provenance,
-            defaultLayout: [
-              {
-                id: 'intro',
-                componentId: 'welcome',
-                props: { text: 'Your personal space' },
-                children: [],
-              },
-            ],
-            requiredNodeIds: [],
-            allowedComponentIds: [
-              'welcome',
-              'collection',
-              'shortcut',
-              ...components.filter((c) => c.kind === 'host').map((c) => c.id),
-            ],
-          },
-        ],
+    surfaces: [...screens.surfaces, ...integration.overrides.surfaces],
+    actions: integration.overrides.actions,
+    relations: integration.overrides.relations,
     sources: integration.sources.map((s) => sourceDescriptor(s, integration)),
     destinations: [
-      {
-        id: 'original',
-        title: 'Original app',
-        params: {},
-        placements: ['tab', 'shortcut'],
-        protected: true,
-        provenance,
-      },
       ...integration.routes.map(({ route, title }) => ({
         id: route.id,
         title,
@@ -114,43 +70,8 @@ export function generateRegistry(
         provenance: { ...provenance, evidence: route.file },
       })),
     ],
-    defaultNavigation: [
-      {
-        target: 'destination',
-        id: 'original',
-        label: 'Original app',
-        placement: 'tab',
-      },
-    ],
-    themeTokens: {
-      ...(screens.surfaces.length
-        ? {}
-        : {
-            'appearance.mode': {
-              type: 'string',
-              values: ['light', 'dark'],
-              default: 'light',
-              consumers: ['SDK surfaces'],
-            },
-          }),
-      'type.scale': {
-        type: 'number',
-        min: 1,
-        max: 1.4,
-        default: 1,
-        consumers: screens.surfaces.length
-          ? ['Connected screen text with explicit font sizes']
-          : ['SDK text'],
-      },
-      'layout.density': {
-        type: 'string',
-        values: ['comfortable', 'compact'],
-        default: 'comfortable',
-        consumers: screens.surfaces.length
-          ? ['Connected screen numeric gaps']
-          : ['SDK collections'],
-      },
-    },
+    defaultNavigation: [],
+    themeTokens: {},
     limits: { depth: 5, nodes: 40, tabs: 4, sources: 3 },
   });
   // Locations are evidence, not a capability change. Moving a file must not obsolete profiles.

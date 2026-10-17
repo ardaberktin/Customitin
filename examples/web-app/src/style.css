@@ -1,0 +1,85 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #192a3a;
+  background: #f5f7fa;
+  line-height: 1.55;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 40px 24px;
+}
+h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.1;
+}
+header > p:first-child {
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #45627f;
+}
+section {
+  margin: 24px 0;
+}
+.visual,
+.assistant {
+  background: white;
+  padding: 24px;
+  border: 1px solid #d5dde5;
+  border-radius: 12px;
+}
+input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  font: inherit;
+  border: 1px solid #8c9aa7;
+  border-radius: 6px;
+}
+button {
+  font: inherit;
+  padding: 10px 16px;
+  border: 1px solid #345578;
+  border-radius: 6px;
+  background: #23496d;
+  color: white;
+  cursor: pointer;
+  margin-right: 8px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+.bar {
+  height: 20px;
+  background: #319b9b;
+  border-radius: 3px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+td,
+th {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #d5dde5;
+}

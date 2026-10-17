@@ -2,12 +2,14 @@ import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import { Project } from 'ts-morph';
+import { Project, ts } from 'ts-morph';
 import { secretContent, sourceFiles } from './files';
 import { discoverSymbols } from './symbols';
 import { discoverRoutes } from './routes';
 import { discoverNavigation } from './navigation';
 import type { DiscoveryReport } from './types';
+import { reachableWorkspaceFiles } from './workspace';
+import { componentUsage } from './usage';
 import { screenStructure } from './screen-structure';
 import { readHostOwnership } from '../commands/host-ownership';
 import { restoreHost } from '../generation/restore-host';
@@ -29,7 +31,16 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
   const config = join(root, 'tsconfig.json');
   const project = new Project({
     ...(existsSync(config) ? { tsConfigFilePath: config } : {}),
-    compilerOptions: { strict: true, jsx: 4 },
+    compilerOptions: {
+      ...(existsSync(config)
+        ? {}
+        : {
+            module: ts.ModuleKind.ESNext,
+            moduleResolution: ts.ModuleResolutionKind.Bundler,
+          }),
+      strict: true,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
     skipAddingFilesFromTsConfig: true,
   });
   const paths = await sourceFiles(root);
@@ -55,6 +66,7 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
     project.createSourceFile(file, text, { overwrite: true });
   }
   project.resolveSourceFileDependencies();
+  allowed.push(...(await reachableWorkspaceFiles(root, project, allowed)));
   const symbols = allowed.flatMap((file) =>
     discoverSymbols(root, project.getSourceFileOrThrow(file)),
   );
@@ -65,24 +77,62 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
         symbol.exportName,
       );
       symbol.screen = {
+        platform: structure.platform,
         sections: structure.sections.map(({ key, title }) => ({ key, title })),
       };
     } catch (error) {
       symbol.screenIssue = (error as Error).message;
     }
   }
-  const framework = versions['expo-router']
-    ? 'expo-router'
-    : versions['@react-navigation/native']
-      ? 'react-navigation'
-      : 'unknown';
   const files = allowed.map((p) => relative(root, p).replaceAll('\\', '/'));
+  const imported = new Set(
+    allowed.flatMap((path) =>
+      project
+        .getSourceFileOrThrow(path)
+        .getImportDeclarations()
+        .map((item) => item.getModuleSpecifierValue()),
+    ),
+  );
+  const hasExpoRoutes = files.some((file) =>
+    /^(src\/)?app\/.+\.tsx$/.test(file),
+  );
+  const ambiguousRouting =
+    hasExpoRoutes &&
+    !!versions['expo-router'] &&
+    imported.has('@react-navigation/native');
+  const framework = ambiguousRouting
+    ? 'unknown'
+    : hasExpoRoutes && versions['expo-router']
+      ? 'expo-router'
+      : imported.has('@react-navigation/native')
+        ? 'react-navigation'
+        : 'unknown';
+  const platform =
+    versions['react-native'] || hasExpoRoutes || imported.has('react-native')
+      ? 'native'
+      : versions['react-dom'] || imported.has('react-dom/client')
+        ? 'web'
+        : 'unknown';
   const entry = [
-    'src/app/_layout.tsx',
-    'app/_layout.tsx',
+    ...(framework === 'expo-router'
+      ? ['src/app/_layout.tsx', 'app/_layout.tsx']
+      : []),
     'App.tsx',
     'src/App.tsx',
   ].find((p) => files.includes(p));
+  const usages = componentUsage(
+    root,
+    allowed.map((file) => project.getSourceFileOrThrow(file)),
+  );
+  for (const symbol of symbols) {
+    const source = project.getSourceFileOrThrow(join(root, symbol.file));
+    const declaration = source
+      .getExportedDeclarations()
+      .get(symbol.exportName)?.[0];
+    const name =
+      symbol.member ?? declaration?.getSymbol()?.getName() ?? symbol.name;
+    symbol.usage = usages.usage.get(`${source.getFilePath()}#${name}`) ?? [];
+  }
   const routeDetails =
     framework === 'expo-router'
       ? discoverRoutes(files)
@@ -122,6 +172,17 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
     routes: routeDetails,
   });
   return {
+    version: 2,
+    platform,
+    files,
+    importedComponents: usages.imports,
+    sourceDigest: createHash('sha256')
+      .update(
+        allowed
+          .map((path) => project.getSourceFileOrThrow(path).getFullText())
+          .join('\0'),
+      )
+      .digest('hex'),
     project: root,
     appId: `app-${createHash('sha256')
       .update(manifest.name ?? 'customitin-app')
@@ -135,6 +196,11 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
     routeDetails,
     unsupported: [
       ...(entry ? [] : ['No supported root component found.']),
+      ...(ambiguousRouting
+        ? [
+            'Multiple routing systems are in use. Select a provider entrypoint manually; navigation bindings need review.',
+          ]
+        : []),
       'Private state, active forms, custom canvas and nested navigator rewrites require review.',
     ],
     unresolved,

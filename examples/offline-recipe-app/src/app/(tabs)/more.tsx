@@ -1,6 +1,7 @@
 import { ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { ActionButton, useCustomization } from '@customitin/react-native';
+import { useCustomization } from '@customitin/react-native';
+import { ActionButton } from '@customitin/examples/ui';
 export default function Screen() {
   const { profile } = useCustomization();
   return (

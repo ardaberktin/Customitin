@@ -6,6 +6,7 @@ import {
   validateProfile,
   validateDestination,
 } from '../validation/profile';
+import { validateDataPlan } from '../data/plans/validate';
 import { validateView } from '../validation/query';
 import { validateValues } from '../validation/values';
 
@@ -15,12 +16,32 @@ export function reconcileProfile(
   registry: CapabilityRegistry,
   scope: string,
 ): { profile: Profile; warnings: string[] } {
-  const original = profileSchema.parse(input);
+  const legacy =
+    typeof input === 'object' &&
+    input !== null &&
+    'schemaVersion' in input &&
+    input.schemaVersion === 1;
+  const original = profileSchema.parse(
+    legacy ? { ...input, schemaVersion: 2, dataViews: [] } : input,
+  );
   if (original.scope !== scope) throw new Error('Profile scope mismatch');
-  if (original.registryRevision === registry.revision)
+  if (!legacy && original.registryRevision === registry.revision)
     return { profile: validateProfile(original, registry), warnings: [] };
   const profile = createProfile(registry, scope);
-  const warnings: string[] = [];
+  const warnings: string[] = legacy
+    ? [
+        'Migrated compatible v1 settings; original stored bytes remain available for recovery.',
+      ]
+    : [];
+  profile.dataViews = [];
+  for (const view of original.dataViews ?? []) {
+    try {
+      validateDataPlan(view.plan, registry);
+      profile.dataViews.push(view);
+    } catch {
+      warnings.push(`Data view ${view.id} is unavailable after this update.`);
+    }
+  }
   profile.revision = original.revision + 1;
   profile.name = original.name;
   for (const [key, value] of Object.entries(original.theme)) {
@@ -48,8 +69,21 @@ export function reconcileProfile(
   }
   for (const [id, nodes] of Object.entries(original.surfaces)) {
     try {
-      validateLayout(nodes, id, profile, registry);
-      profile.surfaces[id] = nodes;
+      const surface = registry.surfaces.find((surface) => surface.id === id);
+      const supported = (items: typeof nodes): typeof nodes =>
+        items
+          .filter((node) =>
+            surface?.allowedComponentIds.includes(node.componentId),
+          )
+          .map((node) => ({ ...node, children: supported(node.children) }));
+      const migrated =
+        legacy && surface?.mode === 'compose' ? supported(nodes) : nodes;
+      if (JSON.stringify(migrated) !== JSON.stringify(nodes))
+        warnings.push(
+          'Unsupported v1 shell components were omitted; compatible host components were retained.',
+        );
+      validateLayout(migrated, id, profile, registry);
+      profile.surfaces[id] = migrated;
     } catch {
       warnings.push('A layout was restored to its original sections.');
     }

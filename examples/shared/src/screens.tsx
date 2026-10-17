@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import { ScrollView, Text, View } from 'react-native';
+import { useCustomization } from '@customitin/react-native';
 import {
+  PersonalizationScreen,
   ActionButton,
   Collection,
   CustomizableSurface,
-  PersonalizationScreen,
-  useCustomization,
   usePersonalTheme,
-} from '@customitin/react-native';
+} from '@customitin/examples/ui';
 import { demoPrompts } from './demo-planner';
 import { demoData, type DemoKind } from './data';
 import { completeTask } from './sources';

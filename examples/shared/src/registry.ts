@@ -49,7 +49,7 @@ export function demoRegistry(kind: DemoKind): CapabilityRegistry {
           };
   return registrySchema.parse({
     appId: `${kind}-demo`,
-    revision: 'demo-v1',
+    revision: 'demo-v2',
     components: [
       ...['intro', 'featured', 'library'].map((id) => ({
         id,
@@ -149,6 +149,21 @@ export function demoRegistry(kind: DemoKind): CapabilityRegistry {
         id: 'home',
         title: 'Home',
         provenance,
+        mode: 'compose',
+        policy: {
+          operations: ['layout', 'data', 'theme', 'navigation'],
+          sourceFields: {
+            catalog: ['id', 'title', 'note', ...Object.keys(fields)],
+          },
+          destinationIds: ['home', 'customize', 'detail'],
+          themeTokenIds: [
+            'appearance.mode',
+            'type.scale',
+            'layout.density',
+            'shape.radius',
+            'motion.reduced',
+          ],
+        },
         defaultLayout: [
           section('intro'),
           section('featured'),

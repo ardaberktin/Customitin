@@ -9,13 +9,13 @@ import {
 import { afterEach, expect, it } from 'vitest';
 import { installProject, overridesSchema } from '@customitin/cli';
 import { consumer } from './helpers/consumer';
-import { screenConsumer } from './helpers/screen-consumer';
+import { controlledScreenConsumer } from './helpers/screen-consumer';
 import { loadScreenConsumer } from './helpers/load-screen';
 
 afterEach(cleanup);
 
 async function setup() {
-  const root = await consumer(screenConsumer);
+  const root = await consumer(controlledScreenConsumer);
   const plan = await installProject(root, {
     dryRun: false,
     overrides: overridesSchema.parse({
@@ -71,8 +71,7 @@ it('customizes the generated existing screen in place while preserving host cont
   expect(
     action.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
-  click('Larger text');
-  expect(heading.style.fontSize).toBe('24px');
+  expect(heading.style.fontSize).toBe('20px');
   click('Discard preview');
   expect(heading.style.fontSize).toBe('20px');
   expect(
@@ -104,12 +103,11 @@ it('customizes the generated existing screen in place while preserving host cont
   ).toBeTruthy();
 });
 
-it('persists layout and appearance across restart, supports undo, and restores the original layout', async () => {
+it('persists layout without changing host appearance across restart, supports undo, and restores the original layout', async () => {
   const { default: App } = await setup();
   const rendered = render(<App />);
   await openEditor();
   click('Hide notes');
-  click('Larger text');
   click('Apply changes');
   await waitFor(() =>
     expect(screen.queryByRole('button', { name: 'Apply changes' })).toBeNull(),
@@ -118,7 +116,7 @@ it('persists layout and appearance across restart, supports undo, and restores t
   render(<App />);
   await openEditor();
   expect(screen.queryByRole('textbox', { name: 'Trip note' })).toBeNull();
-  expect(screen.getByTestId('existing-heading').style.fontSize).toBe('24px');
+  expect(screen.getByTestId('existing-heading').style.fontSize).toBe('20px');
   click('Undo last change');
   await screen.findByRole('textbox', { name: 'Trip note' });
   expect(screen.getByTestId('existing-heading').style.fontSize).toBe('20px');

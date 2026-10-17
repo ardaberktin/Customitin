@@ -14,15 +14,14 @@ export function selectComponents(
     const options = lookupOverride(overrides.components, symbol, lock) ?? {
       defaults: {},
     };
-    if (options.enabled === false || (!options.enabled && !symbol.approved))
-      continue;
+    if (options.enabled !== true) continue;
     if (symbol.unsupportedProps.length) {
       issues.push(
         `${symbol.selector}: wrap required props ${symbol.unsupportedProps.join(', ')} before enabling.`,
       );
       continue;
     }
-    if (symbol.itemProp) {
+    if (symbol.itemProp && options.source) {
       const compatible = sources.filter(
         ({ symbol: s, options: o }) =>
           (!options.source || s.id === referenceId(lock, options.source)) &&

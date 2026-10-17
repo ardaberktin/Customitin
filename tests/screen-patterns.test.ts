@@ -55,7 +55,7 @@ export function Sticky() { return <ScrollView stickyHeaderIndices={[0]}><Text>St
   );
 });
 
-it('accepts deleting a section and organizing away its unused SDK primitive import', async () => {
+it('accepts deleting a section and organizing away its unused host primitive import', async () => {
   const root = await consumer({
     'App.tsx': `import {ScrollView, View, Text} from 'react-native';
 export default function App() { return <ScrollView><View key="optional" /><Text key="title">Keep this</Text></ScrollView>; }`,
@@ -76,7 +76,7 @@ export default function App() { return <ScrollView><View key="optional" /><Text 
   source
     .getImportDeclarations()
     .flatMap((declaration) => declaration.getNamedImports())
-    .find((specifier) => specifier.getName() === 'ScreenView')!
+    .find((specifier) => specifier.getName() === 'View')!
     .remove();
   await writeFile(path, source.getFullText());
   const result = await installProject(root, { dryRun: false });

@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  dataBindingSchema,
+  dataViewSchema,
+  eventBindingSchema,
+  actionProposalSchema,
+} from './data-plan';
 import { idSchema, scalarSchema, valuesSchema } from './primitives';
 
 export const querySchema = z
@@ -58,6 +64,8 @@ export type LayoutNode = {
   viewId?: string;
   destinationId?: string;
   params?: Record<string, z.infer<typeof scalarSchema>>;
+  data?: Record<string, z.infer<typeof dataBindingSchema>>;
+  events?: Record<string, z.infer<typeof eventBindingSchema>>;
 };
 export const nodeSchema: z.ZodType<LayoutNode> = z.lazy(() =>
   z
@@ -69,6 +77,8 @@ export const nodeSchema: z.ZodType<LayoutNode> = z.lazy(() =>
       viewId: idSchema.optional(),
       destinationId: idSchema.optional(),
       params: valuesSchema.optional(),
+      data: z.record(idSchema, dataBindingSchema).optional(),
+      events: z.record(idSchema, eventBindingSchema).optional(),
     })
     .strict(),
 );
@@ -84,6 +94,7 @@ export const placementSchema = z
 export type Placement = z.infer<typeof placementSchema>;
 export const configurationSchema = z
   .object({
+    dataViews: z.array(dataViewSchema).max(24).optional(),
     theme: valuesSchema,
     surfaces: z.record(idSchema, z.array(nodeSchema).max(40)),
     views: z.array(viewSchema).max(24),
@@ -92,7 +103,7 @@ export const configurationSchema = z
   .strict();
 export const profileSchema = configurationSchema
   .extend({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
     registryRevision: idSchema,
     scope: z.string().min(1).max(200),
     revision: z.number().int().nonnegative(),
@@ -103,6 +114,20 @@ export type Configuration = z.infer<typeof configurationSchema>;
 export type Profile = z.infer<typeof profileSchema>;
 
 export const operationSchema = z.discriminatedUnion('op', [
+  z
+    .object({
+      op: z.literal('setDataView'),
+      surfaceId: idSchema,
+      view: dataViewSchema,
+    })
+    .strict(),
+  z
+    .object({
+      op: z.literal('removeDataView'),
+      surfaceId: idSchema,
+      viewId: idSchema,
+    })
+    .strict(),
   z.object({ op: z.literal('setThemeTokens'), tokens: valuesSchema }).strict(),
   z
     .object({
@@ -139,12 +164,36 @@ export const plannerRequestSchema = z
     registryRevision: idSchema,
     baseRevision: z.number().int().nonnegative(),
     instruction: z.string().trim().min(1).max(2000),
+    context: valuesSchema
+      .refine(
+        (value) => Object.keys(value).length <= 20,
+        'Too much permitted context',
+      )
+      .optional(),
     surfaceId: idSchema.optional(),
+    surfaceIds: z.array(idSchema).min(1).max(20).optional(),
+    conversation: z
+      .array(
+        z
+          .object({
+            role: z.enum(['user', 'assistant']),
+            text: z.string().max(2000),
+          })
+          .strict(),
+      )
+      .max(12)
+      .optional(),
     configuration: configurationSchema,
   })
   .strict();
 export type PlannerRequest = z.infer<typeof plannerRequestSchema>;
 export const plannerResponseSchema = z.discriminatedUnion('kind', [
+  z
+    .object({
+      kind: z.literal('action-proposal'),
+      proposal: actionProposalSchema,
+    })
+    .strict(),
   z.object({ kind: z.literal('proposal'), proposal: proposalSchema }).strict(),
   z
     .object({ kind: z.literal('clarification'), message: z.string().max(500) })

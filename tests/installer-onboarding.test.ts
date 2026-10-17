@@ -53,6 +53,7 @@ it('connects details with one durable CLI flag and rejects unknown selections wi
     { '@react-navigation/native': '7.5.0' },
   );
   const overrides = await selectedOverrides(root, {
+    complete: ['data.ts#loadEntries'],
     detail: ['data.ts#loadEntries=navigation.ts#RootParamList.Detail'],
   });
   const plan = await installProject(root, { dryRun: false, overrides });

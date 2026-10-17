@@ -185,7 +185,7 @@ describe('configuration contracts', () => {
     const nextRegistry = JSON.parse(
       JSON.stringify(registry),
     ) as typeof registry;
-    nextRegistry.revision = 'demo-v2';
+    nextRegistry.revision = `${registry.revision}-removed-field`;
     delete nextRegistry.sources[0]!.fields.minutes;
     const { profile, warnings } = reconcileProfile(
       customized,

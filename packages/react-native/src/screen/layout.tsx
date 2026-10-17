@@ -5,7 +5,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { useCustomization } from '../provider/context';
+import { useCustomization } from '@customitin/react';
 import { CustomizableScreen } from './screen';
 
 export interface CustomizableLayoutProps {

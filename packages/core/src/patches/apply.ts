@@ -30,6 +30,19 @@ export function applyProposal(
   const next = JSON.parse(JSON.stringify(current)) as Profile;
   for (const change of proposal.operations) {
     switch (change.op) {
+      case 'setDataView':
+        next.dataViews = [
+          ...(next.dataViews ?? []).filter(
+            (view) => view.id !== change.view.id,
+          ),
+          change.view,
+        ];
+        break;
+      case 'removeDataView':
+        next.dataViews = (next.dataViews ?? []).filter(
+          (view) => view.id !== change.viewId,
+        );
+        break;
       case 'setThemeTokens':
         next.theme = { ...next.theme, ...change.tokens };
         break;

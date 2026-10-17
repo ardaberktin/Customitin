@@ -18,7 +18,7 @@ export async function readPackage(root: string) {
 function recognized(name: string, command: string): boolean {
   return (
     ['start', 'dev', 'web', 'ios', 'android'].includes(name) &&
-    /^(?:(?:npx(?: --no-install)?|pnpm exec|yarn exec)\s+)?(?:expo|react-native|rnc-cli)\s+start(?:\s|$)/.test(
+    /^(?:(?:npx(?: --no-install)?|pnpm exec|yarn exec)\s+)?(?:(?:expo|react-native|rnc-cli)\s+start|vite)(?:\s|$)/.test(
       command.trim(),
     )
   );

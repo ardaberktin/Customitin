@@ -18,6 +18,7 @@ export interface SelectedComponent {
   sourceId?: string;
 }
 export interface ResolvedIntegration {
+  overrides: IntegrationOverrides;
   sources: SelectedSource[];
   components: SelectedComponent[];
   routes: { route: DiscoveredRoute; title: string }[];
@@ -130,6 +131,7 @@ export function resolveIntegration(
     }
   }
   return {
+    overrides,
     sources,
     components,
     routes,

@@ -1,6 +1,6 @@
 # Customitin
 
-> Local-first React Native personalization SDK. Functional alpha; packages are not published. Prefer the CLI and durable overrides over hand-written registries.
+> Headless personalization SDK for React Native/Expo and React web. V2 contracts; packages are local and unpublished. The host owns every visual and customization boundary. Start with reviewed discovery and explicit surface policies.
 
 ## Start here
 

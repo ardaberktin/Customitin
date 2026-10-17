@@ -8,3 +8,18 @@ export * from './validation/planning';
 export * from './patches/apply';
 export * from './data/source';
 export * from './migrations/reconcile';
+export * from './runtime/runtime';
+export * from './runtime/cancellation';
+export * from './storage/profile-store';
+export * from './schema/expression';
+export * from './schema/data-plan';
+export * from './schema/action';
+export * from './data/plans/expression';
+export * from './data/plans/validate';
+export * from './data/plans/execute';
+export * from './validation/bindings';
+export * from './registration';
+export * from './actions/validate';
+export * from './actions/runtime';
+
+export { validateDataResult } from './data/plans/result';

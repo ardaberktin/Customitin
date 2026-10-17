@@ -8,6 +8,8 @@ import { readGuide } from './commands/guide';
 import { developmentCommand } from './development/cli';
 import {
   doctorProject,
+  reviewProject,
+  formatReport,
   inspectProject,
   installProject,
   proposeMapping,
@@ -37,6 +39,9 @@ async function main() {
       'navigation-ref': { type: 'string' },
       typecheck: { type: 'boolean' },
       topic: { type: 'string' },
+      json: { type: 'boolean' },
+      'approve-report': { type: 'string' },
+      exclude: { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' },
     },
   });
@@ -47,6 +52,9 @@ Commands: inspect, init, doctor, refresh, watch, dev, remove, schema, guide
   watch --apply               Refresh an installed integration as host files change
   dev --script NAME --        Run a wired host script with automatic watching
   --cwd <directory>           Select the host application
+  --json                      Print versioned discovery and review JSON
+  --approve-report <digest>   Enable the reviewed suggestions
+  --exclude <id-or-selector>  Exclude a suggestion (repeatable)
   --context                   Show the exact optional AI context
   --dry-run                   Preview changes (the default)
   --apply                     Write installer-owned changes
@@ -78,10 +86,16 @@ When both --apply and --dry-run are passed, --dry-run takes precedence.`);
     console.log(JSON.stringify(z.toJSONSchema(overridesSchema), null, 2));
   } else if (command === 'inspect') {
     const report = await inspectProject(root);
+    const review = await reviewProject(root);
+    if (!values.json && !values.context) {
+      console.log(formatReport(review));
+      return;
+    }
     console.log(
       JSON.stringify(
         {
           ...report,
+          review,
           context: values.context
             ? JSON.parse(report.context)
             : 'Use --context to inspect exactly what can be sent to your provider.',
@@ -102,6 +116,8 @@ When both --apply and --dry-run are passed, --dry-run takes precedence.`);
     if (
       (
         [
+          'approve-report',
+          'exclude',
           'ai',
           'approve-context',
           'complete',
@@ -157,6 +173,8 @@ When both --apply and --dry-run are passed, --dry-run takes precedence.`);
       dryRun,
       selectedIds,
       overrides: await selectedOverrides(root, values),
+      approvalDigest: values['approve-report'],
+      exclude: values.exclude,
     });
     console.log(
       JSON.stringify(

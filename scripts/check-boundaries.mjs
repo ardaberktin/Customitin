@@ -8,7 +8,7 @@ async function walk(dir) {
     )
   ).flat();
 }
-for (const pkg of ['core', 'react-native'])
+for (const pkg of ['core', 'react', 'react-native'])
   for (const file of await walk(`packages/${pkg}/src`)) {
     const source = await readFile(file, 'utf8');
     if (
@@ -17,7 +17,16 @@ for (const pkg of ['core', 'react-native'])
       )
     )
       throw new Error(`Server dependency in ${file}`);
+    if (
+      pkg !== 'react-native' &&
+      /from\s+['"](?:react-native|@customitin\/react-native)/.test(source)
+    )
+      throw new Error(`Native dependency in shared package ${file}`);
+    if (/from\s+['"]@customitin\/examples/.test(source))
+      throw new Error(`Example dependency in SDK ${file}`);
+    if (pkg === 'core' && /from\s+['"]react/.test(source))
+      throw new Error(`React dependency in core ${file}`);
     if (/\b(?:movieId|recipeId|dueAt|watchlist|ingredients)\b/.test(source))
       throw new Error(`Domain dependency in ${file}`);
   }
-console.log('Mobile boundaries and domain independence passed.');
+console.log('Headless platform boundaries and domain independence passed.');

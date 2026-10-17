@@ -1,13 +1,7 @@
 # @customitin/core
 
-Framework-independent schemas, query validation, profile validation, atomic configuration operations and migration helpers for Customitin. Functional 0.1 alpha; not yet published.
+Platform-independent Customitin v2 contracts and execution. Includes typed registration helpers, explicit surface policies, profile validation/storage/recovery, preview/apply/undo, bounded data plans/formulas/joins, and assistant/action controllers. No React, native UI, server, model-provider or application-domain dependency.
 
-Start with the [bundled AI guides](dist/docs/index.md) or [repository guides](../../docs/ai/index.md). Prefer deriving a registry with the CLI over duplicating app types manually.
+Keep executable adapters separate from serializable metadata. Local transformation requires complete authorized datasets. Actions need a separate execution call and host confirmation by default; layout apply/undo never executes/reverses domain actions. Profiles store configuration, not rows or chat history. V1 bytes remain available for recovery.
 
-CapabilityRegistry describes approved sources, components, surfaces, destinations, theme tokens and limits. Runtime code/functions/credentials never belong in the registry. Source descriptors define field rules, permitted operators, completeness, row budgets and optional detail destinations. Item components may declare sourceIds to restrict compatible sources.
-
-SourceAdapter.query receives a validated query plus host-controlled scope/session/cancellation context. createLocalSource requires a complete bounded repository. Partial caches cannot claim complete filtering/grouping/counts. Paginated hosts must filter/sort before pagination.
-
-applyProposal validates revisions, applies the complete operation set to a copy, and validates the resulting profile. Required nodes/protected destinations remain available. Saved-view queries and renderer/source compatibility are enforced. Changes become active through the React Native runtime only after persistence succeeds.
-
-Core has no React Native, AI-provider, server, database or application-domain dependency. Keep domain rules in host adapters. See docs/extensions.md in the repository for the full extension contracts.
+Read the [bundled contracts](dist/docs/contracts.md) or [repository guide](../../docs/ai/contracts.md). Packages are locally distributed alpha artifacts.

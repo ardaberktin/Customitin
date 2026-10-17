@@ -1,169 +1,49 @@
-# Supported contracts and adapter examples
+# Supported v2 contracts
 
-Examples use fictional host exports. They are patterns to map to the consuming app, not instructions to replace working business logic.
+## Discovery and registration
 
-## Complete repositories
+Discovery uses TypeScript at development time, follows reachable local workspace imports/aliases/re-exports, and recognizes supported callable wrapped components (including memo). It inventories named/default/namespace third-party JSX imports used by the app without scanning dependency trees. Traversal is bounded and excludes generated files, tests, dependency trees, native output and likely secrets.
 
-Discovery supports exported function declarations, exported arrow/function expressions and callable methods on exported repository objects. Methods are invoked on the imported object so their `this` receiver is retained. Complete automatic array loaders take no parameters and return typed mutable/readonly arrays or promises of arrays.
+Platform and routing are detected separately from imports and entrypoints. Vite/React and native/Expo have provider-only setup. Multiple routing systems produce a diagnostic rather than assuming one global navigator. Custom framework roots require manual placement. Discovery is static: it never executes host modules or infers provider independence, business authorization, mutation semantics or completeness from types.
 
-```ts
-interface Entry {
-  id: string;
-  title: string;
-  stage: 'draft' | 'done';
-  note?: string;
-}
+Reports distinguish discovered candidates, bindable shapes, explicitly enabled IDs and doctor-verified static installation checks. Verification does not mean device or live-model verification. Unsupported unselected candidates do not prevent unrelated valid bindings. Required callback props identify the adapter needed; the SDK never invents event behavior. Scalar props, scalar-record inputs, arrays of scalar records and a React children slot are supported automatic component bindings. A required complex field inside a record/array needs a host wrapper. Explicit legacy `components[id].source` retains a source-restricted item adapter for old host-rendered collections.
 
-/** @customitinComplete */
-export const loadEntries = async (): Promise<Entry[]> => repository.readAll();
-```
+Sources support bounded complete array loaders, exported repository methods, zero-argument TanStack Query option factories and explicit `@customitinQuery` query-page contracts. `@customitinComplete` describes semantics, not authorization. Query functions must operate on the complete dataset authorized for the current account. Cached rows alone do not establish completeness. Existing QueryClient and navigation-ref integration are retained when explicitly selected. Enabling a navigation binding adds no route or visual navigation.
 
-The marker asserts all authorized rows are returned within the declared row budget. It is not justified by an array return type, a successful fetch, or a cache containing several pages. Without it, use a reviewed source override with completeness: "complete". Other exported sources remain unchanged.
+## Headless rendering and surfaces
 
-Strings, numbers, booleans, literal enums and nullable/optional scalar fields are discovered. Nested objects and executable fields are not exposed. Optional row values normalize to null. The ID field must be a non-nullable string or number; override idField for `_id`, `uuid`, etc. Every returned row is validated and duplicate IDs are rejected. The adapter projects only the registry's exposed fields before validation/rendering.
+Metadata is serializable; executable component/source/action/remote adapters stay in host code. Core has no platform/UI dependency. Shared React imports have no React Native dependency. SDK packages export no shell, editor, theme palette, chat UI or styling primitives. Provider diagnostics report absent/mismatched bindings; a missing adapter affects its capability rather than adding fallback UI.
 
-## TanStack Query
+`compose` allows approved host nodes in a developer-chosen space. `reorder` preserves original local sections and permits only reordering/hiding. `properties` fixes structure and allows only listed scalar props. Per-surface policies grant operations, components, source fields, actions, optional explicit navigation/appearance bindings and maximum nodes. Missing permissions deny access. Client and server both validate target IDs, current profile revision, capability revision, component/data/event compatibility and references. A data view shared with a surface outside the request cannot be changed by that request. No planning target means rejection.
 
-```ts
-import { QueryClient, queryOptions } from '@tanstack/react-query';
-export const queryClient = new QueryClient(); // Reuse the app's actual existing instance.
+In-place integration supports 1–40 static direct keyed sections with a single unconditional return. Native containers are directly imported vertical View/ScrollView; web containers include main/div/section/article/aside. Stable keys, test IDs or unique tags supply identities. Conditional/mapped content belongs inside a stable keyed section. FlatList, horizontal/custom/sticky containers and ambiguous roots need host adapters. The wrapper retains hidden sections mounted to preserve local state and callbacks; hiding does not suspend subscriptions or grant authorization. Native wrappers can affect flex/focus geometry and need device checks. Host state persistence across an actual process restart remains the host's responsibility; SDK persistence restores the layout and section identities.
 
-/** @customitinComplete */
-export const entryOptions = () =>
-  queryOptions({
-    queryKey: ['entries'],
-    queryFn: loadEntries,
-  });
-```
+## Typed data plans
 
-Export an existing QueryClient rather than introducing a second one. When exactly one client is discovered, generation binds it automatically; otherwise select `queryClient` in overrides or use --query-client. The generated adapter calls fetchQuery, keeps the original options, appends `customitin-scope` and the active local scope to the query key, and sets staleTime to zero for refreshes. It uses the same client but a scoped cache entry; it does not claim to share the original exact cache key.
+A data input declares named scalar fields, required/nullability rules and cardinality `one` or `many`. A binding maps those fields to a named data view's projected fields. Multiple compatible approved datasets can feed the same component. Mismatched types, required fields, source restrictions, nullable results or ambiguous automatic mappings are rejected or require a host adapter. Optional nonnullable fields omit null values before reaching the host; required values cannot disappear.
 
-Invalidation of the host key prefix (for example `['entries']`) refreshes personal collections. Manual cache writes on matching keys also notify them. Ordinary fetch-success events do not trigger a new fetch, preventing feedback loops. Exact-key invalidation of only the original key may leave scoped entries unaffected at the cache level, but the bridge observes the matching invalidation event and refreshes the personal source.
+Plans contain a base source, projection, filter expression, sorting, computed fields, grouping and count/sum/average/min/max aggregates. Inner/left equality joins require an approved relation with compatible declared keys and cardinality. The initial implementation joins each relation from the base source; arbitrary chained relations and many-to-many relationships need a host remote adapter and a supported bounded plan. Undeclared relationships are rejected. Left-join missing values become null. Null join keys never match. Duplicate keys violate declared one-to-one/many-to-one relationships; row expansion remains bounded even for approved one-to-many joins.
 
-Cancellation stops the personalized request from accepting a late result. A shared host fetch is not forcibly cancelled by the bridge; its own query function/client controls network cancellation. Existing session checks and account-scoped host data remain the application's responsibility.
+Formulas are interpreted expression trees: `{literal}`, `{field}`, or `{op,args}`. Operators are add/subtract/multiply/divide, eq/lt/gt, and/or/not, if, concat, coalesce. There is no evaluation of code, property traversal, arbitrary function calls, SQL or model-selected network requests. Trees are limited to depth 8 and 100 nodes. Types are checked first. Arithmetic propagates null; division by zero returns null; nonfinite numbers are rejected. Ordered comparisons with null return false; equality is strict (including null equality). Boolean operators propagate null. A conditional takes its first branch only for true. Concatenation accepts strings; coalesce returns the first nonnull value. Text results are bounded to 500 characters. Numeric aggregates ignore null; empty sum/average/min/max return null, count returns zero.
 
-Supported factories currently take no parameters and return query options whose query function returns a typed array. Infinite queries, hooks, unexported clients and factories requiring account/filter arguments need a custom config binding or a small exported host wrapper. Discovery does not invoke hooks or flatten arbitrary useInfiniteQuery caches.
+Local execution requires every source descriptor and returned page to be complete with no next cursor, within source and result budgets. It never aggregates a partial cache. Default result/source budget is 10,000 rows; default operation budget is 100,000 and an explicit core executor limit cannot exceed 1,000,000. Joins, grouping, formula evaluation and sorting consume the budget. Cancellation is checked across loads and bounded processing. Result keys derive from source IDs, typed record keys and join/group identities; filtering/sorting do not reassign index identities.
 
-## Paginated queries
+Use `execution: 'remote'` only with an explicit `RemoteDataAdapter`. It must enforce server authorization, operate on full authorized datasets before pagination/aggregation and return projected validated rows, stable unique keys, completeness and a nonrepeating cursor. `createDataHandler` revalidates policies and output. A remote result may be paginated; the React hook merges pages by stable key with a bounded total. Action invalidation and source invalidation subscriptions reload dependent plans, including joined sources. Persistence stores plans/mappings only.
 
-Use an explicit remote query contract when the host already supports typed filter/sort operations and cursors:
+## Actions and assistant
 
-```ts
-import type { QueryContext, ValidatedQuery } from '@customitin/core';
+An action declares typed arguments/results, `effect: 'read' | 'write'`, confirmation (required by default), and invalidated source IDs. `available` and `execute` adapters reuse authenticated host services. Component event descriptors map typed event values to action arguments through validated expressions. An event proposes an action; it never executes it implicitly. Chat returns a separate `action-proposal` response. The lifecycle is proposed → awaiting-confirmation → executing → succeeded/failed/cancelled.
 
-/** @customitinQuery */
-export async function queryEntries(
-  query: ValidatedQuery,
-  context: QueryContext,
-  cursor?: string,
-): Promise<{
-  items: Entry[];
-  nextCursor: string | null;
-  complete: boolean;
-  totalCount?: number;
-}> {
-  return existingClient.queryEntries(
-    query,
-    context.session,
-    cursor,
-    context.signal,
-  );
-}
-```
+Execution requires a separate host call. When confirmation is required, absence of a host callback blocks execution. An explicit `host-managed` descriptor delegates confirmation to the host. Both are deliberate developer policy decisions. Permission, arguments, surface, revision and account context are checked immediately before dispatch. Actions are blocked during layout preview/saving; new previews cannot start while an action is pending. Layout apply never runs an action, and layout undo does not reverse a business mutation.
 
-The argument order above is the contract. The host verifies authorization and applies mandatory tenant restrictions independently of user filters. Filter and sort happen before cursor pagination. totalCount, if supplied, is the matching total, not the number loaded. Return complete: true only with nextCursor: null.
+Mutation handlers receive an idempotency key. Duplicate submissions in the active runtime are rejected; the bounded set fails closed after 1,000 submitted IDs. No automatic mutation retries occur. The host backend must authorize records and durably deduplicate across retries/restarts/instances. `createActionHandler` requires that durable adapter and trusted account/revision lookup; it does not treat the client's confirmation as backend authorization. Cancellation after dispatch cannot guarantee that a remote mutation did not occur. Report uncertain results and reconcile with the domain service before retrying.
 
-Remote filter/sort capabilities default to empty. Declare supported operators explicitly:
+Execution adapters receive explicit routing context: remote data gets app ID, capability revision and selected surface ID; actions get app ID and the validated action proposal. These values let host clients construct scoped endpoint requests without guessing from component state. Server handlers validate the request and supply their own authenticated account/session context to backend adapters.
 
-```json
-{
-  "version": 1,
-  "sources": {
-    "src/data.ts#queryEntries": {
-      "filters": { "stage": ["eq"], "title": ["contains"] },
-      "sortable": ["title"],
-      "pageSize": 30,
-      "maxRows": 500
-    }
-  }
-}
-```
+Assistant context is bounded to 12 in-memory turns, supports clarification/cancel/preview/apply/undo/reset and clears on account changes. Conversation, rows and action results are not persisted. No rows/results are sent to the model automatically. Explicit host-permitted scalar context is optional; model text and permitted context are never authorization. Planning context is reduced to the requested surfaces and allowed metadata before invoking a server model provider.
 
-A string field does not prove a remote server supports contains. Grouping over paginated/partial sources is unavailable. A backend with another pagination protocol needs a small wrapper implementing the contract; the CLI does not guess URL parameters or SQL.
+## Profile compatibility
 
-## Components
+Registries and profiles declare schemaVersion 2. ProfileStore first reads v2 head/backup, then v1 recovery bytes if migration has not been retired. It reconciles compatible stable host identities; unsupported old shell/theme/destination settings produce warnings. V1 bytes are not overwritten or removed. Successful v2 writes/erasure retire automatic v1 fallback so deleted profiles do not reappear. Save/export recovery bytes before any separate host retention/deletion operation. Old histories that cannot validate are not activatable. Account scope mismatches never migrate.
 
-Use --component, enabled: true, or @customitinComponent to opt a discovered component into generation. Function components with scalar props become host sections; components with one scalar-record object prop can become item renderers when exactly one compatible source is selected. Optional onPress callbacks connect to registered detail navigation. Other required callbacks, React children, complex object props and context requirements need a host wrapper.
-
-```tsx
-export function EntryCard({
-  entry,
-  onPress,
-}: {
-  entry: Entry;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress}>
-      <Text>{entry.title}</Text>
-    </Pressable>
-  );
-}
-```
-
-The generator matches actual field types/nullability/enums. If several sources fit, use the component's source selector. Item renderers get a sourceIds restriction enforced by core validation; the planner cannot reuse a bound renderer with an unrelated source. Required extra item props need defaults. Host scalar props remain configurable; supplied defaults fill omitted values. Components are registered for possible layouts; they are not automatically inserted into the original screen.
-
-## Navigation
-
-Expo Router discovery reads app/ or src/app/ TSX routes, skips layouts and special + files, and extracts single dynamic parameters. Catch-all/array routes need custom navigation. Enabling a route generates a createNavigationAdapter closure using the existing router; discovery alone does not enable it.
-
-React Navigation discovery reads explicit TypeScript type aliases ending in ParamList. Export the existing createNavigationContainerRef result and ensure it is attached to the host container. With one discovered ref it is selected automatically; otherwise use navigationRef/--navigation-ref. Generated closures check isReady and call the existing ref with typed screen names/params. Nested NavigatorScreenParams and arbitrary navigation hooks require host code.
-
-For details, source detailDestination references an enabled route selector or stable ID. Automatic row-to-route mapping supports exactly one parameter of the same scalar type as the ID. Multi-parameter destinations remain available as shortcuts but need a custom detail binding.
-
-## Existing screens
-
-`--screen <file#export>` opts a discovered function/arrow component into in-place customization, including a default-export App. The component can keep props, hooks, closures, session context and existing callbacks: its JSX remains in the original lexical scope. This is separate from `--component`, which registers reusable content for composed surfaces.
-
-Supported automatic structure:
-
-```tsx
-export function Home() {
-  const account = useAccount();
-  return (
-    <ScrollView contentContainerStyle={{ gap: 16 }}>
-      <AccountHeader key="account" account={account} />
-      <View key="recommendations">
-        {account.showRecommendations && <Recommendations />}
-      </View>
-      <CheckoutButton key="checkout" onPress={account.checkout} />
-    </ScrollView>
-  );
-}
-```
-
-The CLI derives a `kind: "screen"` surface and a stable node for each section. Identity comes from a static string key, then a static testID, then a unique JSX tag. Repeated identities are rejected rather than assigned array-index identities. Do not change these identities to repurpose saved sections. Mark non-hideable controls in developer-owned overrides:
-
-```json
-{
-  "version": 1,
-  "screens": {
-    "src/screens/Home.tsx#Home": {
-      "enabled": true,
-      "requiredSections": ["checkout"]
-    }
-  }
-}
-```
-
-The SDK cannot infer business-critical controls; unmarked sections can be hidden. Required sections can move but cannot be omitted or changed. Core validation permits only exact existing nodes, reordered or with optional nodes omitted. It rejects new section identities, duplicate sections, changed props, and injected components. Screen-specific planner requests carry `surfaceId`; both client and server reject changes to other layouts or navigation. Declared theme preferences remain shared across connected screens.
-
-Generated JSX uses `CustomizableLayout` with a screen ID, generated sectionIds map and one ordinary JSX container child. Developers edit the container's keyed JSX children, hooks, callbacks and styles directly. The CLI adds stable React keys to initially unkeyed sections. CustomizableLayout maps those keys to registered nodes and delegates to the lower-level CustomizableScreen (sections map plus render-function child). It clones the container to supply ordered content while retaining its original type, props and ref. Each section gets a stable native View wrapper. Hidden sections stay mounted with display:none and accessibility exclusion, preserving local state and host subscriptions. Hiding is presentation only, not authorization or suspension of background work. The editor is rendered inside the original container; use a scrollable host when content/controls can exceed the viewport.
-
-Content/style edits work immediately. Add/remove/default-order changes need refresh or the watcher to regenerate the registry; recognized development scripts start it automatically. Identities of unchanged keyed sections survive. While JSX keys and registry nodes differ, CustomizableLayout renders the current host container with customization temporarily unavailable. Structural saves during development can remount sections. This fallback does not synchronize a production server manifest; refresh and deploy matching manifests before releasing the app. See [maintenance](maintenance.md).
-
-Directly referenced React Native Text/View/ScrollView primitives inside the selected JSX are connected to ScreenText/ScreenView/ScreenScrollView. Props, refs and styles are forwarded. Explicit fontSize/lineHeight numbers scale with type.scale; numeric gap/rowGap/columnGap values scale to 65% for compact density. Until a user chooses a preference, original values remain. Colors, images, padding, absolute positioning, custom fonts and opaque component internals are not inferred or restyled. These require a host theme bridge or custom integration. The inline generator therefore declares text-scale and density tokens, not the SDK light/dark palettes.
-
-Limits: 1–40 static direct JSX sections, a single unconditional return, and a directly imported vertical View/ScrollView container. Wrap conditional/mapped contents in a stable section. Conditional root returns, FlatList/SectionList roots, horizontal/custom containers, stickyHeaderIndices, maintainVisibleContentPosition and ambiguous sections need a host integration. Added section wrappers may change flex-dependent layouts, sticky-header indexing, clipping or native focus behavior; validate actual device geometry before release. Screens with such container contracts should use a reviewed custom integration. Shared visible provider chains remain above the SDK provider; hidden providers still need host review.
-
-Screen selection adds no data loaders and exposes no JSX bodies, records or callbacks to the model. Natural language still needs a configured planner. Manual layout and appearance controls work offline. Persistence and account isolation follow the existing storage/scope contracts.
+The legacy saved-view schema remains readable for host-rendered v1 collections. New integrations use data inputs/data views. Legacy global view operations require all affected surfaces and explicit data permissions; retaining the schema does not restore the removed SDK shell.

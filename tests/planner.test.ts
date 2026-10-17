@@ -18,6 +18,7 @@ function body(): PlannerRequest {
     requestId: 'r',
     baseRevision: 0,
     instruction: 'dark',
+    surfaceIds: ['home'],
     configuration: {
       theme: p.theme,
       surfaces: p.surfaces,

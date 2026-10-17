@@ -39,7 +39,7 @@ it('refreshes edited JSX, hooks and styles, and adds/removes sections without lo
     .replace('gap: 20', 'gap: 30')
     .replace(
       '<Pressable',
-      '<CustomitinText key="summary">New summary</CustomitinText>\n<Pressable',
+      '<Text key="summary">New summary</Text>\n<Pressable',
     );
   await writeFile(path, edited);
   const next = await installProject(root, { dryRun: false });
@@ -63,7 +63,7 @@ it('refreshes edited JSX, hooks and styles, and adds/removes sections without lo
   await writeFile(
     path,
     saved.replace(
-      /<CustomitinText key="summary">[\s\S]*?<\/CustomitinText>/,
+      /<Text key="summary">[\s\S]*?<\/Text>/,
       '{/* Removed summary */}',
     ),
   );
@@ -191,10 +191,7 @@ it('refuses changed SDK props or unsupported host structure without overwriting 
   expect(await readFile(path, 'utf8')).toBe(changedId);
   await writeFile(
     path,
-    original.replace(
-      '<CustomitinScrollView',
-      '<CustomitinScrollView horizontal',
-    ),
+    original.replace('<ScrollView', '<ScrollView horizontal'),
   );
   const unsupported = await installProject(root, { dryRun: false });
   expect(unsupported.issues.join(' ')).toContain('Horizontal');

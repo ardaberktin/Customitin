@@ -16,13 +16,22 @@ export function generateComponents(integration: ResolvedIntegration): string {
     );
     imports.push(binding.statement);
     const component = `Bound${index}`;
-    imports.push(`const ${component} = ${binding.expression};`);
+    // Resolve live host exports during render so components colocated with the root do not create initialization cycles.
     const props = Object.keys(symbol.props).map((name) => {
       const value = sourceId
         ? (JSON.stringify(options.defaults[name]) ?? 'undefined')
         : `${propertyAccess('values', name)} ?? ${JSON.stringify(options.defaults[name]) ?? 'undefined'}`;
       return `${JSON.stringify(name)}: (${value}) as ComponentProps<typeof ${component}>[${JSON.stringify(name)}]`;
     });
+    for (const [name, input] of Object.entries(
+      sourceId ? {} : (symbol.dataProps ?? {}),
+    )) {
+      const rows = `${propertyAccess('data', name)}?.rows`;
+      props.push(
+        `${JSON.stringify(name)}: (${input.cardinality === 'many' ? rows : rows + '?.[0]'}) as ComponentProps<typeof ${component}>[${JSON.stringify(name)}]`,
+      );
+    }
+    if (symbol.acceptsChildren) props.push('children');
     if (sourceId && symbol.itemProp) {
       props.push(
         `${JSON.stringify(symbol.itemProp)}: { ${Object.keys(
@@ -38,11 +47,11 @@ export function generateComponents(integration: ResolvedIntegration): string {
       );
       if (symbol.pressProp) props.push(`${symbol.pressProp}: onPress`);
       items.push(
-        `${JSON.stringify(symbol.id)}: ({ row${symbol.pressProp ? ', onPress' : ''} }: ItemProps) => <${component} {...{ ${props.join(', ')} }} />`,
+        `${JSON.stringify(symbol.id)}: ({ row${symbol.pressProp ? ', onPress' : ''} }: ItemProps) => { const ${component} = ${binding.expression}; return <${component} {...{ ${props.join(', ')} }} />; }`,
       );
     } else
       hosts.push(
-        `${JSON.stringify(symbol.id)}: (${props.length ? '{ values }' : '_props'}: HostComponentProps) => <${component} {...{ ${props.join(', ')} }} />`,
+        `${JSON.stringify(symbol.id)}: (${props.length ? `{ ${[Object.keys(symbol.props).length ? 'values' : '', symbol.dataProps ? 'data = {}' : '', symbol.acceptsChildren ? 'children' : ''].filter(Boolean).join(', ')} }` : '_props'}: HostComponentProps) => { const ${component} = ${binding.expression}; return <${component} {...{ ${props.join(', ')} }} />; }`,
       );
   }
   const types = [
@@ -51,13 +60,14 @@ export function generateComponents(integration: ResolvedIntegration): string {
   ].filter(Boolean);
   if (
     integration.components.some(
-      ({ symbol }) => symbol.itemProp || Object.keys(symbol.props).length,
+      ({ symbol }) =>
+        symbol.itemProp || symbol.dataProps || Object.keys(symbol.props).length,
     )
   )
     imports.unshift(`import type { ComponentProps } from 'react';`);
   if (types.length)
     imports.unshift(
-      `import type { ${types.join(', ')} } from '@customitin/react-native';`,
+      `import type { ${types.join(', ')} } from '@customitin/react';`,
     );
   return [
     ...imports,

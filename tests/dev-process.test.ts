@@ -29,12 +29,24 @@ it('starts the watcher through the existing npm command, forwards literal argume
     );
     await until(
       () =>
-        readJson<CapabilityRegistry>(app.root, 'personalize/capabilities.json'),
-      (registry) =>
-        registry.sources.some(
-          (source: { title: string }) => source.title === 'loadTasks',
+        readJson<{ capabilities: { selector: string; status: string }[] }>(
+          app.root,
+          'personalize/discovery.json',
+        ),
+      (report) =>
+        report.capabilities.some(
+          (item) =>
+            item.selector === 'data.ts#loadTasks' && item.status === 'bindable',
         ),
     );
+    expect(
+      (
+        await readJson<CapabilityRegistry>(
+          app.root,
+          'personalize/capabilities.json',
+        )
+      ).sources,
+    ).toEqual([]);
     await writeFile(join(app.root, 'exit.txt'), '0');
     expect(await app.exited).toBe(0);
     expect(await readFile(join(app.root, 'events.txt'), 'utf8')).toBe(

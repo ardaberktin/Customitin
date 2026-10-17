@@ -7,7 +7,15 @@
     "@customitin/core": "0.1.0-alpha.1",
     "@customitin/react-native": "0.1.0-alpha.1",
     "@tanstack/react-query": "5.90.12",
-    "@react-navigation/native": "7.5.0"
+    "@react-navigation/native": "7.5.0",
+    "@customitin/react": "0.1.0-alpha.1",
+    "@react-native-async-storage/async-storage": "2.2.0"
   },
-  "type": "module"
+  "type": "module",
+  "exports": {
+    "./ui": "./src/ui/index.ts",
+    ".": "./src/index.ts",
+    "./headless": "./src/headless/index.ts",
+    "./headless/native": "./src/headless/native.tsx"
+  }
 }

@@ -31,7 +31,7 @@ it('watches ordinary saves, updates section registration, and stops cleanly', as
             path,
             (await readFile(path, 'utf8')).replace(
               '<Pressable',
-              '<CustomitinText key="watched">Watched section</CustomitinText><Pressable',
+              '<Text key="watched">Watched section</Text><Pressable',
             ),
           );
         } else if (result.changes.includes('personalize/capabilities.json'))
@@ -60,7 +60,7 @@ it('keeps watch in dry-run by default without writing', async () => {
   const path = join(root, 'Home.tsx');
   const changed = (await readFile(path, 'utf8')).replace(
     '<Pressable',
-    '<CustomitinText key="dry">Dry run</CustomitinText><Pressable',
+    '<Text key="dry">Dry run</Text><Pressable',
   );
   await writeFile(path, changed);
   const manifest = await readFile(
@@ -95,10 +95,7 @@ it('reports unsupported saves without writing and resumes after the correction',
   );
   await writeFile(
     path,
-    supported.replace(
-      '<CustomitinScrollView',
-      '<CustomitinScrollView horizontal',
-    ),
+    supported.replace('<ScrollView', '<ScrollView horizontal'),
   );
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);

@@ -1,3 +1,4 @@
+import { planningContext } from '../providers/context';
 import {
   applyProposal,
   boundedJson,
@@ -5,6 +6,7 @@ import {
   plannerResponseSchema,
   validateProfile,
   validatePlanningTarget,
+  validateActionProposal,
   type CapabilityRegistry,
   type PlannerRequest,
 } from '@customitin/core';
@@ -35,7 +37,7 @@ const json = (body: unknown, status = 200) =>
 function currentProfile(request: PlannerRequest) {
   return {
     ...request.configuration,
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     scope: 'server-validation',
     registryRevision: request.registryRevision,
     revision: request.baseRevision,
@@ -122,7 +124,16 @@ export function createPlannerHandler(
       const profile = currentProfile(request);
       try {
         validateProfile(profile, registry);
-        validatePlanningTarget(registry, request.surfaceId);
+        if (
+          request.surfaceId &&
+          request.surfaceIds &&
+          !request.surfaceIds.includes(request.surfaceId)
+        )
+          throw new Error('Conflicting planning targets');
+        validatePlanningTarget(
+          registry,
+          request.surfaceIds ?? request.surfaceId,
+        );
       } catch {
         return json(
           { kind: 'rejected', message: 'Your layout needs to be refreshed.' },
@@ -134,8 +145,7 @@ export function createPlannerHandler(
           for (let attempt = 0; attempt < 2; attempt++) {
             const output = await options.provider.generate(
               {
-                request,
-                registry,
+                ...planningContext(registry, request),
                 ...(attempt
                   ? {
                       repair:
@@ -154,8 +164,20 @@ export function createPlannerHandler(
                 applyProposal(profile, response.proposal, registry);
                 validatePlanningTarget(
                   registry,
-                  request.surfaceId,
+                  request.surfaceIds ?? request.surfaceId,
                   response.proposal.operations,
+                  profile,
+                );
+              }
+              if (response.kind === 'action-proposal') {
+                if (response.proposal.requestId !== request.requestId)
+                  throw new Error('Request mismatch');
+                validateActionProposal(
+                  response.proposal,
+                  registry,
+                  request.baseRevision,
+                  request.surfaceIds ??
+                    (request.surfaceId ? [request.surfaceId] : []),
                 );
               }
               return response;

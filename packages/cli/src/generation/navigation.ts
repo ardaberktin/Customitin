@@ -6,7 +6,7 @@ export function generateNavigation(
   integration: ResolvedIntegration,
 ): string {
   if (!integration.routes.length)
-    return `import type { RuntimeBindings } from '@customitin/react-native';\nexport const navigate: RuntimeBindings['navigate'] = undefined;\n`;
+    return `import type { RuntimeBindings } from '@customitin/react';\nexport const navigate: RuntimeBindings['navigate'] = undefined;\n`;
   const imports: string[] = [];
   let routes: string[];
   if (report.framework === 'expo-router') {
@@ -34,7 +34,7 @@ export function generateNavigation(
   return `${imports.join('\n')}
 import type { Scalar } from '@customitin/core';
 import { registrySchema } from '@customitin/core';
-import { createNavigationAdapter } from '@customitin/react-native/navigation';
+import { createNavigationAdapter } from '@customitin/react/adapters';
 import capabilities from './capabilities.json';
 export const navigate = createNavigationAdapter(registrySchema.parse(capabilities), {
 ${routes.join(',\n')}

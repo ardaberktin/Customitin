@@ -18,6 +18,14 @@ const registry: CapabilityRegistry = {
   surfaces: registries.recipe.surfaces.map((surface) => ({
     ...surface,
     kind: 'screen',
+    mode: 'reorder',
+    policy: {
+      ...surface.policy,
+      operations: ['layout'],
+      destinationIds: [],
+      sourceFields: {},
+      themeTokenIds: [],
+    },
   })),
 };
 const profile = createProfile(registry, 'alice');
@@ -62,7 +70,7 @@ it('allows existing sections to move/hide but rejects duplicates, replacements, 
     validatePlanningTarget(registry, 'home', [
       { op: 'setNavigationPlacements', placements: profile.navigation },
     ]),
-  ).toThrow('another screen');
+  ).toThrow(/another screen|Navigation changes/);
 });
 
 it('restores a saved screen after a section is removed instead of rendering stale section identities', () => {

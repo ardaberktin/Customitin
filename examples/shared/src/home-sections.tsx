@@ -1,9 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
-import {
-  Collection,
-  usePersonalTheme,
-  type ItemProps,
-} from '@customitin/react-native';
+import { type ItemProps } from '@customitin/react-native';
+import { Collection, usePersonalTheme } from '@customitin/examples/ui';
 import type { SavedView } from '@customitin/core';
 import type { DemoKind } from './data';
 const copy = {

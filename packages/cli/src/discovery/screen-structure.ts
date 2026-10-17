@@ -81,8 +81,13 @@ export function screenStructure(source: SourceFile, exportName: string) {
   if (
     !element ||
     !Node.isJsxElement(element) ||
-    !['View', 'ScrollView'].includes(
-      nativeTagName(element.getOpeningElement().getTagNameNode()) ?? '',
+    !(
+      ['View', 'ScrollView'].includes(
+        nativeTagName(element.getOpeningElement().getTagNameNode()) ?? '',
+      ) ||
+      ['div', 'section', 'main', 'article', 'aside'].includes(
+        element.getOpeningElement().getTagNameNode().getText(),
+      )
     )
   )
     throw new Error(
@@ -126,5 +131,11 @@ export function screenStructure(source: SourceFile, exportName: string) {
     seen.add(key);
     return { key, title: key, node };
   });
-  return { element, sections };
+  return {
+    element,
+    sections,
+    platform: nativeTagName(element.getOpeningElement().getTagNameNode())
+      ? ('native' as const)
+      : ('web' as const),
+  };
 }

@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const destination = resolve(process.argv[2] ?? '/tmp/customitin-packages');
 await mkdir(destination, { recursive: true });
 execFileSync('npm', ['run', 'build'], { cwd: root, stdio: 'inherit' });
-const packages = ['core', 'react-native', 'server', 'cli'];
+const packages = ['core', 'react', 'react-native', 'server', 'cli'];
 const tarballs = {};
 for (const name of packages) {
   const manifest = JSON.parse(
@@ -35,10 +35,16 @@ await writeFile(
   JSON.stringify(tarballs, null, 2) + '\n',
 );
 const quote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
-console.log('\nRun these commands in the consuming app:');
+console.log('\nChoose the runtime install for the consuming app.');
+console.log('React web:');
 console.log(
-  `npm install ${['core', 'react-native'].map((name) => quote(tarballs[name])).join(' ')}`,
+  `npm install ${['core', 'react'].map((name) => quote(tarballs[name])).join(' ')}`,
 );
+console.log('React Native / Expo:');
+console.log(
+  `npm install ${['core', 'react', 'react-native'].map((name) => quote(tarballs[name])).join(' ')}`,
+);
+console.log('Development tooling for either platform:');
 console.log(
   `npm install --save-dev ${['server', 'cli'].map((name) => quote(tarballs[name])).join(' ')}`,
 );

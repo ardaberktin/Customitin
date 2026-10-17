@@ -1,47 +1,36 @@
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { View } from 'react-native';
-import { ProfilePreview, useCustomization } from '../provider/context';
-import { ActionButton } from '../composer/button';
-import { en } from '../composer/strings';
-import { ScreenEditor } from './editor';
+import { useCustomization } from '@customitin/react';
 
 export interface CustomizableScreenProps {
   id: string;
   sections: Record<string, ReactNode>;
   children: (content: ReactNode) => ReactNode;
 }
-
-/** Retains original React elements and their state, including hidden sections. */
-export function CustomizableScreen(props: CustomizableScreenProps) {
-  const { runtime } = useCustomization();
-  // Account changes discard an open editor along with the old runtime.
-  return <Screen key={runtime.activeScope} {...props} />;
-}
-
-function Screen({ id, sections, children }: CustomizableScreenProps) {
-  const { registry, profile, preview, previewSurfaceId, runtime, loading } =
+/** Keeps hidden host sections mounted. The host owns every customization control. */
+export function CustomizableScreen({
+  id,
+  sections,
+  children,
+}: CustomizableScreenProps) {
+  const { registry, profile, preview, previewSurfaceIds, runtime } =
     useCustomization();
-  const [editing, setEditing] = useState(false);
-  const surface = registry.surfaces.find((s) => s.id === id);
-  const rendered =
-    editing && previewSurfaceId === id ? (preview ?? profile) : profile;
-  if (!surface || surface.kind !== 'screen')
-    throw new Error(`Register the existing screen surface: ${id}`);
-  if (surface.defaultLayout.some((node) => !(node.id in sections)))
-    throw new Error(
-      `Screen sections do not match the registered surface: ${id}`,
-    );
-  const nodes = rendered?.surfaces[id] ?? surface.defaultLayout;
+  const surface = registry.surfaces.find((item) => item.id === id);
+  if (!surface) throw new Error(`Unknown existing surface ${id}`);
+  const nodes =
+    (previewSurfaceIds?.includes(id) ? preview : undefined)?.surfaces[id] ??
+    profile?.surfaces[id] ??
+    surface.defaultLayout;
   const visible = new Set(nodes.map((node) => node.id));
   const ordered = [
     ...nodes,
     ...surface.defaultLayout.filter((node) => !visible.has(node.id)),
   ];
-  const content = (
+  return children(
     <>
       {ordered.map((node) => (
         <View
-          key={node.id}
+          key={`${runtime.activeScope}:${node.id}`}
           testID={`screen-section-${node.id}`}
           accessibilityElementsHidden={!visible.has(node.id)}
           importantForAccessibility={
@@ -52,25 +41,6 @@ function Screen({ id, sections, children }: CustomizableScreenProps) {
           {sections[node.id]}
         </View>
       ))}
-      {editing ? <ScreenEditor surface={surface} /> : null}
-      {!profile && !loading ? (
-        <ActionButton label={en.retry} onPress={() => void runtime.start()} />
-      ) : (
-        <ActionButton
-          label={editing ? en.finishScreen : en.customizeScreen}
-          disabled={!profile || loading}
-          onPress={() => {
-            runtime.cancelPreview();
-            setEditing(!editing);
-          }}
-          secondary
-        />
-      )}
-    </>
-  );
-  return (
-    <ProfilePreview profile={rendered ?? null}>
-      {children(content)}
-    </ProfilePreview>
+    </>,
   );
 }

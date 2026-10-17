@@ -16,6 +16,7 @@ export function selectSources(
       options.detailDestination = referenceId(lock, options.detailDestination);
     if (
       options.enabled === false ||
+      (!options.enabled && !lock.selectedSources?.includes(symbol.id)) ||
       (lock.selectedSources &&
         !lock.selectedSources.includes(symbol.id) &&
         options.enabled !== true)

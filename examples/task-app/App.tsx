@@ -1,3 +1,5 @@
+import { en as workspaceStrings } from '@customitin/examples/headless';
+import { NativeWorkspace } from '@customitin/examples/headless/native';
 import { useCallback } from 'react';
 import {
   createNavigationContainerRef,
@@ -7,11 +9,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ScrollView } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import {
-  ActionButton,
-  useCustomization,
-  usePersonalTheme,
-} from '@customitin/react-native';
+import { useCustomization } from '@customitin/react-native';
+import { ActionButton, usePersonalTheme } from '@customitin/examples/ui';
 import {
   CustomizeScreen,
   DemoProvider,
@@ -29,7 +28,7 @@ const navigation = createNavigationContainerRef<Routes>();
 const Stack = createNativeStackNavigator<Routes>();
 const Tabs = createBottomTabNavigator();
 function MainTabs() {
-  const { profile } = useCustomization();
+  const { profile, registry } = useCustomization();
   const theme = usePersonalTheme();
   return (
     <Tabs.Navigator
@@ -60,7 +59,18 @@ function MainTabs() {
           </Tabs.Screen>
         ),
       )}
-      {!profile ? <Tabs.Screen name="Loading" component={HomeScreen} /> : null}
+      {!profile ? (
+        <Tabs.Screen
+          name="destination-home"
+          component={HomeScreen}
+          options={{ title: registry.defaultNavigation[0]?.label }}
+        />
+      ) : null}
+      <Tabs.Screen
+        name="Workspace"
+        options={{ title: workspaceStrings.tab }}
+        component={NativeWorkspace}
+      />
       {profile?.navigation.some((p) => p.placement === 'overflow') ? (
         <Tabs.Screen name="More">
           {() => (

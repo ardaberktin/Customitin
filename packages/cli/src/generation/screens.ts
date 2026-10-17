@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Node, Project, SyntaxKind } from 'ts-morph';
 import type { ResolvedIntegration } from '../configuration/resolve';
-import { nativeTagName, screenStructure } from '../discovery/screen-structure';
+import { screenStructure } from '../discovery/screen-structure';
 import {
   emptyHostBindings,
   syntaxHash,
@@ -34,6 +34,8 @@ export function screenCapabilities(screens: SelectedScreen[]) {
     id: symbol.id,
     title: options.title ?? symbol.name,
     kind: 'screen' as const,
+    mode: 'reorder' as const,
+    policy: { operations: ['layout'] },
     provenance: {
       version: 1,
       evidence: symbol.selector,
@@ -76,10 +78,14 @@ export function instrumentScreen(
     names.add(candidate);
     return candidate;
   }
+  const module =
+    selected.symbol.screen?.platform === 'web'
+      ? '@customitin/react/dom'
+      : '@customitin/react-native';
   const screen = alias('Screen');
   const imports = [{ name: 'CustomizableLayout', alias: screen }];
   bindings.imports.push({
-    module: '@customitin/react-native',
+    module,
     name: 'CustomizableLayout',
     local: screen,
   });
@@ -88,37 +94,6 @@ export function instrumentScreen(
     const opening = Node.isJsxElement(node) ? node.getOpeningElement() : node;
     if (!opening.getAttribute('key'))
       opening.addAttribute({ name: 'key', initializer: JSON.stringify(key) });
-  }
-  const replacements = new Map<string, string>();
-  const tags = [
-    structure.element.getOpeningElement().getTagNameNode(),
-    ...structure.element
-      .getDescendantsOfKind(SyntaxKind.JsxOpeningElement)
-      .map((node) => node.getTagNameNode()),
-    ...structure.element
-      .getDescendantsOfKind(SyntaxKind.JsxClosingElement)
-      .map((node) => node.getTagNameNode()),
-    ...structure.element
-      .getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)
-      .map((node) => node.getTagNameNode()),
-  ];
-  for (const tag of tags) {
-    const original = tag.getText();
-    const native = nativeTagName(tag);
-    if (!native || !['View', 'Text', 'ScrollView'].includes(native)) continue;
-    let replacement = replacements.get(original);
-    if (!replacement) {
-      replacement = alias(native);
-      replacements.set(original, replacement);
-      imports.push({ name: `Screen${native}`, alias: replacement });
-      bindings.imports.push({
-        module: '@customitin/react-native',
-        name: `Screen${native}`,
-        local: replacement,
-        restore: { module: 'react-native', name: native, local: original },
-      });
-    }
-    tag.replaceWithText(replacement);
   }
   const ids = structure.sections
     .map(
@@ -136,32 +111,8 @@ export function instrumentScreen(
     singleChild: true,
   });
   source.addImportDeclaration({
-    moduleSpecifier: '@customitin/react-native',
+    moduleSpecifier: module,
     namedImports: imports,
   });
-  for (const declaration of source
-    .getImportDeclarations()
-    .filter((item) => item.getModuleSpecifierValue() === 'react-native')) {
-    for (const item of declaration.getNamedImports()) {
-      const local = item.getAliasNode() ?? item.getNameNode();
-      if (
-        replacements.has(local.getText()) &&
-        Node.isIdentifier(local) &&
-        local
-          .findReferencesAsNodes()
-          .every(
-            (node) =>
-              !!node.getFirstAncestorByKind(SyntaxKind.ImportDeclaration),
-          )
-      )
-        item.remove();
-    }
-    if (
-      !declaration.getNamedImports().length &&
-      !declaration.getDefaultImport() &&
-      !declaration.getNamespaceImport()
-    )
-      declaration.remove();
-  }
   return source.getFullText();
 }

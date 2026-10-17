@@ -1,11 +1,9 @@
 # @customitin/server
 
-Developer-owned stateless planner handler and OpenAI/Anthropic REST adapters. Functional 0.1 alpha; not yet published. Read the [bundled AI guides](dist/docs/index.md) or [repository guides](../../docs/ai/index.md), then the repository's docs/deployment.md.
+Developer-owned planner, remote data and action handlers for Customitin v2. Supply approved manifests, authentication, usage policy and host-owned services. Unknown revisions and unavailable surfaces/fields/actions are rejected.
 
-createPlannerHandler accepts standard Web Request/Response. Supply immutable approved capability manifests, verified-session authenticate(request), an allowRequest(subject, appId) usage policy, and a ModelProvider. Deploy manifests matching each supported app revision. Unknown revisions are rejected.
+createPlannerHandler reduces metadata to requested surfaces, validates model responses and allows one bounded repair attempt. OpenAI/Anthropic REST adapters keep model keys on the backend. No source rows or action results enter model context automatically.
 
-Provider keys stay on the backend. Mobile uses createHttpPlanner with existing session headers. Model input contains the user instruction, current configuration and approved capabilities; host data records/session secrets are not included. User text and labels may still contain personal data.
+createDataHandler validates explicit remote query plans and output. createActionHandler requires trusted scope/revision lookup and a durable idempotency adapter. Domain handlers own record authorization and business logic. Client confirmation is not backend authorization; cancellation after dispatch does not prove that a mutation was rolled back.
 
-The handler validates input/output, imposes bounded bodies and deadlines, and allows one repair after invalid model output. The host must provide ingress limits, HTTPS, production authentication and deployment-wide quotas. The bundled memory limiter is for a single process. Do not expose the loopback demo as a production service.
-
-Successful schema validation does not prove semantic AI quality. Run live-provider evaluations with a budget and test the actual authenticated deployment before claiming production readiness.
+See the [bundled contracts](dist/docs/contracts.md) and [integration guide](dist/docs/integration.md). Deploy matching manifests, HTTPS and shared quotas. Live-model and authenticated deployment validation remain separate release checks. Locally distributed alpha.

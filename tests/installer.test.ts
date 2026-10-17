@@ -85,6 +85,8 @@ it('installs a compiling fixture, reruns without changes, and restores the origi
         baseUrl: process.cwd(),
         paths: {
           '@customitin/core': ['packages/core/src/index.ts'],
+          '@customitin/react': ['packages/react/src/index.ts'],
+          '@customitin/react/*': ['packages/react/src/*'],
           '@customitin/react-native': ['packages/react-native/src/index.ts'],
           '@customitin/react-native/storage': [
             'packages/react-native/src/storage/index.ts',

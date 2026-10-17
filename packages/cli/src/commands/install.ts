@@ -1,4 +1,6 @@
 import { unlink } from 'node:fs/promises';
+import { capabilityReport } from '../discovery/report';
+import { approveProject } from './review';
 import { inspectProject, type DiscoveryReport } from '../discovery/scan';
 import { generateRegistry } from '../generation/registry';
 import { generateFiles, initialConfig } from '../generation/templates';
@@ -72,6 +74,12 @@ export async function planInstall(
   const registry = generateRegistry(report, integration);
   const files: Record<string, string> = {
     ...generateFiles(report, registry, integration),
+    'personalize/discovery.json':
+      JSON.stringify(
+        { ...capabilityReport(report, overrides, lock), files: report.files },
+        null,
+        2,
+      ) + '\n',
     [identityPath]: JSON.stringify(lock, null, 2) + '\n',
   };
   const setup: Record<string, string> = {};
@@ -150,12 +158,23 @@ export async function installProject(
     dryRun = true,
     selectedIds,
     overrides,
+    approvalDigest,
+    exclude,
   }: {
     dryRun?: boolean;
     selectedIds?: string[];
     overrides?: IntegrationOverrides;
+    approvalDigest?: string;
+    exclude?: string[];
   } = {},
 ) {
+  if (approvalDigest) {
+    if (overrides)
+      throw new Error(
+        'Approve a reviewed report separately from selection flags.',
+      );
+    overrides = await approveProject(root, approvalDigest, exclude);
+  }
   const snapshot = dryRun ? undefined : await projectSnapshot(root);
   const plan = await planInstall(root, selectedIds, overrides);
   if (dryRun || plan.conflicts.length || plan.issues.length) return plan;

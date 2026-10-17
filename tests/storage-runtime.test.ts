@@ -21,6 +21,7 @@ describe('local profiles and runtime', () => {
     first.previewOperations(
       [{ op: 'setThemeTokens', tokens: { 'type.scale': 1.2 } }],
       'Read comfortably',
+      ['home'],
     );
     expect(first.getSnapshot().profile?.theme).toEqual({});
     await first.apply();
@@ -69,7 +70,7 @@ describe('local profiles and runtime', () => {
     await runtime.start();
     await runtime.rename('Last good');
     await runtime.rename('Latest');
-    await storage.setItem('customitin:recipe-demo:v1:alice:head', '{broken');
+    await storage.setItem('customitin:recipe-demo:v2:alice:head', '{broken');
     const restored = new CustomizationRuntime(options(storage));
     await restored.start();
     expect(restored.getSnapshot().profile?.name).toBe('Last good');
@@ -91,7 +92,7 @@ describe('local profiles and runtime', () => {
     });
     await runtime.start();
     await runtime.rename('Alice');
-    const request = runtime.request('dark');
+    const request = runtime.request('dark', ['home']);
     const switching = runtime.switchScope('bob');
     expect(runtime.getSnapshot().profile).toBeUndefined();
     await switching;
@@ -112,6 +113,7 @@ describe('local profiles and runtime', () => {
     a.previewOperations(
       [{ op: 'setThemeTokens', tokens: { 'type.scale': 1.2 } }],
       'Larger',
+      ['home'],
     );
     await b.rename('Changed elsewhere');
     await expect(a.apply()).rejects.toThrow('changed');

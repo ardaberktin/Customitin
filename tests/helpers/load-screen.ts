@@ -21,6 +21,7 @@ export function loadScreenConsumer(root: string) {
     format: 'cjs',
     packages: 'external',
     alias: {
+      '@customitin/react': join(process.cwd(), 'packages/react/src'),
       '@customitin/core': join(process.cwd(), 'packages/core/src/index.ts'),
       '@customitin/react-native': join(
         process.cwd(),

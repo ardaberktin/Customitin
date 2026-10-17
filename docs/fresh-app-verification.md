@@ -1,4 +1,34 @@
-# Fresh React Native integration verification
+# Packed consumer verification
+
+## Headless native and Vite consumers — October 16, 2026
+
+`npm run test:consumer` builds and packs all five local SDK packages, creates isolated apps from [the native fixture](../fixtures/headless-native) and [the Vite fixture](../fixtures/headless-web), and installs actual tarballs with their pinned peers. It verifies that installed package paths are inside each temporary app, not workspace aliases. The current fixtures are intentionally small headless consumers, not full official-template native binary builds.
+
+Both consumers passed:
+
+- Packaged CLI inspection and explicit approval against the report digest.
+- Provider-only setup with two reusable components and one reviewed source; no generated surfaces, appearance tokens or navigation destinations.
+- Strict consumer TypeScript, static doctor verification and an unchanged refresh.
+- A separate explicit `--screen App.tsx#default` refresh, followed by compiling and bundling the generated native/DOM section integration.
+- ESM imports of main React and platform storage/HTTP adapter exports.
+- A Vite production build and native production JavaScript bundles for iOS and Android using the fixture's Metro/Babel configuration.
+- Reversible removal restoring the original entry file byte-for-byte and retaining developer config.
+
+The final successful run retained evidence at `/var/folders/94/96sc1q_x7577ysgkqy4m_0t40000gn/T/customitin-packed-K6JQnV/artifacts`. That directory contains tarballs, CLI JSON, typecheck logs, export smoke logs and platform bundles. Temporary files may be removed by system cleanup; committed fixtures and [the runner](../scripts/consumer/run.mjs) are the durable reproduction.
+
+```sh
+npm ci
+npm run check
+npm run test:consumer
+```
+
+The fixture installation uses npm's offline cache. A fresh environment must first make the pinned peer dependencies and their transitive dependencies available in that cache. This run used an already populated cache and did not contact a package registry. Local tarballs remain unpublished.
+
+These checks establish package/CLI/type/bundle behavior. The separate five-flow browser suite exercises developer-owned controls; neither establishes physical-device interaction, accessibility, performance, live-model quality or production backend authorization. Hosts still place their UI and surfaces, resolve reported adapters, supply scoped persistence/session bindings, implement authenticated planner/data/action services with durable mutation idempotency, and deploy matching manifests. See [integration](ai/integration.md) and [testing](ai/testing.md).
+
+## Historical official-template verification — October 12, 2026
+
+The record below describes the former styled-shell SDK. Its installation commands and native simulator results are preserved as historical evidence, not instructions or device acceptance for headless v2. The historical fixture remains under `fixtures/fresh-react-native`; the current packed runner uses the two headless fixtures above.
 
 Recorded October 12, 2026. Started with the AI integration guides and an official React Native 0.83.10 template, installed locally packed SDK artifacts, and used the packaged CLI from inside the independent app. The initial integration did not copy an existing SDK example or use workspace aliases. SDK implementation files were inspected after consumer failures were reproduced so the failures could be repaired.
 

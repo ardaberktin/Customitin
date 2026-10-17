@@ -15,6 +15,7 @@ jobs:
       - run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run build -w @customitin/web-example
       - run: npm run bundle -w @customitin/recipe-example
       - run: npm run bundle -w @customitin/movie-example
       - run: mkdir -p examples/task-app/dist && npm run bundle:ios -w @customitin/task-example && npm run bundle:android -w @customitin/task-example

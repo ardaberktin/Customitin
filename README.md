@@ -1,85 +1,68 @@
 # Customitin
 
-An open-source, local-first personalization SDK for React Native. Users describe a change, preview it, and apply it to their own space. Applications keep their existing data clients and authentication. Developers own their planner endpoint and AI credentials.
+A headless personalization SDK for React Native/Expo and React web. Developers choose which spaces, components, data and actions users can customize. Users request a change, preview it and apply it inside the approved space.
 
-Existing screens can also be personalized in place. Select a supported screen with `customitin init --screen 'src/screens/Home.tsx#Home' --dry-run`, then repeat with `--apply`. The CLI retains its original JSX/data/callbacks and adds section reorder/hide, text-size/spacing preferences, preview/apply, undo and layout restoration directly to that screen. This path uses the app's existing navigation and does not add My space. See [screen contracts and boundaries](docs/ai/contracts.md#existing-screens).
+The host owns every screen, tab, theme, editor, chat control and confirmation. Customitin supplies discovery, reviewed bindings, validation, data composition, action execution state and persistence. Importing the library never scans production source or inserts UI.
 
-Keep editing those screens normally. Content, styles and handlers work with Fast Refresh. Init/refresh wires recognized Expo/Metro scripts so the app's existing development command starts the section-registration watcher automatically. Existing integrations need one `customitin refresh --apply` after updating the CLI; custom launchers can be selected with `--dev-script NAME`, and `--no-dev-watch` opts out. Refresh and removal preserve current host edits. Keep section keys stable and generated SDK wrapper props/imports intact. See the [maintenance workflow](docs/ai/maintenance.md).
+**Status: v2 contracts in a locally distributed alpha.** Packages are not published. Native device, accessibility, performance and live-model validation remain release gates.
 
-**Status: functional 0.1 alpha.** Four buildable packages, three working reference applications, a bounded installer, and deterministic tests. The full public-release targets in the original plan (independent pilots, hardware performance budgets, store builds, and live-provider evaluations) remain release gates, not claims of completion.
-
-## Run it
+## Run the examples
 
 ```sh
 npm ci
 npm run build
-npm run dev                 # Gather: offline recipe app, localhost:8081
-npm run dev:movie           # Frame: movie app
-npm run dev:tasks           # Daybook: React Navigation, localhost:8083
+npm run dev:web       # Vite: http://localhost:8084
+npm run dev:tasks     # Native host app on web: http://localhost:8083; select Workspace
 ```
 
-Select **Customize**, then an example request, inspect the preview, and apply. Appearance controls, undo, reset, rename, saved destinations, and restoration after restart work without an API key. The default assistant is explicitly labelled a deterministic demo. It supports the example requests; it does not pretend to interpret arbitrary language.
+Both workspace examples reuse existing host charts/tables with other compatible data through the same contracts and different host styling. Their explicitly labelled deterministic assistant supports “Show team hours”, “Show targets as a table”, and “Complete activity one”. The action requires a separate host confirmation. A production app connects its own authenticated planner.
 
-Expo projects: `npm run ios -w @customitin/recipe-example` or `npm run android -w @customitin/recipe-example` with SDK 55 Expo Go. The task app also includes native iOS and Android projects generated with the React Native community CLI. See [native setup](docs/native-testing.md).
+The older recipe/movie/task shell is now optional example code under `examples/shared/src/ui`. SDK packages do not export or install it. `npm run dev` and `npm run dev:movie` still run those examples.
 
-## What is implemented
+## Packages
 
-| Package                    | Responsibility                                                                                                                                                   |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@customitin/core`         | Strict schemas, serializable capability metadata, typed queries, reference/constraint validation, atomic operations, stable IDs, conservative registry migration |
-| `@customitin/react-native` | Provider, scoped local storage/recovery, composition, collections, preview/apply/undo/reset/rename, manual settings, endpoint transport, navigation contracts    |
-| `@customitin/server`       | Authenticated stateless planner, usage hooks, deadlines, bounded input/output, one repair attempt, OpenAI and Anthropic REST adapters                            |
-| `@customitin/cli`          | TypeScript discovery, evidence preview/consent, optional AI mapping, generated adapters/root wiring, ownership tracking, doctor/refresh/remove                   |
+| Package                    | Responsibility                                                                                                                         |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `@customitin/core`         | v2 registration/contracts, scoped runtime/storage, preview/apply/undo, bounded joins/formulas/data plans, action/assistant controllers |
+| `@customitin/react`        | Shared hooks and host-component SurfaceRenderer; browser storage/DOM integration; no native dependency                                 |
+| `@customitin/react-native` | Shared React API plus in-place native section integration                                                                              |
+| `@customitin/server`       | Authenticated planner, remote data and action handler factories; host-owned services and credentials                                   |
+| `@customitin/cli`          | Development discovery/reports, reviewed enablement, generated bindings, refresh/watch/doctor/removal                                   |
 
-The recipe app uses a complete local repository and supports grouping. The movie app demonstrates filtering before pagination. The task app uses TanStack Query and invalidates personalized collections after an existing edit workflow. All use the same SDK schema and renderer. English UI copy is centralized for later translation.
+## Integrate
 
-## A real developer-owned endpoint
+Build tarballs with `npm run pack:local -- /tmp/customitin-packages` and install the emitted paths in the app. Then:
 
 ```sh
-npm run server   # explicit, loopback-only demo server on 4318
+npx --no-install customitin inspect
+npx --no-install customitin inspect --json
+npx --no-install customitin init --approve-report REVIEWED_DIGEST --dry-run
+npx --no-install customitin init --approve-report REVIEWED_DIGEST --apply
+npx --no-install customitin doctor --typecheck
 ```
 
-The demo server also exposes `/movies` and `/tasks`. To exercise HTTP data rather than in-process fixtures, restart the movie/task app with `EXPO_PUBLIC_DATA_URL=http://localhost:4318` (Android emulator: `http://10.0.2.2:4318`). To exercise the HTTP planner, set `EXPO_PUBLIC_PLANNER_URL=http://localhost:4318/plan` in a reference app. Reference-app `getHeaders` is intentionally empty for the loopback demo; replace it with your existing session integration for an authenticated deployment.
+Use the actual `review.digest` and repeat `--exclude ID_OR_SELECTOR` for exclusions. Installation adds a provider and reviewed bindings only. Create an empty screen/region in the host, declare its surface policy, place `SurfaceRenderer`, and build your own controls with `useSurface`, `useDataView`, `useAssistant` and `useAction`. `--screen FILE#EXPORT` can connect supported existing keyed sections without replacing their styles or callbacks. Individual-element surfaces permit only declared property changes.
 
-Production setup uses `npm run server:live`, server-only `OPENAI_API_KEY`, `CUSTOMITIN_MODEL`, and `CUSTOMITIN_AUTH_MODULE`. The auth module exports `authenticate(request)` and returns a verified subject plus allowed app IDs. There is no default production guest access. Use a shared limiter for multiple instances, set the exact allowed web origin, and terminate HTTPS at your host. The reference server binds to loopback; wrap `createPlannerHandler` in your own deployment framework for hosting. See [deployment](docs/deployment.md).
+Discovery follows reachable local workspace imports, aliases and re-exports and reports imported third-party usage. It binds supported scalar/record/array/children patterns and reports exceptions. It does not infer authorization, complete data or mutation semantics. Refresh preserves stable IDs and developer-owned config/overrides; new capabilities remain pending approval. Recognized Vite/Expo/Metro development commands automatically refresh registration. Other React frameworks use documented manual integration.
 
-## Integrate another app
+Data views combine approved fields with projection, filtering, sorting, grouping, aggregates, interpreted formulas and declared inner/left equality joins. Local execution requires verified complete datasets within budgets. Larger/paginated work uses developer-owned remote adapters. No JavaScript evaluation, SQL, arbitrary callback synthesis or automatic record transmission to a model occurs.
 
-These packages are local, **not published to npm**. Build and use workspaces or create tarballs with `npm pack --workspace <package-name>`.
+Action proposals require explicit execution, host confirmation by default, and current permissions/account/revision. Applying a layout never executes its actions; layout undo does not reverse business mutations. The host backend owns authorization and durable idempotency. Persisted v2 profiles contain plans/mappings, not fetched records or conversation history; v1 bytes remain recoverable.
+
+Start with the [integration guide](docs/ai/integration.md), [contracts](docs/ai/contracts.md), and [maintenance/migration guide](docs/ai/maintenance.md). Agents can use [llms.txt](llms.txt), [llms-full.txt](llms-full.txt) or `customitin guide`. Matching guides are packaged under `dist/docs`.
+
+## Verify
 
 ```sh
-npm run cli -- inspect --cwd /absolute/path/to/app --context
-npm run cli -- init --cwd /absolute/path/to/app --dry-run
-npm run cli -- init --cwd /absolute/path/to/app --apply
-npm run cli -- doctor --cwd /absolute/path/to/app
-npm run cli -- refresh --cwd /absolute/path/to/app --dry-run
-npm run cli -- remove --cwd /absolute/path/to/app --apply
+npm run docs:build
+npm run check
+npm run test:consumer
+npm run test:e2e
+npm run build -w @customitin/web-example
+npm run bundle:ios -w @customitin/task-example
+npm run bundle:android -w @customitin/task-example
 ```
 
-The CLI discovers typed array loaders, exported repository methods, zero-argument TanStack Query option factories and explicit paginated query contracts. It derives scalar fields, enums, nullable values, component props and route parameters. Existing exported query clients and React Navigation refs can be reused; Expo Router routes have generated bindings.
+Packed consumer tests install isolated native and Vite fixtures from local tarballs without workspace SDK aliases. See the [testing guide](docs/ai/testing.md) for cache/browser requirements and remaining host/device/deployment checks. Nothing is published or deployed by these commands.
 
-Use `--complete <selector>` to confirm an unannotated complete source, `--component <selector>` and `--route <selector>` to enable discovered UI capabilities. These repeatable flags save decisions in developer-owned `personalize/overrides.json`. Use field allowlists and query operator overrides there; `customitin schema` prints its exact schema. `personalize/config.ts` supplies host session/scope, planner and custom bindings. Neither developer-owned file is removed by uninstall.
-
-Without screen selections, the installer creates a personal surface, saved-view navigation and a customization entry point while keeping the original app mounted. With `--screen`, it instruments selected vertical View/ScrollView screens instead. It supports simple default function/arrow roots and retains hooks/callbacks inside selected screens. Existing provider placement, nested navigator rewrites, flex-dependent section geometry and deep style migration still need host review. AsyncStorage is wired automatically when already installed; otherwise the scaffold uses memory storage and doctor reports it.
-
-`personalize/bindings.lock.json` preserves capability IDs and source selections through refreshes. File moves with unique unchanged export names retain IDs; explicit symbol overrides handle renames. Commit the lock with the integration. Generated file edits block refresh/removal instead of being overwritten. `doctor --typecheck` checks the host and generated TypeScript without executing host scripts.
-
-Start an AI-assisted integration with [llms.txt](llms.txt), the [AI playbook](docs/ai/integration.md), or `npm run cli -- guide`. Every built package includes the guides under `dist/docs`; the CLI can print individual chapters with `guide --topic contracts`. See the [CLI reference](docs/ai/cli-reference.md) and [installer coverage](docs/installer.md).
-
-Optional installer AI analysis requires `CUSTOMITIN_INSTALLER_API_KEY`, `CUSTOMITIN_INSTALLER_MODEL`, `--ai`, and `--approve-context <digest>` matching the locally reviewed `inspect --context` output. Only bounded symbol signatures and locations are transmitted, never file bodies, environment files, or domain records. There is no vendor service or required vendor account.
-
-## Check it
-
-```sh
-npm run check               # types, zero-warning lint, formatting, tests, builds, boundaries
-npx playwright install chromium
-npm run test:e2e            # browser interactions across all three apps
-npm run bundle -w @customitin/recipe-example
-npm run bundle -w @customitin/movie-example
-```
-
-See [verification record](docs/verification.md), [compatibility](docs/compatibility.md), [extension contracts](docs/extensions.md), and [remaining release gates](docs/release-checklist.md). Saved configurations contain no collection records or prompt history. AsyncStorage is unencrypted: supply encrypted host storage if layout labels or filters are sensitive.
-
-MIT licensed. No telemetry. No payments, deletions, arbitrary code, SQL, or model-selected network execution.
-
-Fresh-install verification is reproducible with `npm run test:consumer`; it creates an official React Native app and exercises packed artifacts without workspace aliases. `npm run pack:local -- /tmp/customitin-packages` builds tarballs and prints install commands. Read the [AI testing guide](docs/ai/testing.md) and [fresh-app results](docs/fresh-app-verification.md) for scope and remaining native/deployment checks.
+MIT licensed. No telemetry or required vendor account. The developer owns the application, services, model provider and user experience.

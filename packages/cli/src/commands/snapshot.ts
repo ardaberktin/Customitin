@@ -1,4 +1,6 @@
-import { join, relative } from 'node:path';
+import { realpath } from 'node:fs/promises';
+import { workspaceBoundary } from '../discovery/workspace';
+import { join, relative, resolve, isAbsolute } from 'node:path';
 import { sourceFiles } from '../discovery/files';
 import {
   hash,
@@ -26,6 +28,29 @@ export async function projectSnapshot(root: string): Promise<string> {
     'prettier.config.cjs',
     'prettier.config.mjs',
   ]);
+  const priorReport = await readOptional(
+    join(root, 'personalize/discovery.json'),
+  );
+  if (priorReport) {
+    const report = JSON.parse(priorReport) as { files?: string[] };
+    const boundary = await workspaceBoundary(root);
+    for (const file of report.files ?? []) {
+      // Read-only snapshot; only bounded TypeScript files previously found by workspace traversal.
+      if (
+        typeof file !== 'string' ||
+        !/\.tsx?$/.test(file) ||
+        file.includes('node_modules') ||
+        file.length >= 1000
+      )
+        continue;
+      const path = resolve(root, file);
+      const canonical = await realpath(path).catch(() => undefined);
+      if (!canonical) continue;
+      const within = relative(boundary, canonical);
+      if (!within.startsWith('..') && !isAbsolute(within))
+        paths.add(relative(root, path));
+    }
+  }
   for (const file of ownership?.files ?? []) {
     await safePath(root, file.path);
     paths.add(file.path);

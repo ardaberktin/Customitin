@@ -1,163 +1,228 @@
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, mkdir, readFile } from 'node:fs/promises';
+import {
+  cp,
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  realpath,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cli, command } from './process.mjs';
-import { lifecycle } from './lifecycle.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const directory = await mkdtemp(join(tmpdir(), 'customitin-fresh-'));
-const app = join(directory, 'app');
+const directory = await mkdtemp(join(tmpdir(), 'customitin-packed-'));
 const artifacts = join(directory, 'artifacts');
 await mkdir(artifacts);
-console.log(`Fresh consumer and evidence: ${directory}`);
-console.log(
-  'Building local packages and downloading the official React Native template…',
-);
+console.log(`Packed consumer evidence: ${directory}`);
 command(
   root,
   process.execPath,
   ['scripts/pack-local.mjs', artifacts],
   join(artifacts, 'pack.log'),
 );
-command(
-  root,
-  process.execPath,
-  [
-    'node_modules/@react-native-community/cli/build/bin.js',
-    'init',
-    'CustomitinFresh',
-    '--version',
-    '0.83.10',
-    '--directory',
-    app,
-    '--pm',
-    'npm',
-    '--skip-git-init',
-    '--install-pods',
-    'false',
-  ],
-  join(artifacts, 'template.log'),
-);
 const tarballs = JSON.parse(
   await readFile(join(artifacts, 'packages.json'), 'utf8'),
 );
-console.log(
-  'Installing tarballs and host libraries, with no workspace aliases…',
-);
-command(
-  app,
-  'npm',
-  [
-    'install',
-    '--save-exact',
-    tarballs.core,
-    tarballs['react-native'],
-    '@react-native-async-storage/async-storage@2.2.0',
-    '@tanstack/react-query@5.90.12',
-    '@react-navigation/native@7.5.0',
-    '@react-navigation/native-stack@7.20.0',
-    'react-native-screens@4.23.0',
-  ],
-  join(artifacts, 'install.log'),
-);
-command(
-  app,
-  'npm',
-  [
-    'install',
-    '--save-dev',
-    '--save-exact',
-    tarballs.server,
-    tarballs.cli,
-    '@testing-library/react-native@13.3.3',
-  ],
-  join(artifacts, 'install-dev.log'),
-);
-command(
-  app,
-  join(app, 'node_modules/.bin/customitin'),
-  ['guide', '--topic', 'testing'],
-  join(artifacts, 'guide.md'),
-);
-const template = await readFile(join(app, 'App.tsx'), 'utf8');
-cli(app, artifacts, 'template-install', ['init', '--apply']);
-cli(app, artifacts, 'template-doctor', ['doctor', '--typecheck']);
-cli(app, artifacts, 'template-remove', ['remove', '--apply']);
-assert.equal(await readFile(join(app, 'App.tsx'), 'utf8'), template);
-await cp(join(root, 'fixtures/fresh-react-native'), app, { recursive: true });
-const original = await readFile(join(app, 'App.tsx'), 'utf8');
-const flags = [
-  '--complete',
-  'src/trails.ts#trailOptions',
-  '--component',
-  'src/TrailCard.tsx#TrailCard',
-  '--component',
-  'src/TrailCard.tsx#Greeting',
-  '--detail',
-  'src/trails.ts#trailOptions=src/navigation.ts#RootParamList.Trail',
-];
-cli(app, artifacts, 'inspect', ['inspect']);
-const dry = cli(app, artifacts, 'dry-run', ['init', ...flags, '--dry-run']);
-assert.deepEqual(dry.issues, []);
-assert.equal(await readFile(join(app, 'App.tsx'), 'utf8'), original);
-assert.deepEqual(
-  cli(app, artifacts, 'install', ['init', ...flags, '--apply']).issues,
-  [],
-);
-cli(app, artifacts, 'doctor', ['doctor', '--typecheck']);
-console.log(
-  'Checking app types, zero-warning lint, and native component interactions…',
-);
-command(
-  app,
-  join(app, 'node_modules/.bin/tsc'),
-  ['--noEmit'],
-  join(artifacts, 'typecheck.log'),
-);
-command(
-  app,
-  join(app, 'node_modules/.bin/eslint'),
-  ['.', '--ext', '.js,.jsx,.ts,.tsx', '--max-warnings', '0'],
-  join(artifacts, 'lint.log'),
-);
-command(
-  app,
-  'npm',
-  ['test', '--', '--runInBand', '--watch=false'],
-  join(artifacts, 'interactions.log'),
-);
-console.log(
-  'Bundling iOS and Android with the unmodified template Babel/Metro configs…',
-);
-for (const platform of ['ios', 'android']) {
+for (const platform of ['web', 'native']) {
+  const app = join(directory, platform);
+  const logs = join(artifacts, platform);
+  await mkdir(logs);
+  await cp(join(root, `fixtures/headless-${platform}`), app, {
+    recursive: true,
+  });
+  await writeFile(
+    join(app, 'package.json'),
+    JSON.stringify(
+      {
+        name: `headless-${platform}-consumer`,
+        private: true,
+        version: '1.0.0',
+        scripts:
+          platform === 'web'
+            ? { dev: 'vite', build: 'vite build' }
+            : { start: 'react-native start' },
+      },
+      null,
+      2,
+    ),
+  );
+  await writeFile(
+    join(app, 'tsconfig.json'),
+    JSON.stringify(
+      {
+        compilerOptions: {
+          strict: true,
+          noUnusedLocals: true,
+          noUnusedParameters: true,
+          jsx: 'react-jsx',
+          target: 'ES2022',
+          module: 'ESNext',
+          moduleResolution: 'Bundler',
+          esModuleInterop: true,
+          skipLibCheck: true,
+          resolveJsonModule: true,
+          noEmit: true,
+        },
+        include: ['**/*.ts', '**/*.tsx'],
+      },
+      null,
+      2,
+    ),
+  );
+  const peers =
+    platform === 'web'
+      ? ['react-dom@19.2.0', '@types/react-dom@19.2.2', 'vite@7.3.7']
+      : [
+          'react-native@0.83.10',
+          '@react-native/babel-preset@0.83.10',
+          '@react-native/metro-config@0.83.10',
+          '@react-native-community/cli@20.2.0',
+          '@react-native-async-storage/async-storage@2.2.0',
+        ];
+  console.log(`Installing isolated ${platform} consumer from tarballs…`);
   command(
     app,
-    join(app, 'node_modules/.bin/react-native'),
+    'npm',
     [
-      'bundle',
-      '--platform',
-      platform,
-      '--dev',
-      'false',
-      '--entry-file',
-      'index.js',
-      '--bundle-output',
-      join(artifacts, `main.${platform}.jsbundle`),
-      '--assets-dest',
-      join(artifacts, `${platform}-assets`),
-      '--max-workers',
-      '2',
+      'install',
+      '--offline',
+      '--ignore-scripts',
+      '--no-audit',
+      '--no-fund',
+      '--save-exact',
+      tarballs.core,
+      tarballs.react,
+      tarballs.cli,
+      tarballs.server,
+      ...(platform === 'native' ? [tarballs['react-native']] : []),
+      'react@19.2.0',
+      '@types/react@19.2.2',
+      'typescript@5.9.3',
+      ...peers,
     ],
-    join(artifacts, `${platform}-bundle.log`),
+    join(logs, 'install.log'),
+  );
+  for (const pkg of [
+    'core',
+    'react',
+    'cli',
+    ...(platform === 'native' ? ['react-native'] : []),
+  ])
+    assert(
+      (await realpath(join(app, 'node_modules/@customitin', pkg))).startsWith(
+        await realpath(app),
+      ),
+      'SDK package must be isolated, never a workspace alias',
+    );
+  const original = await readFile(join(app, 'App.tsx'), 'utf8');
+  const report = cli(app, logs, 'inspect', ['inspect', '--json']);
+  const result = cli(app, logs, 'init', [
+    'init',
+    '--approve-report',
+    report.review.digest,
+    '--apply',
+  ]);
+  assert.deepEqual(result.issues, []);
+  const registry = JSON.parse(
+    await readFile(join(app, 'personalize/capabilities.json'), 'utf8'),
+  );
+  assert.deepEqual(registry.surfaces, []);
+  assert.deepEqual(registry.themeTokens, {});
+  assert.deepEqual(registry.destinations, []);
+  assert.equal(registry.components.length, 2);
+  assert.equal(registry.sources.length, 1);
+  const source = await readFile(join(app, 'App.tsx'), 'utf8');
+  assert(source.includes('Original '));
+  assert(!source.includes('PersonalizationScreen'));
+  command(
+    app,
+    join(app, 'node_modules/.bin/tsc'),
+    ['--noEmit'],
+    join(logs, 'typecheck.log'),
+  );
+  assert.equal(
+    cli(app, logs, 'doctor', ['doctor', '--typecheck']).verification.status,
+    'verified',
+  );
+  assert.deepEqual(
+    cli(app, logs, 'idempotent', ['refresh', '--dry-run']).changes,
+    [],
+  );
+  // Opt into an existing region separately; the default install above adds none.
+  assert.deepEqual(
+    cli(app, logs, 'screen', [
+      'refresh',
+      '--screen',
+      'App.tsx#default',
+      '--apply',
+    ]).issues,
+    [],
+  );
+  command(
+    app,
+    join(app, 'node_modules/.bin/tsc'),
+    ['--noEmit'],
+    join(logs, 'screen-typecheck.log'),
+  );
+  if (platform === 'web') {
+    command(app, 'npm', ['run', 'build'], join(logs, 'bundle.log'));
+    command(
+      app,
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        "import { SurfaceRenderer, useAssistant } from '@customitin/react'; if (!SurfaceRenderer || !useAssistant) throw Error('missing exports');",
+      ],
+      join(logs, 'imports.log'),
+    );
+  } else
+    for (const target of ['ios', 'android']) {
+      command(
+        app,
+        join(app, 'node_modules/.bin/react-native'),
+        [
+          'bundle',
+          '--platform',
+          target,
+          '--dev',
+          'false',
+          '--entry-file',
+          'index.js',
+          '--bundle-output',
+          join(logs, `${target}.jsbundle`),
+          '--assets-dest',
+          join(logs, `${target}-assets`),
+          '--max-workers',
+          '2',
+        ],
+        join(logs, `${target}-bundle.log`),
+      );
+    }
+  const exportCheck =
+    platform === 'native'
+      ? "import { asyncStorageAdapter } from '@customitin/react-native/storage'; import { createHttpPlanner } from '@customitin/react-native/adapters'; if (typeof asyncStorageAdapter !== 'function' || typeof createHttpPlanner !== 'function') throw Error('missing native exports');"
+      : "import { browserStorage } from '@customitin/react/storage'; import { createHttpPlanner } from '@customitin/react/adapters'; if (typeof browserStorage !== 'function' || typeof createHttpPlanner !== 'function') throw Error('missing web exports');";
+  command(
+    app,
+    process.execPath,
+    ['--input-type=module', '-e', exportCheck],
+    join(logs, 'subpath-exports.log'),
+  );
+  const config = await readFile(join(app, 'personalize/config.ts'), 'utf8');
+  assert.deepEqual(
+    cli(app, logs, 'remove', ['remove', '--apply']).conflicts,
+    [],
+  );
+  assert.equal(await readFile(join(app, 'App.tsx'), 'utf8'), original);
+  assert.equal(
+    await readFile(join(app, 'personalize/config.ts'), 'utf8'),
+    config,
   );
 }
 console.log(
-  'Checking source moves, idempotency, drift protection, remove, and reinstall…',
-);
-await lifecycle(app, artifacts, original);
-cli(app, artifacts, 'final-doctor', ['doctor', '--typecheck']);
-console.log(
-  `Passed. App: ${app}\nEvidence: ${artifacts}\nNative binaries/device checks and a live planner are separate checks.`,
+  `Packed native and Vite checks passed. Evidence: ${artifacts}. Device and live-model checks remain separate.`,
 );

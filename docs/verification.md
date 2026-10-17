@@ -1,6 +1,27 @@
 # Verification record
 
-Recorded October 11, 2026 on macOS arm64 with Node 24.15.0. This is a functional alpha verification record, not a public-release certification. The supplied specification is preserved in [original-plan.md](original-plan.md).
+This is a functional alpha verification record, not a public-release certification. Results below are dated; older shell and simulator results do not establish acceptance of the headless v2 runtime. The earlier specification is preserved in [original-plan.md](original-plan.md).
+
+## Headless v2 SDK — October 16, 2026
+
+The SDK now separates shared core execution, shared React integration, native section wrappers and development-time discovery. Installation adds reviewed bindings and a provider without inserting screens, themes, controls or navigation. The former visual shell lives in example code. Current supported contracts and limitations are recorded in [the AI guides](ai/index.md).
+
+Verified on macOS:
+
+- `npm run check`: strict TypeScript, zero-warning ESLint, formatting, 122 tests across 29 files, all five package ESM/CommonJS/declaration builds, platform/domain boundaries and AI-documentation freshness.
+- `npm run test:consumer`: isolated Vite and native apps install actual local tarballs without workspace aliases. Checks cover digest approval, provider-only installation, no-op refresh, doctor/typechecking, opt-in existing-section wrappers, ESM subpath exports, Vite/iOS/Android production bundles, exact entry-file restoration and preservation of developer config. See [packed verification](fresh-app-verification.md).
+- Five Playwright browser flows passed: the three existing example regressions plus the Vite and native-workspace flows using developer-owned controls. The new flows exercise component/data composition, preview/apply, persistence, action confirmation and invalidation. They use deterministic planners. The run used installed Google Chrome through `PLAYWRIGHT_CHROMIUM_EXECUTABLE`.
+- The task example's production iOS and Android JavaScript bundles passed, and the standalone Vite example production build passed. These are bundle checks, not native binary/device checks.
+- Consumer fixtures compile workspace aliases/re-exports, wrapped components, scalar record and array inputs, children, provider-only roots and native/DOM sections. An executable import regression checks components colocated with the generated provider entrypoint.
+- Runtime tests cover policy boundaries on client/server, property editing, local section state/callback preservation, incomplete data rejection, typed formulas, nulls, joins, expansion budgets, cancellation, invalidation, explicit action confirmation, duplicates, stale/account-switched execution and blocking actions throughout layout writes. V2 storage tests preserve v1 recovery bytes and prevent retired profiles from reappearing.
+
+The headless Vite and native examples share contracts but supply different host components, styling and controls. Run `npm run dev:web` or `npm run dev:tasks` to inspect them. The [integration guide](ai/integration.md) documents surface placement, adapter exceptions, authenticated account/storage connections and planner/data/action endpoint integration.
+
+No package was published and no backend or manifest was deployed. Physical-device/simulator interaction for v2, accessibility, performance, live-model quality, durable backend idempotency and production authorization remain host release checks. Native JavaScript bundling does not establish native binary or device acceptance. Existing historical dependency audit findings below have not been reassessed by this implementation.
+
+## Historical verification
+
+The remaining entries describe earlier versions and retain their original test counts and limitations. In particular, old generated-shell installation commands are not the v2 integration workflow.
 
 ## Automatic development command watcher — October 16, 2026
 

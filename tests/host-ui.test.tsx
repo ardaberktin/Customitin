@@ -9,7 +9,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { PersonalizationHost } from '../packages/react-native/src/composer/host';
+import { PersonalizationHost } from '../examples/shared/src/ui/composer/host';
 import { memoryStorage } from '../packages/react-native/src/storage/profile-store';
 import { registries } from '../examples/shared/src/registry';
 import { demoPlan } from '../examples/shared/src/demo-planner';

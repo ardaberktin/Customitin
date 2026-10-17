@@ -1,12 +1,34 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { execFile, spawn, type ChildProcess } from 'node:child_process';
+import { promisify } from 'node:util';
 import { setTimeout } from 'node:timers/promises';
 
-function signalGroup(pid: number, signal: NodeJS.Signals | 0): boolean {
+async function signalGroup(
+  pid: number,
+  signal: NodeJS.Signals | 0,
+): Promise<boolean> {
   try {
     process.kill(-pid, signal);
     return true;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ESRCH') return false;
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ESRCH') return false;
+    if (code === 'EPERM') {
+      // A process group can retain exited members during reaping. Never suppress
+      // a permission error for a live process, and never signal unrelated PIDs.
+      const { stdout } = await promisify(execFile)(
+        'ps',
+        ['-axo', 'pid=,pgid=,stat='],
+        { maxBuffer: 1024 * 1024 },
+      );
+      const live = stdout
+        .trim()
+        .split('\n')
+        .some((line) => {
+          const [, group, status] = line.trim().split(/\s+/);
+          return Number(group) === pid && status && !status.startsWith('Z');
+        });
+      if (!live) return false;
+    }
     throw error;
   }
 }
@@ -27,10 +49,10 @@ export async function stopProcessTree(
     });
     return;
   }
-  if (!signalGroup(child.pid, signal)) return;
+  if (!(await signalGroup(child.pid, signal))) return;
   for (let attempt = 0; attempt < 10; attempt++) {
     await setTimeout(100);
-    if (!signalGroup(child.pid, 0)) return;
+    if (!(await signalGroup(child.pid, 0))) return;
   }
-  signalGroup(child.pid, 'SIGKILL');
+  await signalGroup(child.pid, 'SIGKILL');
 }

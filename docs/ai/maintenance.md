@@ -7,12 +7,13 @@
 | personalize/config.ts              | Developer                   | Created once; never overwritten or removed by refresh/remove                                             |
 | personalize/overrides.json         | Developer                   | Created once; CLI selection flags explicitly merge requested decisions                                   |
 | personalize/bindings.lock.json     | Installer                   | Stable IDs and previous selectors; retained on removal; commit this file                                 |
-| personalize/capabilities.json      | Installer                   | Mobile registry generated from discovery plus overrides                                                  |
+| personalize/capabilities.json      | Installer                   | Client v2 registry generated from discovery plus overrides                                               |
 | personalize/server-manifest.json   | Installer                   | Matching backend registry; deploy with planner                                                           |
+| personalize/discovery.json         | Installer                   | Versioned discovery/review evidence and reachable workspace files                                        |
 | personalize/sources.ts             | Installer                   | Data adapter bindings                                                                                    |
-| personalize/components.tsx         | Installer                   | Host/item wrappers                                                                                       |
+| personalize/components.tsx         | Installer                   | Host data-input/children adapters (explicit legacy items supported)                                      |
 | personalize/navigation.ts          | Installer                   | Approved destination closures                                                                            |
-| personalize/root.tsx               | Installer                   | Provider/shell integration and custom binding merge                                                      |
+| personalize/root.tsx               | Installer                   | Provider-only integration and custom binding merge                                                       |
 | .customitin/ownership.json         | Installer                   | Generated hashes, reversible host bindings and unwrapped host snapshots                                  |
 | Root and selected screen TSX files | Developer with SDK wrappers | Host code stays editable; only recognized SDK imports/props/wrappers are maintained                      |
 | package.json scripts               | Shared                      | Only selected script wrappers/helper entries are maintained; other package fields remain developer-owned |
@@ -89,7 +90,7 @@ Pre-lock installations import matching original source IDs when possible. If a l
 
 ## Development command integration
 
-Init/refresh automatically wraps recognized `start`, `dev`, `web`, `ios` and `android` scripts that directly run `expo start`, `react-native start` or `rnc-cli start`. Optional `npx`/`npx --no-install`, `pnpm exec` and `yarn exec` prefixes are recognized. Build/run-ios/run-android scripts and custom environment/launcher prefixes are not inferred. No process-runner dependency is added. Existing installations need one `refresh --apply` with the updated CLI.
+Init/refresh automatically wraps recognized `start`, `dev`, `web`, `ios` and `android` scripts that directly run `vite`, `expo start`, `react-native start` or `rnc-cli start`. Optional `npx`/`npx --no-install`, `pnpm exec` and `yarn exec` prefixes are recognized. Build/run-ios/run-android scripts and custom environment/launcher prefixes are not inferred. No process-runner dependency is added. Existing installations need one `refresh --apply` with the updated CLI.
 
 For example, an existing `"start": "expo start"` becomes:
 
@@ -146,3 +147,13 @@ It does not run application modules, silently change credentials, upgrade framew
 ## Generated formatting
 
 The CLI formats generated TypeScript and the root wrapper before recording ownership hashes. It reads portable literal settings from JSON prettier files, package.json.prettier, and simple module.exports/export-default object configs. It never executes a host configuration or loads formatter plugins. Dynamic configs, YAML, overrides and custom plugins fall back to portable defaults; these are not a promise to reproduce every host formatting rule. To change generated output, adjust a supported static config and refresh before running a formatter over installer-owned files. Check TypeScript files explicitly: the default bare React Native lint script may only scan JavaScript unless `--ext .js,.jsx,.ts,.tsx` is supplied.
+
+## Reviewed enablement and v2 migration
+
+`inspect` prints a readable report; `inspect --json` contains the exact `review.digest`. `init/refresh --approve-report DIGEST --exclude ID_OR_SELECTOR` approves the suggested compatible set against that snapshot. The CLI persists explicit enabled stable IDs. New components/sources discovered by watch stay pending. Completeness annotations do not enable sources, and component annotations do not bypass report review. Required callback/complex-prop candidates remain reported with adapter work; they do not block unrelated unselected bindings.
+
+Workspace discovery follows reachable local files, including compiler-resolved aliases and re-exports. Watch hashes those files as well as app sources. Changing an existing source's shape can change its capability revision; surface field allowlists still control access. Review semantic changes and deploy matching manifests. Source moves retain identity only under the existing unambiguous rules; no identity implies authorization for a new logical dataset.
+
+The alpha SDK now exports headless APIs. Existing config/overrides remain developer-owned during installer migration. Refresh replaces tracked generated files only after ownership checks. The old shell, editors and theme primitives live in examples; update host imports deliberately if the app chose to use them. Installation no longer inserts routes, tabs, appearance tokens or controls. Plan/inspect the migration before applying it, then supply host UI and surface policies.
+
+V2 profile storage uses separate keys. Migration preserves compatible host components by stable ID and reports unsupported shell/theme/navigation settings. It never overwrites v1 bytes. V2 writes and erasure record a retirement marker to prevent automatic v1 fallback after the user resets their retained configuration. Recovery from old bytes is a separate deliberate host workflow, with scope verification. Do not remove those bytes as a side effect of SDK installation. Legacy configuration/identity-lock file formats remain version 1 for ownership compatibility; runtime manifests/profiles/reports are version 2.

@@ -15,12 +15,25 @@ export interface DiscoveredSymbol {
   unsupportedProps: string[];
   complete: boolean;
   approved: boolean;
+  usage?: { file: string; line: number }[];
+  dataProps?: Record<
+    string,
+    {
+      fields: Record<string, ValueRule>;
+      cardinality: 'one' | 'many';
+      required: boolean;
+    }
+  >;
+  acceptsChildren?: boolean;
   adapter?: 'array' | 'query-options' | 'query-page';
   acceptsQuery?: boolean;
   itemProp?: string;
   itemFields?: Record<string, ValueRule>;
   pressProp?: string;
-  screen?: { sections: { key: string; title: string }[] };
+  screen?: {
+    platform?: 'native' | 'web';
+    sections: { key: string; title: string }[];
+  };
   screenIssue?: string;
 }
 export interface DiscoveredRoute {
@@ -32,6 +45,16 @@ export interface DiscoveredRoute {
   supported: boolean;
 }
 export interface DiscoveryReport {
+  version: 2;
+  platform: 'native' | 'web' | 'unknown';
+  sourceDigest: string;
+  files: string[];
+  importedComponents: {
+    module: string;
+    exportName: string;
+    file: string;
+    line: number;
+  }[];
   project: string;
   appId: string;
   framework: 'expo-router' | 'react-navigation' | 'unknown';

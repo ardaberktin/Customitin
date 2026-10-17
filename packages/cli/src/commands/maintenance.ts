@@ -56,7 +56,10 @@ export async function doctorProject(
   }
   if (
     !report.versions['@customitin/core'] ||
-    !report.versions['@customitin/react-native']
+    !(
+      report.versions['@customitin/react'] ||
+      report.versions['@customitin/react-native']
+    )
   )
     issues.push(
       'Install @customitin/core and @customitin/react-native (local tarballs until published).',
@@ -81,6 +84,10 @@ export async function doctorProject(
     issues,
     recommendations,
     coverage: report,
+    verification:
+      options.typecheck && !issues.length
+        ? { status: 'verified', check: 'doctor --typecheck (static only)' }
+        : { status: 'unverified' },
     nextChecks: [
       'Run the host typecheck, lint and bundle commands.',
       'Review complete-source declarations and demonstrate a customization.',

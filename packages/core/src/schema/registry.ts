@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { evidenceSchema, idSchema, ruleSchema } from './primitives';
+import { dataInputSchema, relationSchema } from './data-plan';
+import { actionDescriptorSchema, surfacePolicySchema } from './action';
 import { nodeSchema, placementSchema } from './configuration';
 
 const capability = {
@@ -37,6 +39,9 @@ export const sourceDescriptorSchema = z
 export type SourceDescriptor = z.infer<typeof sourceDescriptorSchema>;
 export const registrySchema = z
   .object({
+    schemaVersion: z.literal(2).default(2),
+    actions: z.array(actionDescriptorSchema).max(100).default([]),
+    relations: z.array(relationSchema).max(100).default([]),
     appId: idSchema,
     revision: idSchema,
     components: z
@@ -54,6 +59,10 @@ export const registrySchema = z
               'item',
             ]),
             props: z.record(idSchema, ruleSchema),
+            dataInputs: z.record(idSchema, dataInputSchema).optional(),
+            events: z
+              .record(idSchema, z.record(idSchema, ruleSchema))
+              .optional(),
             acceptsChildren: z.boolean(),
             sourceIds: z.array(idSchema).max(30).optional(),
           })
@@ -66,6 +75,12 @@ export const registrySchema = z
           .object({
             ...capability,
             kind: z.literal('screen').optional(),
+            mode: z
+              .enum(['compose', 'reorder', 'properties'])
+              .default('compose'),
+            policy: surfacePolicySchema.default(() =>
+              surfacePolicySchema.parse({}),
+            ),
             defaultLayout: z.array(nodeSchema).max(40),
             requiredNodeIds: z.array(idSchema).max(10),
             allowedComponentIds: z.array(idSchema).max(100),

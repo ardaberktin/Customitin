@@ -14,6 +14,12 @@ export default defineConfig({
   },
   webServer: [
     {
+      command: 'npm run dev:web',
+      url: 'http://127.0.0.1:8084',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60000,
+    },
+    {
       command: 'npm run web -w @customitin/recipe-example -- --port 8081',
       url: 'http://localhost:8081',
       reuseExistingServer: !process.env.CI,

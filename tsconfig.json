@@ -22,7 +22,16 @@
       "@customitin/react-native/*": ["./packages/react-native/src/*"],
       "@customitin/server": ["./packages/server/src/index.ts"],
       "@customitin/cli": ["./packages/cli/src/api.ts"],
-      "@customitin/examples": ["./examples/shared/src/index.ts"]
+      "@customitin/examples": ["./examples/shared/src/index.ts"],
+      "@customitin/react": ["./packages/react/src/index.ts"],
+      "@customitin/react/*": ["./packages/react/src/*"],
+      "@customitin/examples/ui": ["./examples/shared/src/ui/index.ts"],
+      "@customitin/examples/headless": [
+        "./examples/shared/src/headless/index.ts"
+      ],
+      "@customitin/examples/headless/native": [
+        "./examples/shared/src/headless/native.tsx"
+      ]
     }
   },
   "include": [

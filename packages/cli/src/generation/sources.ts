@@ -45,7 +45,7 @@ export function generateSources(integration: ResolvedIntegration): string {
       if (symbol.adapter === 'query-options') {
         helpers.add('queryInvalidation');
         entries.push(
-          `${JSON.stringify(symbol.id)}: createCachedSource(${descriptor}, async (context) => { const options = ${binding.expression}(); return queryClient.fetchQuery({ ...options, queryKey: [...options.queryKey, 'customitin-scope', context.scope], staleTime: 0 }); }, queryInvalidation(queryClient.getQueryCache(), () => ${binding.expression}().queryKey))`,
+          `${JSON.stringify(symbol.id)}: createCachedSource(${descriptor}, async (context) => { const options = ${binding.expression}(); return queryClient.fetchQuery({ ...options, queryKey: [...options.queryKey, 'customitin-scope', context.scope], staleTime: 0 }); }, (onChange) => queryInvalidation(queryClient.getQueryCache(), () => ${binding.expression}().queryKey)(onChange))`,
         );
       } else
         entries.push(
@@ -55,7 +55,7 @@ export function generateSources(integration: ResolvedIntegration): string {
   });
   if (helpers.size)
     imports.push(
-      `import { ${[...helpers].join(', ')} } from '@customitin/react-native/adapters';`,
+      `import { ${[...helpers].join(', ')} } from '@customitin/react/adapters';`,
     );
   return [
     ...imports,

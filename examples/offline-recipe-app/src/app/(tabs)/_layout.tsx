@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
-import { useCustomization, usePersonalTheme } from '@customitin/react-native';
+import { useCustomization } from '@customitin/react-native';
+import { usePersonalTheme } from '@customitin/examples/ui';
 export default function TabLayout() {
   const { profile } = useCustomization();
   const theme = usePersonalTheme();

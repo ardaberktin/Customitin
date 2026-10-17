@@ -11,12 +11,12 @@ import {
 import { afterEach, expect, it } from 'vitest';
 import { installProject, overridesSchema } from '@customitin/cli';
 import { consumer } from './helpers/consumer';
-import { screenConsumer } from './helpers/screen-consumer';
+import { controlledScreenConsumer } from './helpers/screen-consumer';
 import { loadScreenConsumer } from './helpers/load-screen';
 
 afterEach(cleanup);
 it('shows newly edited host UI while registration is stale and customizes it after refresh', async () => {
-  const root = await consumer(screenConsumer);
+  const root = await consumer(controlledScreenConsumer);
   await installProject(root, {
     dryRun: false,
     overrides: overridesSchema.parse({
@@ -36,9 +36,7 @@ it('shows newly edited host UI while registration is stale and customizes it aft
   const { default: BeforeRefresh } = loadScreenConsumer(root);
   render(<BeforeRefresh />);
   expect(await screen.findByText('New summary')).toBeTruthy();
-  expect(
-    screen.queryByRole('button', { name: 'Customize this screen' }),
-  ).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Hide summary' })).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Existing action 0' }));
   expect(
     screen.getByRole('button', { name: 'Existing action 2' }),

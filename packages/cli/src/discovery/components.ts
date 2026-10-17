@@ -1,6 +1,6 @@
 import type { Node, Signature } from 'ts-morph';
 import { scalarFields, valueRule } from './fields';
-import { callable } from './signatures';
+import { arrayItem, callable } from './signatures';
 import type { DiscoveredSymbol } from './types';
 type SymbolBase = Omit<DiscoveredSymbol, 'kind' | 'signature'>;
 export function discoverComponent(
@@ -25,10 +25,30 @@ export function discoverComponent(
   const props = signature.getParameters()[0]?.getTypeAtLocation(location);
   for (const prop of props?.getProperties() ?? []) {
     const propName = prop.getName();
-    const propType = prop.getTypeAtLocation(location);
-    const rule = valueRule(propType, prop.isOptional());
+    const declaredType = prop.getTypeAtLocation(location);
+    const propType = declaredType.getNonNullableType();
+    const rule = valueRule(declaredType, prop.isOptional());
     if (rule) symbol.props[propName] = rule;
-    else if (propName === 'onPress' && prop.isOptional() && callable(propType))
+    else if (propName === 'children') symbol.acceptsChildren = true;
+    else if (
+      arrayItem(propType) &&
+      Object.keys(scalarFields(arrayItem(propType)!, location)).length
+    ) {
+      const item = arrayItem(propType)!;
+      const fields = scalarFields(item, location);
+      if (Object.keys(fields).length === item.getProperties().length) {
+        symbol.dataProps ??= {};
+        symbol.dataProps[propName] = {
+          fields,
+          cardinality: 'many',
+          required: !prop.isOptional(),
+        };
+      } else if (!prop.isOptional()) symbol.unsupportedProps.push(propName);
+    } else if (
+      propName === 'onPress' &&
+      prop.isOptional() &&
+      callable(propType)
+    )
       symbol.pressProp = propName;
     else if (
       !symbol.itemProp &&
@@ -39,8 +59,14 @@ export function discoverComponent(
     ) {
       symbol.itemProp = propName;
       symbol.itemFields = scalarFields(propType, location);
+      symbol.dataProps ??= {};
+      symbol.dataProps[propName] = {
+        fields: symbol.itemFields,
+        cardinality: 'one',
+        required: !prop.isOptional(),
+      };
     } else if (!prop.isOptional()) symbol.unsupportedProps.push(propName);
   }
-  symbol.signature = `${name}: component ${JSON.stringify({ props: symbol.props, itemProp: symbol.itemProp, itemFields: symbol.itemFields, unsupportedProps: symbol.unsupportedProps })}`;
+  symbol.signature = `${name}: component ${JSON.stringify({ props: symbol.props, itemProp: symbol.itemProp, itemFields: symbol.itemFields, unsupportedProps: symbol.unsupportedProps, dataProps: symbol.dataProps, acceptsChildren: symbol.acceptsChildren })}`;
   return symbol;
 }

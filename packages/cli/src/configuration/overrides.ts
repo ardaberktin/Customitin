@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { idSchema, scalarSchema } from '@customitin/core';
+import {
+  idSchema,
+  scalarSchema,
+  registrySchema,
+  actionDescriptorSchema,
+  relationSchema,
+} from '@customitin/core';
 import { readOptional, safePath } from '../commands/files';
 import { scriptNameSchema } from '../development/schema';
 
@@ -21,6 +27,16 @@ const selection = {
 export const overridesSchema = z
   .object({
     version: z.literal(1),
+    surfaces: z
+      .array(registrySchema.shape.surfaces.element)
+      .max(20)
+      .default([]),
+    actions: z.array(actionDescriptorSchema).max(100).default([]),
+    relations: z.array(relationSchema).max(100).default([]),
+    customComponents: z
+      .array(registrySchema.shape.components.element)
+      .max(100)
+      .default([]),
     sources: z
       .record(
         z.string(),

@@ -7,6 +7,8 @@ import {
 import { boundedJson, invariant } from '../schema/primitives';
 import { registrySchema, type CapabilityRegistry } from '../schema/registry';
 import { validateView } from './query';
+import { validateNodeBindings } from './bindings';
+import { validateDataPlan } from '../data/plans/validate';
 import { validateValues } from './values';
 
 export function validateDestination(
@@ -31,7 +33,7 @@ export function validateLayout(
 ): Set<string> {
   const surface = registry.surfaces.find((s) => s.id === surfaceId);
   invariant(surface, `Unknown surface ${surfaceId}`);
-  if (surface.kind === 'screen')
+  if (surface.kind === 'screen' || surface.mode === 'reorder')
     for (const node of nodes)
       invariant(
         surface.defaultLayout.some(
@@ -39,11 +41,39 @@ export function validateLayout(
         ),
         'Existing screen sections may only be reordered or hidden',
       );
+  if (surface.mode === 'properties') {
+    invariant(
+      nodes.length === surface.defaultLayout.length,
+      'Property surfaces cannot add or remove elements',
+    );
+    nodes.forEach((node, index) => {
+      const original = surface.defaultLayout[index]!;
+      invariant(
+        JSON.stringify({ ...node, props: {} }) ===
+          JSON.stringify({ ...original, props: {} }),
+        'Property surfaces cannot replace elements',
+      );
+      for (const key of new Set([
+        ...Object.keys(original.props),
+        ...Object.keys(node.props),
+      ]))
+        invariant(
+          surface.policy?.editableProps.includes(key) ||
+            node.props[key] === original.props[key],
+          'Property is locked',
+        );
+    });
+  }
   const ids = new Set<string>();
   const sources = new Set<string>();
   function visit(node: LayoutNode, depth: number): void {
     invariant(
-      depth <= registry.limits.depth && ids.size < registry.limits.nodes,
+      depth <= registry.limits.depth &&
+        ids.size <
+          Math.min(
+            registry.limits.nodes,
+            surface?.policy?.maxNodes ?? registry.limits.nodes,
+          ),
       'Layout is too complex',
     );
     invariant(!ids.has(node.id), 'Duplicate section identity');
@@ -64,6 +94,16 @@ export function validateLayout(
     if (component.kind === 'collection' || component.kind === 'summary') {
       const view = profile.views.find((v) => v.id === node.viewId);
       invariant(view, 'Collection requires an existing saved view');
+      const source = registry.sources.find(
+        (source) => source.id === view.sourceId,
+      )!;
+      invariant(
+        surface?.policy?.operations.includes('data') &&
+          Object.keys(source.fields).every((field) =>
+            surface.policy.sourceFields[source.id]?.includes(field),
+          ),
+        'Collection source is unavailable on this surface',
+      );
       sources.add(view.sourceId);
       if (component.kind === 'summary')
         invariant(
@@ -77,6 +117,10 @@ export function validateLayout(
       );
     if (component.kind === 'shortcut') {
       invariant(node.destinationId, 'Shortcut requires a destination');
+      invariant(
+        surface?.policy?.destinationIds.includes(node.destinationId),
+        'Destination is unavailable on this surface',
+      );
       validateDestination(
         node.destinationId,
         node.params,
@@ -88,6 +132,9 @@ export function validateLayout(
         !node.destinationId && !node.params,
         'Only shortcuts accept destinations',
       );
+    validateNodeBindings(node, profile, registry, surfaceId).forEach((id) =>
+      sources.add(id),
+    );
     node.children.forEach((child) => visit(child, depth + 1));
   }
   nodes.forEach((node) => visit(node, 1));
@@ -129,6 +176,13 @@ export function validateProfile(
     new Set(profile.views.map((v) => v.id)).size === profile.views.length,
     'Duplicate saved view',
   );
+  invariant(
+    new Set((profile.dataViews ?? []).map((view) => view.id)).size ===
+      (profile.dataViews ?? []).length,
+    'Duplicate data view',
+  );
+  for (const view of profile.dataViews ?? [])
+    validateDataPlan(view.plan, registry);
   profile.views.forEach((view) => validateView(view, registry));
   for (const [id, nodes] of Object.entries(profile.surfaces))
     validateLayout(nodes, id, profile, registry);
@@ -175,6 +229,8 @@ export function createProfile(
     registry.surfaces,
     registry.sources,
     registry.destinations,
+    registry.actions,
+    registry.relations,
   ])
     invariant(
       new Set(list.map((v) => v.id)).size === list.length,
@@ -182,8 +238,9 @@ export function createProfile(
     );
   return validateProfile(
     {
-      schemaVersion: 1,
+      schemaVersion: 2,
       registryRevision: registry.revision,
+      dataViews: [],
       scope,
       revision: 0,
       name: 'My space',

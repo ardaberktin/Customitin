@@ -18,6 +18,7 @@ export async function consumer(
       name: 'consumer-fixture',
       dependencies: {
         '@customitin/core': '0.1.0-alpha.1',
+        '@customitin/react': '0.1.0-alpha.1',
         '@customitin/react-native': '0.1.0-alpha.1',
         ...dependencies,
       },
@@ -40,6 +41,8 @@ export async function consumer(
         baseUrl: process.cwd(),
         paths: {
           '@customitin/core': ['packages/core/src/index.ts'],
+          '@customitin/react': ['packages/react/src/index.ts'],
+          '@customitin/react/*': ['packages/react/src/*'],
           '@customitin/react-native': ['packages/react-native/src/index.ts'],
           '@customitin/react-native/*': ['packages/react-native/src/*'],
         },

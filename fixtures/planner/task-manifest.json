@@ -1,6 +1,9 @@
 {
+  "schemaVersion": 2,
+  "actions": [],
+  "relations": [],
   "appId": "task-demo",
-  "revision": "demo-v1",
+  "revision": "demo-v2",
   "components": [
     {
       "id": "intro",
@@ -138,6 +141,40 @@
         "version": 1,
         "evidence": "examples/shared/src/registry.ts",
         "status": "developer-reviewed"
+      },
+      "mode": "compose",
+      "policy": {
+        "sourceFields": {
+          "catalog": [
+            "id",
+            "title",
+            "note",
+            "category",
+            "dueAt",
+            "completed"
+          ]
+        },
+        "actionIds": [],
+        "destinationIds": [
+          "home",
+          "customize",
+          "detail"
+        ],
+        "themeTokenIds": [
+          "appearance.mode",
+          "type.scale",
+          "layout.density",
+          "shape.radius",
+          "motion.reduced"
+        ],
+        "editableProps": [],
+        "operations": [
+          "layout",
+          "data",
+          "theme",
+          "navigation"
+        ],
+        "maxNodes": 40
       },
       "defaultLayout": [
         {

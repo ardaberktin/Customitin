@@ -1,17 +1,24 @@
 import { build } from 'tsup';
 import { cp } from 'node:fs/promises';
-for (const name of ['core', 'react-native', 'server', 'cli']) {
+for (const name of ['core', 'react', 'react-native', 'server', 'cli']) {
   const entry =
-    name === 'react-native'
+    name === 'react'
       ? [
           'src/index.ts',
-          'src/storage/index.ts',
           'src/adapters/index.ts',
-          'src/navigation/index.ts',
+          'src/storage/index.ts',
+          'src/dom/index.ts',
         ]
-      : name === 'cli'
-        ? ['src/index.ts', 'src/api.ts']
-        : ['src/index.ts'];
+      : name === 'react-native'
+        ? [
+            'src/index.ts',
+            'src/storage/index.ts',
+            'src/adapters/index.ts',
+            'src/navigation/index.ts',
+          ]
+        : name === 'cli'
+          ? ['src/index.ts', 'src/api.ts']
+          : ['src/index.ts'];
   await build({
     entry: entry.map((e) => `packages/${name}/${e}`),
     outDir: `packages/${name}/dist`,
@@ -21,10 +28,13 @@ for (const name of ['core', 'react-native', 'server', 'cli']) {
     clean: true,
     splitting: false,
     tsconfig: `packages/${name}/tsconfig.json`,
-    platform: name === 'core' || name === 'react-native' ? 'neutral' : 'node',
+    platform: ['core', 'react', 'react-native'].includes(name)
+      ? 'neutral'
+      : 'node',
     external: [
       '@customitin/core',
       '@customitin/react-native',
+      '@customitin/react',
       '@customitin/server',
       'react',
       'react-native',

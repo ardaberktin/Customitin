@@ -1,2 +1,1 @@
-export * from './http';
-export * from './query';
+export * from '@customitin/react/adapters';

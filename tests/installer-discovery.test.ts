@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   inspectProject,
+  reviewProject,
   installProject,
   overridesSchema,
   planInstall,
@@ -32,7 +33,10 @@ export const useEntries = () => [];
   expect(report.symbols.find((s) => s.name === 'useEntries')?.kind).toBe(
     'hook',
   );
-  const plan = await installProject(root, { dryRun: false });
+  const plan = await installProject(root, {
+    dryRun: false,
+    approvalDigest: (await reviewProject(root)).digest,
+  });
   expect(
     JSON.parse(plan.files['personalize/capabilities.json']!).sources,
   ).toHaveLength(2);
@@ -60,7 +64,10 @@ export const entryOptions = () => queryOptions({ queryKey: ['entries'], queryFn:
   expect(report.symbols.find((s) => s.name === 'queryClient')?.kind).toBe(
     'query-client',
   );
-  const plan = await installProject(root, { dryRun: false });
+  const plan = await installProject(root, {
+    dryRun: false,
+    approvalDigest: (await reviewProject(root)).digest,
+  });
   expect(plan.files['personalize/sources.ts']).toContain(
     'queryClient.fetchQuery',
   );
@@ -83,9 +90,14 @@ export const Banner = () => <Text>Welcome</Text>;
   );
   const overrides = overridesSchema.parse({
     version: 1,
-    sources: { 'data.ts#loadEntries': { detailDestination: 'app/[id].tsx' } },
+    sources: {
+      'data.ts#loadEntries': {
+        enabled: true,
+        detailDestination: 'app/[id].tsx',
+      },
+    },
     components: {
-      'Card.tsx#EntryCard': { enabled: true },
+      'Card.tsx#EntryCard': { enabled: true, source: 'data.ts#loadEntries' },
       'Card.tsx#Heading': { enabled: true },
       'Card.tsx#Banner': { enabled: true },
     },
@@ -98,7 +110,7 @@ export const Banner = () => <Text>Welcome</Text>;
       .sourceIds,
   ).toEqual([registry.sources[0].id]);
   expect(registry.sources[0].detailDestinationId).toBe(
-    registry.destinations[1].id,
+    registry.destinations[0].id,
   );
   expect(plan.files['personalize/navigation.ts']).toContain('router.push');
   compileConsumer(root);
@@ -138,7 +150,10 @@ import type { ValidatedQuery, QueryContext } from '@customitin/core';
 export async function page(_query: ValidatedQuery, _context: QueryContext, _cursor?: string): Promise<{ items: Entry[]; nextCursor: string | null; complete: boolean }> { return { items: await loadEntries(), nextCursor: null, complete: true }; }
 `,
   });
-  const plan = await installProject(root, { dryRun: false });
+  const plan = await installProject(root, {
+    dryRun: false,
+    approvalDigest: (await reviewProject(root)).digest,
+  });
   const remote = JSON.parse(
     plan.files['personalize/capabilities.json']!,
   ).sources.find((s: { title: string }) => s.title === 'page');
@@ -151,7 +166,9 @@ export async function page(_query: ValidatedQuery, _context: QueryContext, _curs
       undefined,
       overridesSchema.parse({
         version: 1,
-        sources: { 'data.ts#page': { fields: ['id', 'missing'] } },
+        sources: {
+          'data.ts#page': { enabled: true, fields: ['id', 'missing'] },
+        },
       }),
     ),
   ).rejects.toThrow('unknown field');

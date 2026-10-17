@@ -14,7 +14,11 @@ it('persists source decisions, excludes private fields, and keeps IDs/revision a
   const overrides = overridesSchema.parse({
     version: 1,
     sources: {
-      'data.ts#loadEntries': { fields: ['id', 'title'], title: 'Entries' },
+      'data.ts#loadEntries': {
+        enabled: true,
+        fields: ['id', 'title'],
+        title: 'Entries',
+      },
     },
   });
   const first = await installProject(root, { dryRun: false, overrides });
@@ -105,6 +109,7 @@ it('keeps component source references working after the source file moves', asyn
   });
   const overrides = overridesSchema.parse({
     version: 1,
+    sources: { 'data.ts#loadEntries': { enabled: true } },
     components: {
       'Card.tsx#Card': { enabled: true, source: 'data.ts#loadEntries' },
     },
@@ -143,7 +148,9 @@ it('CLI selection flags preserve existing decisions when a selector moves', asyn
     dryRun: false,
     overrides: overridesSchema.parse({
       version: 1,
-      sources: { 'data.ts#loadEntries': { fields: ['id', 'title'] } },
+      sources: {
+        'data.ts#loadEntries': { enabled: true, fields: ['id', 'title'] },
+      },
     }),
   });
   await rename(join(root, 'data.ts'), join(root, 'moved.ts'));
