@@ -62,7 +62,7 @@ export async function doctorProject(
     )
   )
     issues.push(
-      'Install @customitin/core and @customitin/react-native (local tarballs until published).',
+      `Install @customitin/core and ${report.platform === 'web' ? '@customitin/react' : '@customitin/react-native'} (local tarballs until published).`,
     );
   const config = await readOptional(
     await safePath(root, 'personalize/config.ts'),

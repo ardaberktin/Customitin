@@ -12,11 +12,12 @@ export function command(cwd, executable, args, log) {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
     maxBuffer: 20 * 1024 * 1024,
+    timeout: 5 * 60 * 1000,
   });
   if (log) writeFileSync(log, `${result.stdout ?? ''}${result.stderr ?? ''}`);
   if (result.error || result.status !== 0) {
     throw new Error(
-      `${executable} ${args.join(' ')} failed. ${log ? `See ${log}` : (result.error?.message ?? result.stderr)}`,
+      `${executable} ${args.join(' ')} failed (${result.error?.message ?? result.signal ?? `exit ${result.status}`}). ${log ? `See ${log}` : result.stderr}`,
     );
   }
   return result.stdout;

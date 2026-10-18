@@ -1,16 +1,12 @@
 import assert from 'node:assert/strict';
-import {
-  cp,
-  mkdtemp,
-  mkdir,
-  readFile,
-  writeFile,
-  realpath,
-} from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cli, command } from './process.mjs';
+import { prepare } from './prepare.mjs';
+import { interactions, runInteraction } from './interactions.mjs';
+import { verifyNativeBundle, verifyNativeExports } from './native-exports.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const directory = await mkdtemp(join(tmpdir(), 'customitin-packed-'));
@@ -27,104 +23,25 @@ const tarballs = JSON.parse(
   await readFile(join(artifacts, 'packages.json'), 'utf8'),
 );
 for (const platform of ['web', 'native']) {
-  const app = join(directory, platform);
-  const logs = join(artifacts, platform);
-  await mkdir(logs);
-  await cp(join(root, `fixtures/headless-${platform}`), app, {
-    recursive: true,
-  });
-  await writeFile(
-    join(app, 'package.json'),
-    JSON.stringify(
-      {
-        name: `headless-${platform}-consumer`,
-        private: true,
-        version: '1.0.0',
-        scripts:
-          platform === 'web'
-            ? { dev: 'vite', build: 'vite build' }
-            : { start: 'react-native start' },
-      },
-      null,
-      2,
-    ),
+  const { app, logs, typecheck } = await prepare(
+    root,
+    directory,
+    platform,
+    tarballs,
   );
-  await writeFile(
-    join(app, 'tsconfig.json'),
-    JSON.stringify(
-      {
-        compilerOptions: {
-          strict: true,
-          noUnusedLocals: true,
-          noUnusedParameters: true,
-          jsx: 'react-jsx',
-          target: 'ES2022',
-          module: 'ESNext',
-          moduleResolution: 'Bundler',
-          esModuleInterop: true,
-          skipLibCheck: true,
-          resolveJsonModule: true,
-          noEmit: true,
-        },
-        include: ['**/*.ts', '**/*.tsx'],
-      },
-      null,
-      2,
-    ),
-  );
-  const peers =
-    platform === 'web'
-      ? ['react-dom@19.2.0', '@types/react-dom@19.2.2', 'vite@7.3.7']
-      : [
-          'react-native@0.83.10',
-          '@react-native/babel-preset@0.83.10',
-          '@react-native/metro-config@0.83.10',
-          '@react-native-community/cli@20.2.0',
-          '@react-native-async-storage/async-storage@2.2.0',
-        ];
-  console.log(`Installing isolated ${platform} consumer from tarballs…`);
-  command(
-    app,
-    'npm',
-    [
-      'install',
-      '--offline',
-      '--ignore-scripts',
-      '--no-audit',
-      '--no-fund',
-      '--save-exact',
-      tarballs.core,
-      tarballs.react,
-      tarballs.cli,
-      tarballs.server,
-      ...(platform === 'native' ? [tarballs['react-native']] : []),
-      'react@19.2.0',
-      '@types/react@19.2.2',
-      'typescript@5.9.3',
-      ...peers,
-    ],
-    join(logs, 'install.log'),
-  );
-  for (const pkg of [
-    'core',
-    'react',
-    'cli',
-    ...(platform === 'native' ? ['react-native'] : []),
-  ])
-    assert(
-      (await realpath(join(app, 'node_modules/@customitin', pkg))).startsWith(
-        await realpath(app),
-      ),
-      'SDK package must be isolated, never a workspace alias',
-    );
   const original = await readFile(join(app, 'App.tsx'), 'utf8');
   const report = cli(app, logs, 'inspect', ['inspect', '--json']);
-  const result = cli(app, logs, 'init', [
+  const approval = [
     'init',
     '--approve-report',
     report.review.digest,
-    '--apply',
-  ]);
+    '--exclude',
+    'App.tsx#Card',
+  ];
+  const preview = cli(app, logs, 'init-dry-run', [...approval, '--dry-run']);
+  assert.deepEqual(preview.issues, []);
+  await assert.rejects(access(join(app, 'personalize')));
+  const result = cli(app, logs, 'init', [...approval, '--apply']);
   assert.deepEqual(result.issues, []);
   const registry = JSON.parse(
     await readFile(join(app, 'personalize/capabilities.json'), 'utf8'),
@@ -132,15 +49,15 @@ for (const platform of ['web', 'native']) {
   assert.deepEqual(registry.surfaces, []);
   assert.deepEqual(registry.themeTokens, {});
   assert.deepEqual(registry.destinations, []);
-  assert.equal(registry.components.length, 2);
-  assert.equal(registry.sources.length, 1);
+  assert.equal(registry.components.length, 1);
+  assert.equal(registry.sources.length, 2);
   const source = await readFile(join(app, 'App.tsx'), 'utf8');
   assert(source.includes('Original '));
   assert(!source.includes('PersonalizationScreen'));
   command(
     app,
     join(app, 'node_modules/.bin/tsc'),
-    ['--noEmit'],
+    typecheck,
     join(logs, 'typecheck.log'),
   );
   assert.equal(
@@ -151,6 +68,36 @@ for (const platform of ['web', 'native']) {
     cli(app, logs, 'idempotent', ['refresh', '--dry-run']).changes,
     [],
   );
+  const additional = join(app, 'NewChart.tsx');
+  await writeFile(
+    additional,
+    'export function NewChart() { return null as import("react").ReactElement | null; }',
+  );
+  assert.throws(() =>
+    cli(app, logs, 'stale-approval', [...approval, '--apply']),
+  );
+  assert.match(
+    await readFile(join(logs, 'stale-approval.json'), 'utf8'),
+    /report changed/,
+  );
+  assert.deepEqual(
+    cli(app, logs, 'pending-refresh', ['refresh', '--apply']).issues,
+    [],
+  );
+  const pending = cli(app, logs, 'pending-inspect', ['inspect', '--json']);
+  assert.equal(
+    pending.review.capabilities.find(
+      (item) => item.selector === 'NewChart.tsx#NewChart',
+    )?.status,
+    'bindable',
+  );
+  assert.equal(
+    JSON.parse(
+      await readFile(join(app, 'personalize/capabilities.json'), 'utf8'),
+    ).components.length,
+    1,
+  );
+  await interactions(root, app, logs, platform);
   // Opt into an existing region separately; the default install above adds none.
   assert.deepEqual(
     cli(app, logs, 'screen', [
@@ -164,9 +111,10 @@ for (const platform of ['web', 'native']) {
   command(
     app,
     join(app, 'node_modules/.bin/tsc'),
-    ['--noEmit'],
+    typecheck,
     join(logs, 'screen-typecheck.log'),
   );
+  runInteraction(app, logs, platform, 'screen-interaction');
   if (platform === 'web') {
     command(app, 'npm', ['run', 'build'], join(logs, 'bundle.log'));
     command(
@@ -179,7 +127,8 @@ for (const platform of ['web', 'native']) {
       ],
       join(logs, 'imports.log'),
     );
-  } else
+  } else {
+    verifyNativeExports(app, logs);
     for (const target of ['ios', 'android']) {
       command(
         app,
@@ -194,6 +143,8 @@ for (const platform of ['web', 'native']) {
           'index.js',
           '--bundle-output',
           join(logs, `${target}.jsbundle`),
+          '--sourcemap-output',
+          join(logs, `${target}.map`),
           '--assets-dest',
           join(logs, `${target}-assets`),
           '--max-workers',
@@ -201,7 +152,9 @@ for (const platform of ['web', 'native']) {
         ],
         join(logs, `${target}-bundle.log`),
       );
+      await verifyNativeBundle(join(logs, `${target}.map`));
     }
+  }
   const exportCheck =
     platform === 'native'
       ? "import { asyncStorageAdapter } from '@customitin/react-native/storage'; import { createHttpPlanner } from '@customitin/react-native/adapters'; if (typeof asyncStorageAdapter !== 'function' || typeof createHttpPlanner !== 'function') throw Error('missing native exports');"
@@ -213,6 +166,14 @@ for (const platform of ['web', 'native']) {
     join(logs, 'subpath-exports.log'),
   );
   const config = await readFile(join(app, 'personalize/config.ts'), 'utf8');
+  const overrides = await readFile(
+    join(app, 'personalize/overrides.json'),
+    'utf8',
+  );
+  const identities = await readFile(
+    join(app, 'personalize/bindings.lock.json'),
+    'utf8',
+  );
   assert.deepEqual(
     cli(app, logs, 'remove', ['remove', '--apply']).conflicts,
     [],
@@ -221,6 +182,20 @@ for (const platform of ['web', 'native']) {
   assert.equal(
     await readFile(join(app, 'personalize/config.ts'), 'utf8'),
     config,
+  );
+  assert.equal(
+    await readFile(join(app, 'personalize/overrides.json'), 'utf8'),
+    overrides,
+  );
+  assert.equal(
+    await readFile(join(app, 'personalize/bindings.lock.json'), 'utf8'),
+    identities,
+  );
+  assert.deepEqual(cli(app, logs, 'reinstall', ['init', '--apply']).issues, []);
+  assert.equal(
+    cli(app, logs, 'reinstall-doctor', ['doctor', '--typecheck']).verification
+      .status,
+    'verified',
   );
 }
 console.log(

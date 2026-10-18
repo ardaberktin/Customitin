@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { Project, ts } from 'ts-morph';
 import { planInstall } from './install';
+import { applicationConfig } from '../discovery/tsconfig';
 
 export async function integrationDiagnostics(
   root: string,
@@ -19,7 +20,8 @@ export async function integrationDiagnostics(
   if (typecheck) {
     try {
       const project = new Project({
-        tsConfigFilePath: join(root, 'tsconfig.json'),
+        tsConfigFilePath:
+          applicationConfig(root).path ?? join(root, 'tsconfig.json'),
       });
       project.addSourceFilesAtPaths(join(root, 'personalize/**/*.{ts,tsx}'));
       for (const diagnostic of project.getPreEmitDiagnostics().slice(0, 50)) {

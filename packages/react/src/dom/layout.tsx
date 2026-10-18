@@ -5,7 +5,8 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { useCustomization } from '../provider/context';
+// Keep the subpath on the public module's context when package entries are bundled separately.
+import { useCustomization } from '@customitin/react';
 /** Static keyed DOM regions; no styles are introduced except visibility of hidden regions. */
 export function CustomizableLayout({
   id,

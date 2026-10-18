@@ -27,8 +27,10 @@ export function generateComponents(integration: ResolvedIntegration): string {
       sourceId ? {} : (symbol.dataProps ?? {}),
     )) {
       const rows = `${propertyAccess('data', name)}?.rows`;
+      // SurfaceRenderer validates mapped rows against the discovered input schema.
+      // Named host interfaces need an explicit boundary from index-signature rows.
       props.push(
-        `${JSON.stringify(name)}: (${input.cardinality === 'many' ? rows : rows + '?.[0]'}) as ComponentProps<typeof ${component}>[${JSON.stringify(name)}]`,
+        `${JSON.stringify(name)}: (${input.cardinality === 'many' ? rows : rows + '?.[0]'}) as unknown as ComponentProps<typeof ${component}>[${JSON.stringify(name)}]`,
       );
     }
     if (symbol.acceptsChildren) props.push('children');

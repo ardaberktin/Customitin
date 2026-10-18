@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { Project, ts } from 'ts-morph';
@@ -11,6 +10,7 @@ import type { DiscoveryReport } from './types';
 import { reachableWorkspaceFiles } from './workspace';
 import { componentUsage } from './usage';
 import { screenStructure } from './screen-structure';
+import { applicationConfig } from './tsconfig';
 import { readHostOwnership } from '../commands/host-ownership';
 import { restoreHost } from '../generation/restore-host';
 export type {
@@ -28,11 +28,11 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
     devDependencies?: Record<string, string>;
   };
   const versions = { ...manifest.dependencies, ...manifest.devDependencies };
-  const config = join(root, 'tsconfig.json');
+  const config = applicationConfig(root);
   const project = new Project({
-    ...(existsSync(config) ? { tsConfigFilePath: config } : {}),
+    ...(config.path ? { tsConfigFilePath: config.path } : {}),
     compilerOptions: {
-      ...(existsSync(config)
+      ...(config.path
         ? {}
         : {
             module: ts.ModuleKind.ESNext,
@@ -177,6 +177,7 @@ export async function inspectProject(root: string): Promise<DiscoveryReport> {
     files,
     importedComponents: usages.imports,
     sourceDigest: createHash('sha256')
+      .update(JSON.stringify([...config.inputs]))
       .update(
         allowed
           .map((path) => project.getSourceFileOrThrow(path).getFullText())

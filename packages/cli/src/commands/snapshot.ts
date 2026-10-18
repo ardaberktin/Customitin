@@ -2,6 +2,7 @@ import { realpath } from 'node:fs/promises';
 import { workspaceBoundary } from '../discovery/workspace';
 import { join, relative, resolve, isAbsolute } from 'node:path';
 import { sourceFiles } from '../discovery/files';
+import { applicationConfig } from '../discovery/tsconfig';
 import {
   hash,
   manifestPath,
@@ -63,5 +64,5 @@ export async function projectSnapshot(root: string): Promise<string> {
         hash((await readOptional(join(root, path))) ?? '\0missing'),
       ]),
   );
-  return hash(JSON.stringify(contents));
+  return hash(JSON.stringify([contents, [...applicationConfig(root).inputs]]));
 }

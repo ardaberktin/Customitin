@@ -10,21 +10,25 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "react-native": "./dist/index.cjs",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
     "./adapters": {
       "types": "./dist/adapters/index.d.ts",
+      "react-native": "./dist/adapters/index.cjs",
       "import": "./dist/adapters/index.js",
       "require": "./dist/adapters/index.cjs"
     },
     "./storage": {
       "types": "./dist/storage/index.d.ts",
+      "react-native": "./dist/storage/index.cjs",
       "import": "./dist/storage/index.js",
       "require": "./dist/storage/index.cjs"
     },
     "./dom": {
       "types": "./dist/dom/index.d.ts",
+      "react-native": "./dist/dom/index.cjs",
       "import": "./dist/dom/index.js",
       "require": "./dist/dom/index.cjs"
     }
