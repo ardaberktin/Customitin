@@ -21,6 +21,7 @@
     "boundaries": "node scripts/check-boundaries.mjs",
     "dev": "npm run web -w @customitin/recipe-example",
     "dev:movie": "npm run web -w @customitin/movie-example -- --port 8082",
+    "dev:refract": "npm run dev -w @customitin/refract-example",
     "dev:tasks": "npm run web -w @customitin/task-example",
     "server": "node --import tsx examples/planner-server/src/index.ts --demo",
     "cli": "node --import tsx packages/cli/src/index.ts",

@@ -22,16 +22,27 @@ export function valueRule(type: Type, optional = false): ValueRule | undefined {
   return {
     type: kind,
     required: !optional,
-    nullable: type.isNullable() || optional,
+    nullable: type.isUnion()
+      ? type.getUnionTypes().some((member) => member.isNull())
+      : type.isNull(),
     ...(values ? { values } : {}),
   };
 }
-export function scalarFields(type: Type, location: Node) {
+export function scalarFields(
+  type: Type,
+  location: Node,
+  normalizeMissing = false,
+) {
   const fields: Record<string, ValueRule> = {};
   for (const prop of type.getProperties()) {
     if (!idSchema.safeParse(prop.getName()).success) continue;
     const rule = valueRule(prop.getTypeAtLocation(location), prop.isOptional());
-    if (rule) fields[prop.getName()] = rule;
+    if (rule)
+      fields[prop.getName()] = {
+        ...rule,
+        // Source adapters normalize missing scalars to null. Host props do not.
+        nullable: rule.nullable || (normalizeMissing && !rule.required),
+      };
   }
   return fields;
 }

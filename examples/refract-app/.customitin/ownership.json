@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "contextDigest": "f76fc9f7796c27d93fee3d5da7da79844cb5cb51ee01a80e89a4f1e570b7c463",
+  "registryRevision": "r-66a5547e0a4fbafa",
+  "files": [
+    {
+      "path": "personalize/capabilities.json",
+      "hash": "8eb1c875ce446de50084585cefa2d015d6ea00a7cfd9fb62fcb41c92dd343d6b",
+      "before": null
+    },
+    {
+      "path": "personalize/server-manifest.json",
+      "hash": "8eb1c875ce446de50084585cefa2d015d6ea00a7cfd9fb62fcb41c92dd343d6b",
+      "before": null
+    },
+    {
+      "path": "personalize/sources.ts",
+      "hash": "36d4acf6fd8c9ede46953774b0d0701b4b9859f8008e7b3ba6947d6e472c3160",
+      "before": null
+    },
+    {
+      "path": "personalize/components.tsx",
+      "hash": "23eb00a7be72c645b131376a7db648fed42efe8ebb85ae8d34d72b7f73ea0167",
+      "before": null
+    },
+    {
+      "path": "personalize/navigation.ts",
+      "hash": "93046a589641e625cb005b3477128eaa3f7d5d3b4d6f9bf986c718ddeed06e19",
+      "before": null
+    },
+    {
+      "path": "personalize/root.tsx",
+      "hash": "947fe36cdbbed30c7f9cb092c5456692480356fc46152b9e672be7e501307eb2",
+      "before": null
+    },
+    {
+      "path": "personalize/README.md",
+      "hash": "ed7ad35595988cfbf8e0d624c8c5c344f666622ff242f4538ed73a397ad85dee",
+      "before": null
+    },
+    {
+      "path": "personalize/discovery.json",
+      "hash": "14446cb7ba770eb08f6a7d68cb248b678cb00cc594ef49f1147804973850a70a",
+      "before": null
+    },
+    {
+      "path": "personalize/bindings.lock.json",
+      "hash": "f64ef1529d0b38bb1ce59a686e1dc3cc1502a2017107ab18b9da6f371fb369ef",
+      "before": null
+    },
+    {
+      "path": "src/App.tsx",
+      "hash": "83948aa9a767b78144c7dc5debd17ab1927fe2d588a05cb51be01340b7b8a530",
+      "before": "import { useState } from 'react';\nimport { en } from './en';\nimport { library } from './data/library';\nimport { Home } from './screens/Home';\nimport { Collection } from './screens/Collection';\nimport { Dialog } from './components/Dialog';\nimport { Icon } from './components/Icon';\nimport { LibraryProvider, useLibrary } from './components/LibraryContext';\nimport { MediaShelf } from './components/MediaShelf';\nconst tabs = ['home', 'search', 'favorites', 'collection', 'profile'] as const;\ntype Tab = (typeof tabs)[number];\nfunction Shell() {\n  const [tab, setTab] = useState<Tab>('home');\n  const [query, setQuery] = useState('');\n  const { selected, setSelected } = useLibrary();\n  return (\n    <main className=\"phone\">\n      <div className=\"screen\">\n        {tab === 'home' && <Home onAssistant={() => setTab('collection')} />}\n        {tab === 'collection' && <Collection />}\n        {tab === 'search' && (\n          <div className=\"secondary-screen\">\n            <h1>{en.search}</h1>\n            <input\n              aria-label={en.search}\n              placeholder={en.searchPlaceholder}\n              value={query}\n              onChange={(event) => setQuery(event.target.value)}\n            />\n            <MediaShelf\n              title={en.search}\n              items={library.filter((item) =>\n                item.title.toLowerCase().includes(query.toLowerCase()),\n              )}\n            />\n          </div>\n        )}\n        {tab === 'favorites' && (\n          <div className=\"secondary-screen\">\n            <h1>{en.favorites}</h1>\n            <MediaShelf\n              title={en.favorites}\n              items={library.filter((item) => Number(item.rating) >= 8.4)}\n            />\n          </div>\n        )}\n        {tab === 'profile' && (\n          <div className=\"secondary-screen\">\n            <h1>{en.profile}</h1>\n            <p>{en.about}</p>\n          </div>\n        )}\n      </div>\n      <nav className=\"tab-bar\" aria-label={en.navigation}>\n        {tabs.map((value) => (\n          <button\n            key={value}\n            aria-label={en[value]}\n            aria-current={tab === value ? 'page' : undefined}\n            onClick={() => {\n              setTab(value);\n              window.scrollTo(0, 0);\n            }}\n          >\n            <Icon\n              name={\n                value === 'favorites'\n                  ? 'heart'\n                  : value === 'profile'\n                    ? 'user'\n                    : value\n              }\n              size={28}\n            />\n          </button>\n        ))}\n      </nav>\n      {selected && (\n        <Dialog label={en.detail} onClose={() => setSelected(null)}>\n          <section className=\"detail-sheet\">\n            <button\n              className=\"close\"\n              aria-label={en.close}\n              onClick={() => setSelected(null)}\n            >\n              <Icon name=\"close\" />\n            </button>\n            <h2>{selected.title}</h2>\n            <p>\n              {selected.year} · {selected.status}\n            </p>\n            <p>\n              △ {selected.rating} · ● {selected.comments}\n            </p>\n          </section>\n        </Dialog>\n      )}\n    </main>\n  );\n}\nexport function App() {\n  return (\n    <LibraryProvider>\n      <Shell />\n    </LibraryProvider>\n  );\n}\n",
+      "host": {
+        "imports": [
+          {
+            "module": "../personalize/root",
+            "name": "PersonalizationRoot",
+            "local": "PersonalizationRoot"
+          }
+        ],
+        "wrappers": [
+          {
+            "local": "PersonalizationRoot",
+            "attributes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "singleChild": false
+          }
+        ]
+      }
+    }
+  ],
+  "devScripts": [
+    {
+      "name": "dev",
+      "host": "customitin:host:dev"
+    }
+  ]
+}

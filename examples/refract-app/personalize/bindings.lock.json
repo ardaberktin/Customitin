@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "bindings": [
+    {
+      "id": "cap-79892e93cf6c6f08",
+      "selector": "src/App.tsx#App",
+      "name": "App",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-bdff06e9dddc86b9",
+      "selector": "src/components/ContinueShelf.tsx#ContinueShelf",
+      "name": "ContinueShelf",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-35d501ee8dea6ab1",
+      "selector": "src/components/Icon.tsx#Icon",
+      "name": "Icon",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-dadc4b5119e564c9",
+      "selector": "src/components/LibraryContext.tsx#LibraryProvider",
+      "name": "LibraryProvider",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-e1a89876aa6cefa2",
+      "selector": "src/components/LibraryContext.tsx#useLibrary",
+      "name": "useLibrary",
+      "kind": "hook",
+      "aliases": []
+    },
+    {
+      "id": "cap-a2fe41427f7b3395",
+      "selector": "src/components/LibraryControls.tsx#LibraryHeading",
+      "name": "LibraryHeading",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-4da68a8ce0b0ccf7",
+      "selector": "src/components/LibraryControls.tsx#StatusFilters",
+      "name": "StatusFilters",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-a1b9f28bc5ba4ec9",
+      "selector": "src/components/LibraryControls.tsx#SortControl",
+      "name": "SortControl",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-70c1f279aa8ab465",
+      "selector": "src/components/MediaShelf.tsx#MediaCard",
+      "name": "MediaCard",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-2e3b1c78f1a7e5ff",
+      "selector": "src/components/MediaShelf.tsx#MediaShelf",
+      "name": "MediaShelf",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-83a3e73694ceb2c9",
+      "selector": "src/data/library.ts#loadLibrary",
+      "name": "loadLibrary",
+      "kind": "source",
+      "aliases": []
+    },
+    {
+      "id": "cap-6b9c3d4e5b288717",
+      "selector": "src/screens/Home.tsx#Home",
+      "name": "Home",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-2c2b7a4cda40363a",
+      "selector": "src/components/AssistantPanel.tsx#AssistantPanel",
+      "name": "AssistantPanel",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-5dff06df3a13331f",
+      "selector": "src/screens/Collection.tsx#Collection",
+      "name": "Collection",
+      "kind": "component",
+      "aliases": []
+    },
+    {
+      "id": "cap-adb4adb1265ec41c",
+      "selector": "src/components/Dialog.tsx#Dialog",
+      "name": "Dialog",
+      "kind": "component",
+      "aliases": []
+    }
+  ]
+}

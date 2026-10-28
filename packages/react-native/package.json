@@ -31,6 +31,12 @@
       "react-native": "./dist/navigation/index.cjs",
       "import": "./dist/navigation/index.js",
       "require": "./dist/navigation/index.cjs"
+    },
+    "./collection": {
+      "types": "./dist/collection/index.d.ts",
+      "react-native": "./dist/collection/index.cjs",
+      "import": "./dist/collection/index.js",
+      "require": "./dist/collection/index.cjs"
     }
   },
   "files": [

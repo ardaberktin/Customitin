@@ -65,6 +65,14 @@ export const registrySchema = z
               .optional(),
             acceptsChildren: z.boolean(),
             sourceIds: z.array(idSchema).max(30).optional(),
+            collection: z
+              .object({
+                itemComponentId: idSchema,
+                input: idSchema,
+                sourceId: idSchema,
+              })
+              .strict()
+              .optional(),
           })
           .strict(),
       )

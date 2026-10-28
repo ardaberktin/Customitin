@@ -1,0 +1,326 @@
+{
+  "version": 2,
+  "platform": "web",
+  "navigation": "unknown",
+  "capabilities": [
+    {
+      "id": "cap-79892e93cf6c6f08",
+      "selector": "src/App.tsx#App",
+      "kind": "component",
+      "location": {
+        "file": "src/App.tsx",
+        "line": 101
+      },
+      "usage": [
+        {
+          "file": "src/main.tsx",
+          "line": 7
+        }
+      ],
+      "status": "bindable",
+      "suggested": false,
+      "reasons": [],
+      "evidence": "App: component {\"props\":{},\"unsupportedProps\":[]}",
+      "checks": []
+    },
+    {
+      "id": "cap-2c2b7a4cda40363a",
+      "selector": "src/components/AssistantPanel.tsx#AssistantPanel",
+      "kind": "component",
+      "location": {
+        "file": "src/components/AssistantPanel.tsx",
+        "line": 6
+      },
+      "usage": [
+        {
+          "file": "src/screens/Collection.tsx",
+          "line": 90
+        }
+      ],
+      "status": "discovered",
+      "suggested": false,
+      "reasons": [
+        "Required assistant needs a host adapter.",
+        "Required setInstruction needs a host adapter.",
+        "Required onRequest needs a host adapter.",
+        "Required onClose needs a host adapter.",
+        "Required onUndo needs a host adapter.",
+        "Required onReset needs a host adapter."
+      ],
+      "evidence": "AssistantPanel: component {\"props\":{\"instruction\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"error\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"saving\":{\"type\":\"boolean\",\"required\":true,\"nullable\":false}},\"unsupportedProps\":[\"assistant\",\"setInstruction\",\"onRequest\",\"onClose\",\"onUndo\",\"onReset\"]}",
+      "checks": []
+    },
+    {
+      "id": "cap-bdff06e9dddc86b9",
+      "selector": "src/components/ContinueShelf.tsx#ContinueShelf",
+      "kind": "component",
+      "location": {
+        "file": "src/components/ContinueShelf.tsx",
+        "line": 21
+      },
+      "usage": [
+        {
+          "file": "src/screens/Home.tsx",
+          "line": 52
+        }
+      ],
+      "status": "bindable",
+      "suggested": false,
+      "reasons": [],
+      "evidence": "ContinueShelf: component {\"props\":{},\"unsupportedProps\":[]}",
+      "checks": []
+    },
+    {
+      "id": "cap-adb4adb1265ec41c",
+      "selector": "src/components/Dialog.tsx#Dialog",
+      "kind": "component",
+      "location": {
+        "file": "src/components/Dialog.tsx",
+        "line": 3
+      },
+      "usage": [
+        {
+          "file": "src/App.tsx",
+          "line": 79
+        },
+        {
+          "file": "src/components/AssistantPanel.tsx",
+          "line": 29
+        }
+      ],
+      "status": "discovered",
+      "suggested": false,
+      "reasons": ["Required onClose needs a host adapter."],
+      "evidence": "Dialog: component {\"props\":{\"label\":{\"type\":\"string\",\"required\":true,\"nullable\":false}},\"unsupportedProps\":[\"onClose\"],\"acceptsChildren\":true}",
+      "checks": []
+    },
+    {
+      "id": "cap-35d501ee8dea6ab1",
+      "selector": "src/components/Icon.tsx#Icon",
+      "kind": "component",
+      "location": {
+        "file": "src/components/Icon.tsx",
+        "line": 34
+      },
+      "usage": [
+        {
+          "file": "src/App.tsx",
+          "line": 65
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 86
+        },
+        {
+          "file": "src/components/AssistantPanel.tsx",
+          "line": 32
+        },
+        {
+          "file": "src/components/AssistantPanel.tsx",
+          "line": 34
+        },
+        {
+          "file": "src/components/ContinueShelf.tsx",
+          "line": 27
+        },
+        {
+          "file": "src/components/ContinueShelf.tsx",
+          "line": 30
+        },
+        {
+          "file": "src/components/ContinueShelf.tsx",
+          "line": 40
+        },
+        {
+          "file": "src/components/ContinueShelf.tsx",
+          "line": 53
+        },
+        {
+          "file": "src/components/MediaShelf.tsx",
+          "line": 19
+        },
+        {
+          "file": "src/components/MediaShelf.tsx",
+          "line": 55
+        },
+        {
+          "file": "src/components/MediaShelf.tsx",
+          "line": 58
+        },
+        {
+          "file": "src/screens/Collection.tsx",
+          "line": 51
+        },
+        {
+          "file": "src/screens/Collection.tsx",
+          "line": 82
+        },
+        {
+          "file": "src/screens/Home.tsx",
+          "line": 30
+        }
+      ],
+      "status": "bindable",
+      "suggested": false,
+      "reasons": [],
+      "evidence": "Icon: component {\"props\":{\"name\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"size\":{\"type\":\"number\",\"required\":false,\"nullable\":false}},\"unsupportedProps\":[]}",
+      "checks": []
+    },
+    {
+      "id": "cap-dadc4b5119e564c9",
+      "selector": "src/components/LibraryContext.tsx#LibraryProvider",
+      "kind": "component",
+      "location": {
+        "file": "src/components/LibraryContext.tsx",
+        "line": 8
+      },
+      "usage": [
+        {
+          "file": "src/App.tsx",
+          "line": 103
+        }
+      ],
+      "status": "bindable",
+      "suggested": false,
+      "reasons": [],
+      "evidence": "LibraryProvider: component {\"props\":{},\"unsupportedProps\":[],\"acceptsChildren\":true}",
+      "checks": []
+    },
+    {
+      "id": "cap-70c1f279aa8ab465",
+      "selector": "src/components/MediaShelf.tsx#MediaCard",
+      "kind": "component",
+      "location": {
+        "file": "src/components/MediaShelf.tsx",
+        "line": 6
+      },
+      "usage": [
+        {
+          "file": "src/components/MediaShelf.tsx",
+          "line": 62
+        }
+      ],
+      "status": "enabled",
+      "suggested": true,
+      "reasons": [],
+      "evidence": "MediaCard: component {\"props\":{},\"itemProp\":\"item\",\"itemFields\":{\"id\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"title\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"year\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"status\":{\"type\":\"string\",\"required\":true,\"nullable\":false,\"values\":[\"Watching\",\"Up to Date\",\"Watched\",\"Plan to Watch\",\"On Hold\",\"Dropped\",\"Rewatched\",\"Rewatching\"]},\"poster\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"kind\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"comments\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"rating\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"progress\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"released\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"isNew\":{\"type\":\"boolean\",\"required\":true,\"nullable\":false}},\"unsupportedProps\":[],\"dataProps\":{\"item\":{\"fields\":{\"id\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"title\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"year\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"status\":{\"type\":\"string\",\"required\":true,\"nullable\":false,\"values\":[\"Watching\",\"Up to Date\",\"Watched\",\"Plan to Watch\",\"On Hold\",\"Dropped\",\"Rewatched\",\"Rewatching\"]},\"poster\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"kind\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"comments\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"rating\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"progress\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"released\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"isNew\":{\"type\":\"boolean\",\"required\":true,\"nullable\":false}},\"cardinality\":\"one\",\"required\":true}}}",
+      "checks": []
+    },
+    {
+      "id": "cap-2e3b1c78f1a7e5ff",
+      "selector": "src/components/MediaShelf.tsx#MediaShelf",
+      "kind": "component",
+      "location": {
+        "file": "src/components/MediaShelf.tsx",
+        "line": 42
+      },
+      "usage": [
+        {
+          "file": "src/App.tsx",
+          "line": 30
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 41
+        },
+        {
+          "file": "src/screens/Home.tsx",
+          "line": 53
+        },
+        {
+          "file": "src/screens/Home.tsx",
+          "line": 57
+        }
+      ],
+      "status": "bindable",
+      "suggested": false,
+      "reasons": [],
+      "evidence": "MediaShelf: component {\"props\":{\"title\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"icon\":{\"type\":\"string\",\"required\":false,\"nullable\":false}},\"unsupportedProps\":[],\"dataProps\":{\"items\":{\"fields\":{\"id\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"title\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"year\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"status\":{\"type\":\"string\",\"required\":true,\"nullable\":false,\"values\":[\"Watching\",\"Up to Date\",\"Watched\",\"Plan to Watch\",\"On Hold\",\"Dropped\",\"Rewatched\",\"Rewatching\"]},\"poster\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"kind\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"comments\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"rating\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"progress\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"released\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"isNew\":{\"type\":\"boolean\",\"required\":true,\"nullable\":false}},\"cardinality\":\"many\",\"required\":true}}}",
+      "checks": []
+    },
+    {
+      "id": "cap-83a3e73694ceb2c9",
+      "selector": "src/data/library.ts#loadLibrary",
+      "kind": "source",
+      "location": {
+        "file": "src/data/library.ts",
+        "line": 149
+      },
+      "usage": [],
+      "status": "enabled",
+      "suggested": true,
+      "reasons": [],
+      "evidence": "loadLibrary: array {\"id\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"title\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"year\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"status\":{\"type\":\"string\",\"required\":true,\"nullable\":false,\"values\":[\"Watching\",\"Up to Date\",\"Watched\",\"Plan to Watch\",\"On Hold\",\"Dropped\",\"Rewatched\",\"Rewatching\"]},\"poster\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"kind\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"comments\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"rating\":{\"type\":\"string\",\"required\":true,\"nullable\":false},\"progress\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"released\":{\"type\":\"number\",\"required\":true,\"nullable\":false},\"isNew\":{\"type\":\"boolean\",\"required\":true,\"nullable\":false}}",
+      "checks": []
+    },
+    {
+      "id": "cap-5dff06df3a13331f",
+      "selector": "src/screens/Collection.tsx#Collection",
+      "kind": "component",
+      "location": {
+        "file": "src/screens/Collection.tsx",
+        "line": 16
+      },
+      "usage": [
+        {
+          "file": "src/App.tsx",
+          "line": 20
+        }
+      ],
+      "status": "bindable",
+      "suggested": true,
+      "reasons": [],
+      "evidence": "Collection: component {\"props\":{},\"unsupportedProps\":[]}",
+      "checks": []
+    },
+    {
+      "id": "cap-6b9c3d4e5b288717",
+      "selector": "src/screens/Home.tsx#Home",
+      "kind": "component",
+      "location": {
+        "file": "src/screens/Home.tsx",
+        "line": 8
+      },
+      "usage": [
+        {
+          "file": "src/App.tsx",
+          "line": 19
+        }
+      ],
+      "status": "discovered",
+      "suggested": false,
+      "reasons": ["Required onAssistant needs a host adapter."],
+      "evidence": "Home: component {\"props\":{},\"unsupportedProps\":[\"onAssistant\"]}",
+      "checks": []
+    }
+  ],
+  "importedComponents": [],
+  "exclusions": 0,
+  "diagnostics": [
+    "Private state, active forms, custom canvas and nested navigator rewrites require review.",
+    "src/components/AssistantPanel.tsx#AssistantPanel: required non-scalar props need a host wrapper: assistant, setInstruction, onRequest, onClose, onUndo, onReset.",
+    "src/components/Dialog.tsx#Dialog: required non-scalar props need a host wrapper: onClose.",
+    "src/components/LibraryContext.tsx#useLibrary: hook requires a component adapter or extracted query function.",
+    "src/screens/Home.tsx#Home: required non-scalar props need a host wrapper: onAssistant."
+  ],
+  "digest": "f548cc5f107f99cdfd876a98719e1b33c03f7357202f9b7863f68930464c67e6",
+  "files": [
+    "server/audit.ts",
+    "server/planner.ts",
+    "server/plugin.ts",
+    "src/App.tsx",
+    "src/components/AssistantPanel.tsx",
+    "src/components/ContinueShelf.tsx",
+    "src/components/Dialog.tsx",
+    "src/components/Icon.tsx",
+    "src/components/LibraryContext.tsx",
+    "src/components/MediaShelf.tsx",
+    "src/data/artwork.ts",
+    "src/data/library.ts",
+    "src/en.ts",
+    "src/main.tsx",
+    "src/screens/Collection.tsx",
+    "src/screens/Home.tsx",
+    "vite.config.ts"
+  ]
+}

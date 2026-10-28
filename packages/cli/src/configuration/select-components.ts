@@ -15,6 +15,19 @@ export function selectComponents(
       defaults: {},
     };
     if (options.enabled !== true) continue;
+    const collectionSourceId = options.collection
+      ? referenceId(lock, options.collection.source)
+      : undefined;
+    if (
+      options.collection &&
+      (options.source ||
+        !sources.some((s) => s.symbol.id === collectionSourceId))
+    ) {
+      issues.push(
+        `${symbol.selector}: SDK collection needs an enabled complete source and a record binding, not a legacy source adapter.`,
+      );
+      continue;
+    }
     if (symbol.unsupportedProps.length) {
       issues.push(
         `${symbol.selector}: wrap required props ${symbol.unsupportedProps.join(', ')} before enabling.`,
@@ -31,7 +44,7 @@ export function selectComponents(
               actual &&
               (!o.fields || o.fields.includes(field)) &&
               actual.type === rule.type &&
-              (!actual.nullable || rule.nullable) &&
+              (!actual.nullable || rule.nullable || !rule.required) &&
               (!rule.values ||
                 actual.values?.every((v) => rule.values?.includes(v)))
             );
@@ -54,7 +67,7 @@ export function selectComponents(
         continue;
       }
       components.push({ symbol, options, sourceId: compatible[0]!.symbol.id });
-    } else components.push({ symbol, options });
+    } else components.push({ symbol, options, collectionSourceId });
   }
   return components;
 }

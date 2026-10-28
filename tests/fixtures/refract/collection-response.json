@@ -1,0 +1,683 @@
+{
+  "kind": "proposal",
+  "proposal": {
+    "requestId": "local-mvs1y15p-1-ctwfd8md",
+    "baseRevision": 0,
+    "registryRevision": "r-18c74e598d035285",
+    "summary": "Build Collection using the existing poster cards in three-column status groups, with actual library and group counts, colored dots, expanded status filters, and shared sorting. Start each group with the newest releases. Leave Home unchanged.",
+    "operations": [
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-library",
+          "title": "Complete library",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [],
+            "project": [
+              "id"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-watching",
+          "title": "Watching",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Watching"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-up-to-date",
+          "title": "Up to Date",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Up to Date"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-watched",
+          "title": "Watched",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Watched"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-plan-to-watch",
+          "title": "Plan to Watch",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Plan to Watch"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-on-hold",
+          "title": "On Hold",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "On Hold"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-dropped",
+          "title": "Dropped",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Dropped"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-rewatched",
+          "title": "Rewatched",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Rewatched"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-rewatching",
+          "title": "Rewatching",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "filter": {
+              "op": "eq",
+              "args": [
+                {
+                  "field": "status"
+                },
+                {
+                  "literal": "Rewatching"
+                }
+              ]
+            },
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [
+              {
+                "field": "released",
+                "direction": "desc"
+              }
+            ],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setSurfaceLayout",
+        "surfaceId": "collection",
+        "nodes": [
+          {
+            "id": "collection-heading",
+            "componentId": "cap-a2fe41427f7b3395",
+            "props": {
+              "title": "Collection"
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-library",
+                "mapping": {
+                  "id": "id"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-status-filters",
+            "componentId": "cap-4da68a8ce0b0ccf7",
+            "props": {
+              "expanded": true
+            },
+            "children": []
+          },
+          {
+            "id": "collection-sort",
+            "componentId": "cap-a1b9f28bc5ba4ec9",
+            "props": {},
+            "children": []
+          },
+          {
+            "id": "collection-watching-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Watching",
+              "layout": "grid",
+              "icon": "🔵",
+              "status": "Watching",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-watching",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-up-to-date-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Up to Date",
+              "layout": "grid",
+              "icon": "🟢",
+              "status": "Up to Date",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-up-to-date",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-watched-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Watched",
+              "layout": "grid",
+              "icon": "🟣",
+              "status": "Watched",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-watched",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-plan-to-watch-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Plan to Watch",
+              "layout": "grid",
+              "icon": "⚪",
+              "status": "Plan to Watch",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-plan-to-watch",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-on-hold-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "On Hold",
+              "layout": "grid",
+              "icon": "🟡",
+              "status": "On Hold",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-on-hold",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-dropped-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Dropped",
+              "layout": "grid",
+              "icon": "🔴",
+              "status": "Dropped",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-dropped",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-rewatched-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Rewatched",
+              "layout": "grid",
+              "icon": "🟣",
+              "status": "Rewatched",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-rewatched",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-rewatching-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Rewatching",
+              "layout": "grid",
+              "icon": "🟠",
+              "status": "Rewatching",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-rewatching",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

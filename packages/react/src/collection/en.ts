@@ -1,0 +1,17 @@
+export const collectionEnglish = {
+  all: 'All',
+  empty: 'No items match these filters.',
+  missing: 'No value',
+  filters: 'Filter',
+  expand: 'Expand filters',
+  collapse: 'Collapse filters',
+  sort: 'Sort by',
+  ascending: 'Ascending',
+  descending: 'Descending',
+  density: 'Toggle grid density',
+  clear: 'Clear filters',
+  incomplete: 'This collection requires complete data.',
+  collection: 'Collection',
+  original: 'Original order',
+  total: 'Total items',
+};

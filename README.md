@@ -2,7 +2,7 @@
 
 A headless personalization SDK for React Native/Expo and React web. Developers choose which spaces, components, data and actions users can customize. Users request a change, preview it and apply it inside the approved space.
 
-The host owns every screen, tab, theme, editor, chat control and confirmation. Customitin supplies discovery, reviewed bindings, validation, data composition, action execution state and persistence. Importing the library never scans production source or inserts UI.
+The host owns every screen, tab, theme, editor, chat control and confirmation. Customitin supplies discovery, reviewed bindings, validation, data composition, action execution state and persistence. Opt-in SDK collection controls can reuse an existing card without a developer prebuilding the target screen's filters, sorting or grouped grid. Importing the library never scans production source or inserts UI.
 
 **Status: v2 contracts in a locally distributed alpha.** Packages are not published. Native device, accessibility, performance and live-model validation remain release gates.
 

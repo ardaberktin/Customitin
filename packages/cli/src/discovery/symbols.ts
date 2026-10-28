@@ -100,7 +100,7 @@ function describe(
   const page = pageItems && arrayItem(pageItems);
   const explicitQuery = /@customitinQuery\b/.test(comments);
   if ((item && parameters.length === 0) || (page && explicitQuery)) {
-    const fields = scalarFields(item ?? page!, location);
+    const fields = scalarFields(item ?? page!, location, true);
     const adapter = page
       ? 'query-page'
       : queryReturn && resolved.getProperty('queryKey')
@@ -129,7 +129,10 @@ export function discoverSymbols(
     const symbol = describe(root, source, declaration, name);
     if (symbol) symbols.push(symbol);
     else if (Node.isVariableDeclaration(declaration)) {
-      for (const member of declaration.getType().getProperties().slice(0, 30)) {
+      const type = declaration.getType();
+      // Array prototype methods (for example reverse) are not repository loaders.
+      if (type.isArray() || type.isReadonlyArray() || type.isTuple()) continue;
+      for (const member of type.getProperties().slice(0, 30)) {
         const found = describe(
           root,
           source,

@@ -93,11 +93,11 @@ export async function formatGenerated(
 ): Promise<void> {
   const options = await settings(root);
   for (const [path, content] of Object.entries(files)) {
-    if (/\.tsx?$/.test(path))
+    if (/\.(tsx?|json)$/.test(path))
       files[path] = await format(content, {
         ...options,
         filepath: path,
-        parser: 'typescript',
+        parser: path.endsWith('.json') ? 'json' : 'typescript',
       });
   }
 }

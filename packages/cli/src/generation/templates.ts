@@ -17,7 +17,10 @@ export function generateFiles(
     'personalize/server-manifest.json':
       JSON.stringify(registry, null, 2) + '\n',
     'personalize/sources.ts': generateSources(integration),
-    'personalize/components.tsx': generateComponents(integration),
+    'personalize/components.tsx': generateComponents(
+      integration,
+      report.platform,
+    ),
     'personalize/navigation.ts': generateNavigation(report, integration),
     'personalize/root.tsx': generateRoot(report),
     'personalize/README.md': `# Headless Customitin integration

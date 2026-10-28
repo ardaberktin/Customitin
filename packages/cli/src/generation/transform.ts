@@ -1,4 +1,5 @@
 import { Node, Project, SyntaxKind } from 'ts-morph';
+import { basename } from 'node:path';
 import { relativeImport } from './imports';
 import {
   emptyHostBindings,
@@ -28,11 +29,20 @@ export function wrapEntry(
     exported && Node.isIdentifier(exported)
       ? exported.getSymbol()?.getValueDeclaration()
       : exported;
+  // App.tsx is a recognized conventional entry. A named App is common in Vite.
+  // Never guess another export or choose among arbitrary component names.
+  const named =
+    basename(path) === 'App.tsx'
+      ? source.getExportedDeclarations().get('App')?.[0]
+      : undefined;
   const root =
     declaration ??
     (target && Node.isVariableDeclaration(target)
       ? target.getInitializer()
-      : target);
+      : target) ??
+    (named && Node.isVariableDeclaration(named)
+      ? named.getInitializer()
+      : named);
   if (
     !root ||
     !(
@@ -42,7 +52,7 @@ export function wrapEntry(
     )
   )
     throw new Error(
-      'Automatic wiring supports default function/arrow components. Wrapped or conditional roots need a host integration.',
+      'Automatic wiring supports default function/arrow components or a named App in App.tsx. Wrapped or conditional roots need a host integration.',
     );
   const body = root.getBody();
   const returns =

@@ -24,6 +24,7 @@ export interface ConversationTurn {
 interface Options {
   registry: CapabilityRegistry;
   transport?: PlannerTransport;
+  timeoutMs?: number;
   snapshot(): RuntimeState;
   signal(): AbortSignal;
   publish(patch: Partial<RuntimeState>): void;
@@ -35,7 +36,13 @@ interface Options {
 export class AssistantController {
   private pending?: AbortController;
   private conversation: ConversationTurn[] = [];
-  constructor(private options: Options) {}
+  constructor(private options: Options) {
+    const timeout = options.timeoutMs ?? 30_000;
+    invariant(
+      Number.isInteger(timeout) && timeout > 0 && timeout <= 300_000,
+      'plannerTimeoutMs must be an integer between 1 and 300000',
+    );
+  }
   cancel() {
     this.pending?.abort();
     this.pending = undefined;
@@ -73,7 +80,7 @@ export class AssistantController {
     const signal = this.options.signal(),
       abort = () => controller.abort();
     signal.addEventListener('abort', abort, { once: true });
-    const deadline = setTimeout(abort, 30000),
+    const deadline = setTimeout(abort, this.options.timeoutMs ?? 30_000),
       requestId = this.options.createId();
     const history = [
       ...this.conversation,

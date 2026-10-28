@@ -10,6 +10,10 @@ import { validateView } from './query';
 import { validateNodeBindings } from './bindings';
 import { validateDataPlan } from '../data/plans/validate';
 import { validateValues } from './values';
+import {
+  validateCollectionBinding,
+  validateCollectionDescriptors,
+} from '../collections/validate';
 
 export function validateDestination(
   id: string,
@@ -132,6 +136,7 @@ export function validateLayout(
         !node.destinationId && !node.params,
         'Only shortcuts accept destinations',
       );
+    validateCollectionBinding(node, profile, registry, surfaceId);
     validateNodeBindings(node, profile, registry, surfaceId).forEach((id) =>
       sources.add(id),
     );
@@ -224,6 +229,7 @@ export function createProfile(
   scope: string,
 ): Profile {
   registrySchema.parse(registry);
+  validateCollectionDescriptors(registry);
   for (const list of [
     registry.components,
     registry.surfaces,

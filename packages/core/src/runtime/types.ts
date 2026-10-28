@@ -23,6 +23,8 @@ export interface RuntimeOptions {
   storage: StorageAdapter;
   scope: string;
   planner?: PlannerTransport;
+  /** Client planning deadline, 1–300000 ms. Defaults to 30000. */
+  plannerTimeoutMs?: number;
   plannerContext?: () => Record<string, Scalar>;
   createId?: () => string;
   actions?: Record<string, ActionBinding>;

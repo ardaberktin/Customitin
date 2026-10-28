@@ -20,6 +20,8 @@ These packed interactions run in jsdom with React DOM; the native harness substi
 
 The runner also renders each generated existing-screen integration from installed packages and exercises its original callback. Native import/require identity checks and both Metro source maps verify that the shared provider/hooks use one module instance. Source aliases or successful compilation alone would miss duplicate-context failures at package entry points.
 
+It also enables an SDK collection around the consumer's existing record card, generates platform bindings, verifies doctor/typecheck, and exercises generated counts, filtering and density controls. The collection imports remain present for Vite and real iOS/Android Metro bundle checks. Unit/interaction tests additionally cover source operation restrictions, identity-only mappings, partial-data rejection, numeric/null sorting, dynamic group counts, card state during reordering and configuration resets.
+
 ## Native simulator pilot
 
 `fixtures/native-pilot/README.md` describes a separate official React Native 0.83.10 app created with the community CLI and installed from packed SDK artifacts. Run `node scripts/consumer/pilot.mjs /path/to/fresh/app` after installing its dependencies. The setup reviews the fixture's capabilities, generates its integration, configures real AsyncStorage and checks strict TypeScript. Build a Release simulator app with embedded JavaScript for actual terminate/relaunch persistence checks.
@@ -39,6 +41,6 @@ Browser tests use developer-owned controls: the Vite workspace and task-app nati
 
 ## Required host and release work
 
-Choose surface placement and all user-facing UI. Review provider context and source completeness. Implement adapter exceptions, stable record IDs, account scope/storage, backend authorization, remote aggregation/pagination where necessary, action confirmation and durable idempotency. Deploy the matching manifest before requiring its revision in a client build.
+Choose surface placement and assistant/confirmation UI. Collection controls may be supplied by the opt-in SDK binding. Review provider context and source completeness. Implement adapter exceptions, stable record IDs, account scope/storage, backend authorization, remote aggregation/pagination where necessary, action confirmation and durable idempotency. Deploy the matching manifest before requiring its revision in a client build.
 
 Check real native devices, navigation/provider geometry, screen-reader focus and hidden content, keyboard/text scaling, performance on realistic data, offline/online transitions and account switching. Measure bundle/startup/frame/memory behavior rather than inferring it from unit tests. Validate live-model clarification, reliability, prompt injection, costs and recovery against the host's actual policies. Signed binaries, accessibility, performance, independent developer pilots and live-model validation remain explicit release gates. A passing automated suite does not establish them.

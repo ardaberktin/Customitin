@@ -68,6 +68,7 @@ export const overridesSchema = z
             ...selection,
             defaults: z.record(idSchema, scalarSchema).default({}),
             source: z.string().optional(),
+            collection: z.object({ source: z.string() }).strict().optional(),
           })
           .strict(),
       )

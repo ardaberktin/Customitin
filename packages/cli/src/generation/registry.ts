@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   createProfile,
+  createCollectionDescriptor,
   registrySchema,
   validateValues,
   type CapabilityRegistry,
@@ -20,6 +21,9 @@ export function generateRegistry(
     status: 'proposed',
   };
   const screens = screenCapabilities(integration.screens);
+  const sources = integration.sources.map((s) =>
+    sourceDescriptor(s, integration),
+  );
   const components = integration.components.map(
     ({ symbol, options, sourceId }) => {
       validateValues(options.defaults, symbol.props, symbol.name, false);
@@ -48,18 +52,32 @@ export function generateRegistry(
       };
     },
   );
+  const collections = integration.components.flatMap(
+    ({ symbol, collectionSourceId }) =>
+      collectionSourceId
+        ? [
+            createCollectionDescriptor(
+              registrySchema.shape.components.element.parse(
+                components.find((c) => c.id === symbol.id),
+              ),
+              sources.find((s) => s.id === collectionSourceId)!,
+            ),
+          ]
+        : [],
+  );
   const registry = registrySchema.parse({
     appId: report.appId,
     revision: 'pending',
     components: [
       ...components,
+      ...collections,
       ...screens.components,
       ...integration.overrides.customComponents,
     ],
     surfaces: [...screens.surfaces, ...integration.overrides.surfaces],
     actions: integration.overrides.actions,
     relations: integration.overrides.relations,
-    sources: integration.sources.map((s) => sourceDescriptor(s, integration)),
+    sources,
     destinations: [
       ...integration.routes.map(({ route, title }) => ({
         id: route.id,

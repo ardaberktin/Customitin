@@ -2,7 +2,7 @@
 
 Customitin is a headless personalization SDK for React Native/Expo and React web. These alpha packages are locally distributed, not published. Contracts and profiles are v2; breaking changes from the earlier styled shell are intentional.
 
-The developer owns every screen, tab, theme, control, chat interface and confirmation appearance. Installation adds a provider and reviewed bindings. It does not add navigation, a theme, an editor, an empty screen or an AI chat. A developer-owned empty surface is the recommended starting example. Users can compose approved existing components with compatible approved data inside that space.
+The developer owns screen/tab placement, application styling, chat and confirmation UI. An opt-in SDK collection can supply generic filtering, sorting, grouping, counts and grid controls around an existing host card; see integration. Installation adds a provider and reviewed bindings. It does not add navigation, a theme, an editor, an empty screen or an AI chat. A developer-owned empty surface is the recommended starting example. Users can compose approved existing components with compatible approved data inside that space.
 
 Read [integration](integration.md) before changing SDK integration or the CLI. [Contracts](contracts.md) defines supported behavior; [maintenance](maintenance.md) defines ownership, identities and recovery. [Testing](testing.md) distinguishes automated checks from release validation. `customitin guide --topic <name>` prints these same guides from packed artifacts.
 
@@ -11,7 +11,7 @@ Read [integration](integration.md) before changing SDK integration or the CLI. [
 | Package                    | Responsibility                                                                                                                                     |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@customitin/core`         | v2 contracts, registration, profile validation/storage, preview/apply/undo, conversation and action controllers, bounded data plans/formulas/joins |
-| `@customitin/react`        | Shared provider/hooks, host-only SurfaceRenderer, HTTP/query adapters, browser storage; no React Native dependency                                 |
+| `@customitin/react`        | Shared provider/hooks, SurfaceRenderer plus opt-in DOM collection controls, HTTP/query adapters, browser storage; no React Native dependency       |
 | `@customitin/react-native` | Shared React APIs plus in-place native section integration and native storage/navigation adapter exports                                           |
 | `@customitin/server`       | Authenticated planner, remote data and action handlers; developer-owned model, data and domain services                                            |
 | `@customitin/cli`          | Development-time source discovery, reports, reviewed enablement, generated bindings, refresh/watch/doctor/removal                                  |

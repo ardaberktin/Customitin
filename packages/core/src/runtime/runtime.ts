@@ -62,6 +62,7 @@ export class CustomizationRuntime {
     this.assistant = new AssistantController({
       registry: options.registry,
       transport: options.planner,
+      timeoutMs: options.plannerTimeoutMs,
       permittedContext: options.plannerContext,
       snapshot: this.getSnapshot,
       signal: () => this.signal,

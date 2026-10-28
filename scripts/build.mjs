@@ -8,6 +8,7 @@ for (const name of ['core', 'react', 'react-native', 'server', 'cli']) {
           'src/adapters/index.ts',
           'src/storage/index.ts',
           'src/dom/index.ts',
+          'src/collection/index.ts',
         ]
       : name === 'react-native'
         ? [
@@ -15,6 +16,7 @@ for (const name of ['core', 'react', 'react-native', 'server', 'cli']) {
             'src/storage/index.ts',
             'src/adapters/index.ts',
             'src/navigation/index.ts',
+            'src/collection/index.tsx',
           ]
         : name === 'cli'
           ? ['src/index.ts', 'src/api.ts']

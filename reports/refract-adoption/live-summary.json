@@ -1,0 +1,86 @@
+[
+  {
+    "file": "model-1793185806296-1.json",
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "xhigh",
+    "elapsedMs": 29992,
+    "status": null,
+    "usage": null,
+    "error": "AbortError"
+  },
+  {
+    "file": "model-1793186011438-1.json",
+    "model": "gpt-6.1-sol",
+    "returnedModel": "gpt-6.1-sol",
+    "reasoningEffort": "xhigh",
+    "elapsedMs": 68316,
+    "status": 200,
+    "usage": {
+      "prompt_tokens": 6146,
+      "completion_tokens": 2896,
+      "total_tokens": 9042,
+      "prompt_tokens_details": {
+        "cached_tokens": 4473,
+        "cache_write_tokens": 1670,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2796,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "error": null
+  },
+  {
+    "file": "model-1793188182899-1.json",
+    "model": "gpt-6.1-sol",
+    "returnedModel": "gpt-6.1-sol",
+    "reasoningEffort": "xhigh",
+    "elapsedMs": 108570,
+    "status": 200,
+    "usage": {
+      "prompt_tokens": 6166,
+      "completion_tokens": 7328,
+      "total_tokens": 13494,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 6163,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3639,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "error": null
+  },
+  {
+    "file": "model-1793188427436-2.json",
+    "model": "gpt-6.1-sol",
+    "returnedModel": "gpt-6.1-sol",
+    "reasoningEffort": "xhigh",
+    "elapsedMs": 11584,
+    "status": 200,
+    "usage": {
+      "prompt_tokens": 8098,
+      "completion_tokens": 799,
+      "total_tokens": 8897,
+      "prompt_tokens_details": {
+        "cached_tokens": 4473,
+        "cache_write_tokens": 3622,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 272,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "error": null
+  }
+]

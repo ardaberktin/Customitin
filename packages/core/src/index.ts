@@ -19,6 +19,7 @@ export * from './data/plans/validate';
 export * from './data/plans/execute';
 export * from './validation/bindings';
 export * from './registration';
+export * from './collections/descriptor';
 export * from './actions/validate';
 export * from './actions/runtime';
 

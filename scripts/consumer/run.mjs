@@ -7,6 +7,7 @@ import { cli, command } from './process.mjs';
 import { prepare } from './prepare.mjs';
 import { interactions, runInteraction } from './interactions.mjs';
 import { verifyNativeBundle, verifyNativeExports } from './native-exports.mjs';
+import { collectionInteractions } from './collections.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const directory = await mkdtemp(join(tmpdir(), 'customitin-packed-'));
@@ -115,6 +116,7 @@ for (const platform of ['web', 'native']) {
     join(logs, 'screen-typecheck.log'),
   );
   runInteraction(app, logs, platform, 'screen-interaction');
+  await collectionInteractions(app, logs, platform);
   if (platform === 'web') {
     command(app, 'npm', ['run', 'build'], join(logs, 'bundle.log'));
     command(

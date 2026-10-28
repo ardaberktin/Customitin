@@ -49,6 +49,9 @@ export function createPlannerHandler(
 ): (request: Request) => Promise<Response> {
   if (!options.authenticate || !options.allowRequest)
     throw new Error('Authentication and usage policy are required');
+  const timeoutMs = options.timeoutMs ?? 20_000;
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 300_000)
+    throw new Error('timeoutMs must be an integer between 1 and 300000');
   return async (httpRequest) => {
     if (httpRequest.method !== 'POST')
       return json({ kind: 'rejected', message: 'Use POST.' }, 405);
@@ -193,7 +196,7 @@ export function createPlannerHandler(
           throw new Error('Planning failed');
         },
         httpRequest.signal,
-        Math.min(options.timeoutMs ?? 20_000, 30_000),
+        timeoutMs,
       );
       return json(result);
     } catch {

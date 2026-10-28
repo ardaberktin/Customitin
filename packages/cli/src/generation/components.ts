@@ -1,7 +1,11 @@
 import type { ResolvedIntegration } from '../configuration/resolve';
 import { propertyAccess, symbolImport } from './imports';
+import type { DiscoveryReport } from '../discovery/types';
 
-export function generateComponents(integration: ResolvedIntegration): string {
+export function generateComponents(
+  integration: ResolvedIntegration,
+  platform: DiscoveryReport['platform'],
+): string {
   const imports: string[] = [];
   const hosts: string[] = [];
   const items: string[] = [];
@@ -60,6 +64,17 @@ export function generateComponents(integration: ResolvedIntegration): string {
     hosts.length ? 'HostComponentProps' : '',
     items.length ? 'ItemProps' : '',
   ].filter(Boolean);
+  const collections = integration.components.filter(
+    (c) => c.collectionSourceId,
+  );
+  if (collections.length) {
+    imports.unshift(
+      `import { createCollectionBinding } from '${platform === 'web' ? '@customitin/react/dom' : '@customitin/react-native/collection'}';`,
+    );
+    imports.unshift(
+      `import capabilities from './capabilities.json';\nimport { registrySchema } from '@customitin/core';\nconst registry = registrySchema.parse(capabilities);`,
+    );
+  }
   if (
     integration.components.some(
       ({ symbol }) =>
@@ -73,7 +88,8 @@ export function generateComponents(integration: ResolvedIntegration): string {
     );
   return [
     ...imports,
-    `export const components = {\n${hosts.join(',\n')}\n};`,
+    `const hosts = {\n${hosts.join(',\n')}\n};`,
+    `export const components = { ...hosts, ${collections.map(({ symbol }) => `${JSON.stringify(symbol.id + '.collection')}: createCollectionBinding(hosts[${JSON.stringify(symbol.id)}], registry.components.find(c => c.id === ${JSON.stringify(symbol.id + '.collection')})!)`).join(',\n')} };`,
     `export const items = {\n${items.join(',\n')}\n};`,
     '',
   ].join('\n');

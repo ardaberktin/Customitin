@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "surfaces": [
+    {
+      "id": "collection",
+      "title": "Collection",
+      "mode": "compose",
+      "defaultLayout": [],
+      "requiredNodeIds": [],
+      "allowedComponentIds": [
+        "cap-70c1f279aa8ab465",
+        "cap-70c1f279aa8ab465.collection"
+      ],
+      "policy": {
+        "operations": ["layout", "data"],
+        "sourceFields": {
+          "cap-83a3e73694ceb2c9": [
+            "id",
+            "title",
+            "year",
+            "status",
+            "poster",
+            "kind",
+            "comments",
+            "rating",
+            "progress",
+            "released",
+            "isNew"
+          ]
+        },
+        "actionIds": [],
+        "maxNodes": 16
+      },
+      "provenance": {
+        "version": 1,
+        "status": "developer-reviewed",
+        "evidence": "Approve the original Home card and complete library, plus opt-in SDK collection controls; no host collection controls."
+      }
+    }
+  ],
+  "actions": [],
+  "relations": [],
+  "customComponents": [],
+  "sources": {
+    "cap-83a3e73694ceb2c9": {
+      "enabled": true
+    }
+  },
+  "components": {
+    "cap-79892e93cf6c6f08": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-bdff06e9dddc86b9": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-35d501ee8dea6ab1": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-dadc4b5119e564c9": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-a2fe41427f7b3395": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-4da68a8ce0b0ccf7": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-a1b9f28bc5ba4ec9": {
+      "defaults": {},
+      "enabled": false
+    },
+    "cap-70c1f279aa8ab465": {
+      "enabled": true,
+      "defaults": {},
+      "collection": {
+        "source": "cap-83a3e73694ceb2c9"
+      }
+    },
+    "cap-2e3b1c78f1a7e5ff": {
+      "defaults": {},
+      "enabled": false
+    }
+  },
+  "routes": {},
+  "screens": {}
+}

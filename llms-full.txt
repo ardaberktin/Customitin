@@ -6,7 +6,7 @@
 
 Customitin is a headless personalization SDK for React Native/Expo and React web. These alpha packages are locally distributed, not published. Contracts and profiles are v2; breaking changes from the earlier styled shell are intentional.
 
-The developer owns every screen, tab, theme, control, chat interface and confirmation appearance. Installation adds a provider and reviewed bindings. It does not add navigation, a theme, an editor, an empty screen or an AI chat. A developer-owned empty surface is the recommended starting example. Users can compose approved existing components with compatible approved data inside that space.
+The developer owns screen/tab placement, application styling, chat and confirmation UI. An opt-in SDK collection can supply generic filtering, sorting, grouping, counts and grid controls around an existing host card; see integration. Installation adds a provider and reviewed bindings. It does not add navigation, a theme, an editor, an empty screen or an AI chat. A developer-owned empty surface is the recommended starting example. Users can compose approved existing components with compatible approved data inside that space.
 
 Read [integration](integration.md) before changing SDK integration or the CLI. [Contracts](contracts.md) defines supported behavior; [maintenance](maintenance.md) defines ownership, identities and recovery. [Testing](testing.md) distinguishes automated checks from release validation. `customitin guide --topic <name>` prints these same guides from packed artifacts.
 
@@ -15,7 +15,7 @@ Read [integration](integration.md) before changing SDK integration or the CLI. [
 | Package                    | Responsibility                                                                                                                                     |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@customitin/core`         | v2 contracts, registration, profile validation/storage, preview/apply/undo, conversation and action controllers, bounded data plans/formulas/joins |
-| `@customitin/react`        | Shared provider/hooks, host-only SurfaceRenderer, HTTP/query adapters, browser storage; no React Native dependency                                 |
+| `@customitin/react`        | Shared provider/hooks, SurfaceRenderer plus opt-in DOM collection controls, HTTP/query adapters, browser storage; no React Native dependency       |
 | `@customitin/react-native` | Shared React APIs plus in-place native section integration and native storage/navigation adapter exports                                           |
 | `@customitin/server`       | Authenticated planner, remote data and action handlers; developer-owned model, data and domain services                                            |
 | `@customitin/cli`          | Development-time source discovery, reports, reviewed enablement, generated bindings, refresh/watch/doctor/removal                                  |
@@ -79,7 +79,7 @@ npx --no-install customitin doctor --typecheck
 
 Replace the digest/exclusion with actual report values; omit `--exclude` when none is needed. JSON contains `review.digest`, source locations, usage sites, compatibility evidence, exclusions and actionable diagnostics. An approval fails if the reviewed source or policy changes. Approval stores enabled stable capability IDs, preserving overrides. `--complete`, `--component`, `--screen` and `--route` remain explicit individual decisions. New discoveries on refresh are not implicitly enabled.
 
-The default installer adds a provider and generated bindings only. It preserves the host's styling and navigation. It does not create an empty surface automatically. Select the region to customize and create its controls in host code. Recognized Vite, Expo and Metro development commands are wrapped to refresh registration during development. Production imports do not discover code. Other React frameworks use manual provider placement; SSR/request-scoped storage and client component boundaries are host responsibilities.
+The default installer adds a provider and generated bindings only. Conventional `App.tsx` roots may use a default export or a named `App` function/arrow export; ambiguous, wrapped or conditional roots need manual placement. It preserves the host's styling and navigation. It does not create an empty surface automatically. Select the region to customize. Supply host controls or opt into the SDK collection controls below. Recognized Vite, Expo and Metro development commands are wrapped to refresh registration during development. Production imports do not discover code. Other React frameworks use manual provider placement; SSR/request-scoped storage and client component boundaries are host responsibilities.
 
 ## Declare a space
 
@@ -116,6 +116,33 @@ Use actual registered IDs. Absence of a permission denies it. A whole-app experi
 
 ## Render with the host's components
 
+### Opt-in SDK collection controls
+
+A developer does not need to implement a target screen's filter bar, sort selector, heading/count, grouped grid or density toggle. Enable the existing single-record card with an approved complete source:
+
+```json
+{
+  "version": 1,
+  "sources": { "src/data.ts#loadEntries": { "enabled": true } },
+  "components": {
+    "src/Card.tsx#Card": {
+      "enabled": true,
+      "collection": { "source": "src/data.ts#loadEntries" }
+    }
+  }
+}
+```
+
+Use real discovered selectors and verify completeness (`@customitinComplete` or the explicit source override). Refresh generates the ordinary card binding and a second capability with ID `<stable-card-id>.collection`. Approve **both IDs** on the intended compose surface, together with `layout`/`data` permission and the required source fields. No layout is inserted. Mount `SurfaceRenderer` in the existing host destination and use the normal assistant workflow.
+
+The CLI generates `createCollectionBinding` from `@customitin/react/dom` on web or `@customitin/react-native/collection` on native. It reuses the card's original data prop and surrounding providers/callbacks. Manual integrations can call `createCollectionDescriptor(cardDescriptor, sourceDescriptor)` from core and `createCollectionBinding(cardBinding, descriptor)` from the appropriate platform entry.
+
+The planner selects `title`, `groupBy`, `filterBy`, `sortBy`, `sortDirection`, `sortLabel`, `columns` (1–4), `showCount`, `showFilters`, `showSort`, and `expanded`. The SDK implements the controls and state. Groups follow declared enum order, with other observed values afterward; empty groups are omitted. Null values have a separate category and sort last. Clicking a filter or sort control changes local presentation without a model call. Applying a new component configuration resets temporary control state. Saved profiles contain the AI's props/data plans, not temporary selections or records.
+
+This capability currently accepts one scalar-record input per card, optional/defaulted scalar props, host-owned interactions, and one compatible complete, count-enabled source. Required callback props still need a host adapter. Source `filterOps`, `sortable` and `groupable` declarations constrain control fields. Card fields must map by identical names to a flat complete local data view: remote/paginated results, joins, computed fields and aggregates are rejected for this binding. Other host bindings retain their existing richer data-plan support. At most 49 card fields and 100 categories are supported; collection rendering is not virtualized. Existing source/result budgets still apply.
+
+DOM controls inherit host font/color and use neutral chrome. Optional app-wide `--customitin-panel` and `--customitin-accent` CSS variables can match existing design tokens; no target-specific control CSS is required. Native controls use a generic native appearance and segmented choices. Exact brand styling, native device geometry, production authentication, source completeness and responsive host-card behavior remain developer/release responsibilities.
+
 Customization applies to the host's UI generally: text, cards, forms, containers, controls and library components. Charts are one data-binding example. Use `compose` for approved components and child slots, `properties` for a fixed element's allowed scalar props, and `reorder` for existing keyed sections. These modes share preview, apply, persistence and undo.
 
 A host adapter receives `values`, `data`, `events` and `children`. Map these to the existing component's public API. A chart/table can accept the same typed series input and use different sources through validated field mappings. Discovery supports compatible scalar-record and array props plus `children`; unusual providers, callbacks, generic types and complex object shapes need reviewed adapters. Installed third-party usage is inventoried without scanning the dependency tree.
@@ -149,6 +176,12 @@ This sketch requires the host's real types/exports. Strongly typed charts may ne
 In a host-owned screen, place `<SurfaceRenderer id="workspace" />`. It renders registered host components and containers only. Supply its `status` callback for loading, empty single-record, unavailable binding or render failures. It inserts no fallback text or visuals. For array inputs, the host component owns its empty-state appearance.
 
 Use `useAssistant(['workspace'])` for request, cancel, preview, apply, undo, reset and conversation state. Render previews explicitly with `<SurfaceRenderer id="workspace" preview />`. Use `useSurface(id)` for approved nodes and manual preview commands; `useDataView(id, surfaceId)` for data/loading/more/refresh; `useAction(surfaceId, actionId)` for explicit proposals and execution. Display errors and disable controls during pending host writes. Hooks expose structured codes; choose your own user-facing wording.
+
+For reasoning models, configure both ends of the planning deadline. `RuntimeOptions.plannerTimeoutMs` defaults to 30,000 ms; generated integrations pass it through `useHostConfiguration()`. The server's `createPlannerHandler({ timeoutMs })` defaults to 20,000 ms. Both accept integers from 1 to 300,000; keep the server deadline below the client deadline. Cancellation still aborts the transport and late output cannot overwrite the current profile. These settings do not alter data-query deadlines.
+
+The server-only `createOpenAIProvider` accepts an explicit `reasoningEffort` and `maxTokens` (1–65,536, default 4,096). Choose values supported by the exact model. Reasoning consumes the completion budget too. The adapter forwards `reasoning_effort` and `max_completion_tokens` without substituting a model or silently reducing a valid budget. Never place a model key in browser configuration.
+
+`examples/refract-app` is a consumer workflow study: Home's existing poster shelf, library heading, status filters and sort control feed an initially empty Collection surface through generated bindings. Its loopback-only Vite planner uses a server-side environment key and an HttpOnly local test session. It is development infrastructure, not a production authentication or deployment template. The accompanying report separates live-model evidence, recorded-response regression tests and remaining device checks.
 
 See compiling examples in `examples/shared/src/headless` and `examples/web-app`. Their host controls centralize English copy and handle rejected saves. `examples/shared/src/ui` contains the earlier optional visual demo, now owned by the examples.
 
@@ -220,13 +253,13 @@ Platform and routing are detected separately from imports and entrypoints. Vite/
 
 Reports distinguish discovered candidates, bindable shapes, explicitly enabled IDs and doctor-verified static installation checks. Verification does not mean device or live-model verification. Unsupported unselected candidates do not prevent unrelated valid bindings. Required callback props identify the adapter needed; the SDK never invents event behavior. Scalar props, scalar-record inputs, arrays of scalar records and a React children slot are supported automatic component bindings. A required complex field inside a record/array needs a host wrapper. Explicit legacy `components[id].source` retains a source-restricted item adapter for old host-rendered collections.
 
-Sources support bounded complete array loaders, exported repository methods, zero-argument TanStack Query option factories and explicit `@customitinQuery` query-page contracts. `@customitinComplete` describes semantics, not authorization. Query functions must operate on the complete dataset authorized for the current account. Cached rows alone do not establish completeness. Existing QueryClient and navigation-ref integration are retained when explicitly selected. Enabling a navigation binding adds no route or visual navigation.
+Sources support bounded complete array loaders, exported repository methods, zero-argument TanStack Query option factories and explicit `@customitinQuery` query-page contracts. Array prototype methods are not repository loaders. Optional source fields normalize to null; optional host props remain nonnullable unless their declared type explicitly includes null. `@customitinComplete` describes semantics, not authorization. Query functions must operate on the complete dataset authorized for the current account. Cached rows alone do not establish completeness. Existing QueryClient and navigation-ref integration are retained when explicitly selected. Enabling a navigation binding adds no route or visual navigation.
 
 ## Headless rendering and surfaces
 
-Metadata is serializable; executable component/source/action/remote adapters stay in host code. Core has no platform/UI dependency. Shared React imports have no React Native dependency. SDK packages export no shell, editor, theme palette, chat UI or styling primitives. Provider diagnostics report absent/mismatched bindings; a missing adapter affects its capability rather than adding fallback UI.
+Metadata is serializable; executable component/source/action/remote adapters stay in host code. Core has no platform/UI dependency. Shared React imports have no React Native dependency. The default provider and SurfaceRenderer add no shell, editor, theme or chat UI. Opt-in collection bindings supply generic DOM/native collection controls; the shared React entry remains platform independent. Provider diagnostics report absent/mismatched bindings; a missing adapter affects its capability rather than adding fallback UI.
 
-`compose` allows approved host nodes in a developer-chosen space. `reorder` preserves original local sections and permits only reordering/hiding. `properties` fixes structure and allows only listed scalar props. Per-surface policies grant operations, components, source fields, actions, optional explicit navigation/appearance bindings and maximum nodes. Missing permissions deny access. Client and server both validate target IDs, current profile revision, capability revision, component/data/event compatibility and references. A data view shared with a surface outside the request cannot be changed by that request. No planning target means rejection.
+`compose` allows approved host nodes, including explicitly enabled SDK collection bindings, in a developer-chosen space. `reorder` preserves original local sections and permits only reordering/hiding. `properties` fixes structure and allows only listed scalar props. Per-surface policies grant operations, components, source fields, actions, optional explicit navigation/appearance bindings and maximum nodes. Missing permissions deny access. Client and server both validate target IDs, current profile revision, capability revision, component/data/event compatibility and references. A data view shared with a surface outside the request cannot be changed by that request. No planning target means rejection.
 
 In-place integration supports 1–40 static direct keyed sections with a single unconditional return. Native containers are directly imported vertical View/ScrollView; web containers include main/div/section/article/aside. Stable keys, test IDs or unique tags supply identities. Conditional/mapped content belongs inside a stable keyed section. FlatList, horizontal/custom/sticky containers and ambiguous roots need host adapters. The wrapper retains hidden sections mounted to preserve local state and callbacks; hiding does not suspend subscriptions or grant authorization. Native wrappers can affect flex/focus geometry and need device checks. Host state persistence across an actual process restart remains the host's responsibility; SDK persistence restores the layout and section identities.
 
@@ -413,7 +446,7 @@ It does not run application modules, silently change credentials, upgrade framew
 
 ## Generated formatting
 
-The CLI formats generated TypeScript and the root wrapper before recording ownership hashes. It reads portable literal settings from JSON prettier files, package.json.prettier, and simple module.exports/export-default object configs. It never executes a host configuration or loads formatter plugins. Dynamic configs, YAML, overrides and custom plugins fall back to portable defaults; these are not a promise to reproduce every host formatting rule. To change generated output, adjust a supported static config and refresh before running a formatter over installer-owned files. Check TypeScript files explicitly: the default bare React Native lint script may only scan JavaScript unless `--ext .js,.jsx,.ts,.tsx` is supplied.
+The CLI formats generated JSON, TypeScript and the root wrapper before recording ownership hashes. It reads portable literal settings from JSON prettier files, package.json.prettier, and simple module.exports/export-default object configs. It never executes a host configuration or loads formatter plugins. Dynamic configs, YAML, overrides and custom plugins fall back to portable defaults; these are not a promise to reproduce every host formatting rule. To change generated output, adjust a supported static config and refresh before running a formatter over installer-owned files. Check TypeScript files explicitly: the default bare React Native lint script may only scan JavaScript unless `--ext .js,.jsx,.ts,.tsx` is supplied.
 
 ## Reviewed enablement and v2 migration
 
@@ -421,7 +454,7 @@ The CLI formats generated TypeScript and the root wrapper before recording owner
 
 Workspace discovery follows reachable local files, including compiler-resolved aliases and re-exports. Watch hashes those files as well as app sources. Changing an existing source's shape can change its capability revision; surface field allowlists still control access. Review semantic changes and deploy matching manifests. Source moves retain identity only under the existing unambiguous rules; no identity implies authorization for a new logical dataset.
 
-The alpha SDK now exports headless APIs. Existing config/overrides remain developer-owned during installer migration. Refresh replaces tracked generated files only after ownership checks. The old shell, editors and theme primitives live in examples; update host imports deliberately if the app chose to use them. Installation no longer inserts routes, tabs, appearance tokens or controls. Plan/inspect the migration before applying it, then supply host UI and surface policies.
+The alpha SDK now exports headless APIs. Existing config/overrides remain developer-owned during installer migration. Refresh replaces tracked generated files only after ownership checks. The old shell, editors and theme primitives live in examples; update host imports deliberately if the app chose to use them. Default installation does not insert routes, tabs, appearance tokens or controls. Explicit collection opt-in registers SDK controls for model composition; it still does not create a screen or initial layout. Plan/inspect the migration before applying it, then supply host UI and surface policies.
 
 V2 profile storage uses separate keys. Migration preserves compatible host components by stable ID and reports unsupported shell/theme/navigation settings. It never overwrites v1 bytes. V2 writes and erasure record a retirement marker to prevent automatic v1 fallback after the user resets their retained configuration. Recovery from old bytes is a separate deliberate host workflow, with scope verification. Do not remove those bytes as a side effect of SDK installation. Legacy configuration/identity-lock file formats remain version 1 for ownership compatibility; runtime manifests/profiles/reports are version 2.
 
@@ -480,6 +513,8 @@ These packed interactions run in jsdom with React DOM; the native harness substi
 
 The runner also renders each generated existing-screen integration from installed packages and exercises its original callback. Native import/require identity checks and both Metro source maps verify that the shared provider/hooks use one module instance. Source aliases or successful compilation alone would miss duplicate-context failures at package entry points.
 
+It also enables an SDK collection around the consumer's existing record card, generates platform bindings, verifies doctor/typecheck, and exercises generated counts, filtering and density controls. The collection imports remain present for Vite and real iOS/Android Metro bundle checks. Unit/interaction tests additionally cover source operation restrictions, identity-only mappings, partial-data rejection, numeric/null sorting, dynamic group counts, card state during reordering and configuration resets.
+
 ## Native simulator pilot
 
 `fixtures/native-pilot/README.md` describes a separate official React Native 0.83.10 app created with the community CLI and installed from packed SDK artifacts. Run `node scripts/consumer/pilot.mjs /path/to/fresh/app` after installing its dependencies. The setup reviews the fixture's capabilities, generates its integration, configures real AsyncStorage and checks strict TypeScript. Build a Release simulator app with embedded JavaScript for actual terminate/relaunch persistence checks.
@@ -499,7 +534,7 @@ Browser tests use developer-owned controls: the Vite workspace and task-app nati
 
 ## Required host and release work
 
-Choose surface placement and all user-facing UI. Review provider context and source completeness. Implement adapter exceptions, stable record IDs, account scope/storage, backend authorization, remote aggregation/pagination where necessary, action confirmation and durable idempotency. Deploy the matching manifest before requiring its revision in a client build.
+Choose surface placement and assistant/confirmation UI. Collection controls may be supplied by the opt-in SDK binding. Review provider context and source completeness. Implement adapter exceptions, stable record IDs, account scope/storage, backend authorization, remote aggregation/pagination where necessary, action confirmation and durable idempotency. Deploy the matching manifest before requiring its revision in a client build.
 
 Check real native devices, navigation/provider geometry, screen-reader focus and hidden content, keyboard/text scaling, performance on realistic data, offline/online transitions and account switching. Measure bundle/startup/frame/memory behavior rather than inferring it from unit tests. Validate live-model clarification, reliability, prompt injection, costs and recovery against the host's actual policies. Signed binaries, accessibility, performance, independent developer pilots and live-model validation remain explicit release gates. A passing automated suite does not establish them.
 

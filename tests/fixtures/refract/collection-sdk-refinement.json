@@ -1,0 +1,53 @@
+{
+  "kind": "proposal",
+  "proposal": {
+    "requestId": "local-mvsr97je-1-5ogo1l68",
+    "baseRevision": 1,
+    "registryRevision": "r-66a5547e0a4fbafa",
+    "summary": "Make Collection cards larger with two columns and collapse the status filter labels. Preserve the full library count, all eight status groups, and newest-first Last released sorting. Leave Home unchanged.",
+    "operations": [
+      {
+        "op": "setSurfaceLayout",
+        "surfaceId": "collection",
+        "nodes": [
+          {
+            "id": "collection-library",
+            "componentId": "cap-70c1f279aa8ab465.collection",
+            "props": {
+              "title": "Collection",
+              "groupBy": "status",
+              "filterBy": "status",
+              "sortBy": "released",
+              "sortDirection": "desc",
+              "sortLabel": "Last released",
+              "columns": 2,
+              "showCount": true,
+              "showFilters": true,
+              "showSort": true,
+              "expanded": false
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-library-data",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

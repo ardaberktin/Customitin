@@ -16,6 +16,7 @@ export interface SelectedComponent {
   symbol: DiscoveredSymbol;
   options: IntegrationOverrides['components'][string];
   sourceId?: string;
+  collectionSourceId?: string;
 }
 export interface ResolvedIntegration {
   overrides: IntegrationOverrides;

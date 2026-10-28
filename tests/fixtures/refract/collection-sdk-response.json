@@ -1,0 +1,83 @@
+{
+  "kind": "proposal",
+  "proposal": {
+    "requestId": "local-mvsr4pym-1-xq6fyqmt",
+    "baseRevision": 0,
+    "registryRevision": "r-66a5547e0a4fbafa",
+    "summary": "Create Collection using the existing poster cards in three columns, with full library and group counts, all eight status groups, expanded status filters, and interactive sorting by last released, newest first. Leave Home unchanged.",
+    "operations": [
+      {
+        "op": "setDataView",
+        "surfaceId": "collection",
+        "view": {
+          "id": "collection-library-data",
+          "title": "Complete library",
+          "plan": {
+            "sourceId": "cap-83a3e73694ceb2c9",
+            "joins": [],
+            "computed": {},
+            "groupBy": [],
+            "aggregates": {},
+            "sort": [],
+            "project": [
+              "id",
+              "title",
+              "year",
+              "status",
+              "poster",
+              "kind",
+              "comments",
+              "rating",
+              "progress",
+              "released",
+              "isNew"
+            ],
+            "execution": "local"
+          }
+        }
+      },
+      {
+        "op": "setSurfaceLayout",
+        "surfaceId": "collection",
+        "nodes": [
+          {
+            "id": "collection-library",
+            "componentId": "cap-70c1f279aa8ab465.collection",
+            "props": {
+              "title": "Collection",
+              "groupBy": "status",
+              "filterBy": "status",
+              "sortBy": "released",
+              "sortDirection": "desc",
+              "sortLabel": "Last released",
+              "columns": 3,
+              "showCount": true,
+              "showFilters": true,
+              "showSort": true,
+              "expanded": true
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-library-data",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

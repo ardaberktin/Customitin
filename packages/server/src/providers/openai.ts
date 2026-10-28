@@ -10,11 +10,27 @@ const completionSchema = z.object({
 export function createOpenAIProvider(options: {
   apiKey: string;
   model: string;
+  /** Supported efforts depend on the selected model; omitted preserves its default. */
+  reasoningEffort?:
+    | 'none'
+    | 'minimal'
+    | 'low'
+    | 'medium'
+    | 'high'
+    | 'xhigh'
+    | 'max';
   maxTokens?: number;
   fetch?: typeof fetch;
 }): ModelProvider {
   if (!options.apiKey || !options.model)
     throw new Error('Server-side provider credentials and model are required');
+  if (
+    options.maxTokens !== undefined &&
+    (!Number.isInteger(options.maxTokens) ||
+      options.maxTokens < 1 ||
+      options.maxTokens > 65_536)
+  )
+    throw new Error('maxTokens must be an integer between 1 and 65536');
   return {
     async generate(input, signal) {
       const response = await (options.fetch ?? fetch)(
@@ -30,7 +46,10 @@ export function createOpenAIProvider(options: {
             model: options.model,
             messages: planningMessages(input),
             response_format: { type: 'json_object' },
-            max_completion_tokens: Math.min(options.maxTokens ?? 4096, 8192),
+            ...(options.reasoningEffort
+              ? { reasoning_effort: options.reasoningEffort }
+              : {}),
+            max_completion_tokens: options.maxTokens ?? 4096,
           }),
         },
       );

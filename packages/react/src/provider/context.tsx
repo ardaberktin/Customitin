@@ -61,8 +61,15 @@ export function CustomizationProvider({
   bindings: RuntimeBindings;
   children: ReactNode;
 }) {
-  const { registry, storage, scope, planner, createId, plannerContext } =
-    options;
+  const {
+    registry,
+    storage,
+    scope,
+    planner,
+    plannerTimeoutMs,
+    createId,
+    plannerContext,
+  } = options;
   const runtime = useMemo(
     () =>
       new CustomizationRuntime({
@@ -70,6 +77,7 @@ export function CustomizationProvider({
         storage,
         scope,
         planner,
+        plannerTimeoutMs,
         createId,
         plannerContext,
         actions: bindings.actions,
@@ -80,6 +88,7 @@ export function CustomizationProvider({
       storage,
       scope,
       planner,
+      plannerTimeoutMs,
       createId,
       plannerContext,
       bindings.actions,

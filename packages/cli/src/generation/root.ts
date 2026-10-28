@@ -17,7 +17,7 @@ export function PersonalizationRoot({ children }: { children: ReactNode }) {
   const host: HostConfiguration = useHostConfiguration();
   const custom = host.bindings;
   const bindings = useMemo(() => ({ ...custom, sources: { ...sources, ...custom?.sources }, components: { ...components, ...custom?.components }, items: { ...items, ...custom?.items }, navigate: custom?.navigate ?? navigate }), [custom]);
-  return <CustomizationProvider options={{ registry, storage: host.storage ?? config.storage, scope: host.scope ?? config.scope, planner: host.planner ?? config.planner, plannerContext: host.plannerContext }} bindings={bindings}>{children}</CustomizationProvider>;
+  return <CustomizationProvider options={{ registry, storage: host.storage ?? config.storage, scope: host.scope ?? config.scope, planner: host.planner ?? config.planner, plannerTimeoutMs: host.plannerTimeoutMs, plannerContext: host.plannerContext }} bindings={bindings}>{children}</CustomizationProvider>;
 }
 `;
 }

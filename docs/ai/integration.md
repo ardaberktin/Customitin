@@ -34,7 +34,7 @@ npx --no-install customitin doctor --typecheck
 
 Replace the digest/exclusion with actual report values; omit `--exclude` when none is needed. JSON contains `review.digest`, source locations, usage sites, compatibility evidence, exclusions and actionable diagnostics. An approval fails if the reviewed source or policy changes. Approval stores enabled stable capability IDs, preserving overrides. `--complete`, `--component`, `--screen` and `--route` remain explicit individual decisions. New discoveries on refresh are not implicitly enabled.
 
-The default installer adds a provider and generated bindings only. It preserves the host's styling and navigation. It does not create an empty surface automatically. Select the region to customize and create its controls in host code. Recognized Vite, Expo and Metro development commands are wrapped to refresh registration during development. Production imports do not discover code. Other React frameworks use manual provider placement; SSR/request-scoped storage and client component boundaries are host responsibilities.
+The default installer adds a provider and generated bindings only. Conventional `App.tsx` roots may use a default export or a named `App` function/arrow export; ambiguous, wrapped or conditional roots need manual placement. It preserves the host's styling and navigation. It does not create an empty surface automatically. Select the region to customize. Supply host controls or opt into the SDK collection controls below. Recognized Vite, Expo and Metro development commands are wrapped to refresh registration during development. Production imports do not discover code. Other React frameworks use manual provider placement; SSR/request-scoped storage and client component boundaries are host responsibilities.
 
 ## Declare a space
 
@@ -71,6 +71,33 @@ Use actual registered IDs. Absence of a permission denies it. A whole-app experi
 
 ## Render with the host's components
 
+### Opt-in SDK collection controls
+
+A developer does not need to implement a target screen's filter bar, sort selector, heading/count, grouped grid or density toggle. Enable the existing single-record card with an approved complete source:
+
+```json
+{
+  "version": 1,
+  "sources": { "src/data.ts#loadEntries": { "enabled": true } },
+  "components": {
+    "src/Card.tsx#Card": {
+      "enabled": true,
+      "collection": { "source": "src/data.ts#loadEntries" }
+    }
+  }
+}
+```
+
+Use real discovered selectors and verify completeness (`@customitinComplete` or the explicit source override). Refresh generates the ordinary card binding and a second capability with ID `<stable-card-id>.collection`. Approve **both IDs** on the intended compose surface, together with `layout`/`data` permission and the required source fields. No layout is inserted. Mount `SurfaceRenderer` in the existing host destination and use the normal assistant workflow.
+
+The CLI generates `createCollectionBinding` from `@customitin/react/dom` on web or `@customitin/react-native/collection` on native. It reuses the card's original data prop and surrounding providers/callbacks. Manual integrations can call `createCollectionDescriptor(cardDescriptor, sourceDescriptor)` from core and `createCollectionBinding(cardBinding, descriptor)` from the appropriate platform entry.
+
+The planner selects `title`, `groupBy`, `filterBy`, `sortBy`, `sortDirection`, `sortLabel`, `columns` (1–4), `showCount`, `showFilters`, `showSort`, and `expanded`. The SDK implements the controls and state. Groups follow declared enum order, with other observed values afterward; empty groups are omitted. Null values have a separate category and sort last. Clicking a filter or sort control changes local presentation without a model call. Applying a new component configuration resets temporary control state. Saved profiles contain the AI's props/data plans, not temporary selections or records.
+
+This capability currently accepts one scalar-record input per card, optional/defaulted scalar props, host-owned interactions, and one compatible complete, count-enabled source. Required callback props still need a host adapter. Source `filterOps`, `sortable` and `groupable` declarations constrain control fields. Card fields must map by identical names to a flat complete local data view: remote/paginated results, joins, computed fields and aggregates are rejected for this binding. Other host bindings retain their existing richer data-plan support. At most 49 card fields and 100 categories are supported; collection rendering is not virtualized. Existing source/result budgets still apply.
+
+DOM controls inherit host font/color and use neutral chrome. Optional app-wide `--customitin-panel` and `--customitin-accent` CSS variables can match existing design tokens; no target-specific control CSS is required. Native controls use a generic native appearance and segmented choices. Exact brand styling, native device geometry, production authentication, source completeness and responsive host-card behavior remain developer/release responsibilities.
+
 Customization applies to the host's UI generally: text, cards, forms, containers, controls and library components. Charts are one data-binding example. Use `compose` for approved components and child slots, `properties` for a fixed element's allowed scalar props, and `reorder` for existing keyed sections. These modes share preview, apply, persistence and undo.
 
 A host adapter receives `values`, `data`, `events` and `children`. Map these to the existing component's public API. A chart/table can accept the same typed series input and use different sources through validated field mappings. Discovery supports compatible scalar-record and array props plus `children`; unusual providers, callbacks, generic types and complex object shapes need reviewed adapters. Installed third-party usage is inventoried without scanning the dependency tree.
@@ -104,6 +131,12 @@ This sketch requires the host's real types/exports. Strongly typed charts may ne
 In a host-owned screen, place `<SurfaceRenderer id="workspace" />`. It renders registered host components and containers only. Supply its `status` callback for loading, empty single-record, unavailable binding or render failures. It inserts no fallback text or visuals. For array inputs, the host component owns its empty-state appearance.
 
 Use `useAssistant(['workspace'])` for request, cancel, preview, apply, undo, reset and conversation state. Render previews explicitly with `<SurfaceRenderer id="workspace" preview />`. Use `useSurface(id)` for approved nodes and manual preview commands; `useDataView(id, surfaceId)` for data/loading/more/refresh; `useAction(surfaceId, actionId)` for explicit proposals and execution. Display errors and disable controls during pending host writes. Hooks expose structured codes; choose your own user-facing wording.
+
+For reasoning models, configure both ends of the planning deadline. `RuntimeOptions.plannerTimeoutMs` defaults to 30,000 ms; generated integrations pass it through `useHostConfiguration()`. The server's `createPlannerHandler({ timeoutMs })` defaults to 20,000 ms. Both accept integers from 1 to 300,000; keep the server deadline below the client deadline. Cancellation still aborts the transport and late output cannot overwrite the current profile. These settings do not alter data-query deadlines.
+
+The server-only `createOpenAIProvider` accepts an explicit `reasoningEffort` and `maxTokens` (1–65,536, default 4,096). Choose values supported by the exact model. Reasoning consumes the completion budget too. The adapter forwards `reasoning_effort` and `max_completion_tokens` without substituting a model or silently reducing a valid budget. Never place a model key in browser configuration.
+
+`examples/refract-app` is a consumer workflow study: Home's existing poster shelf, library heading, status filters and sort control feed an initially empty Collection surface through generated bindings. Its loopback-only Vite planner uses a server-side environment key and an HttpOnly local test session. It is development infrastructure, not a production authentication or deployment template. The accompanying report separates live-model evidence, recorded-response regression tests and remaining device checks.
 
 See compiling examples in `examples/shared/src/headless` and `examples/web-app`. Their host controls centralize English copy and handle rejected saves. `examples/shared/src/ui` contains the earlier optional visual demo, now owned by the examples.
 

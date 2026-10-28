@@ -1,0 +1,453 @@
+{
+  "schemaVersion": 2,
+  "actions": [],
+  "relations": [],
+  "appId": "app-f0a5275c73ec",
+  "revision": "r-66a5547e0a4fbafa",
+  "components": [
+    {
+      "id": "cap-70c1f279aa8ab465",
+      "title": "MediaCard",
+      "provenance": {
+        "version": 1,
+        "evidence": "src/components/MediaShelf.tsx:6",
+        "status": "proposed"
+      },
+      "kind": "host",
+      "props": {},
+      "dataInputs": {
+        "item": {
+          "fields": {
+            "id": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "title": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "year": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "status": {
+              "type": "string",
+              "required": true,
+              "nullable": false,
+              "values": [
+                "Watching",
+                "Up to Date",
+                "Watched",
+                "Plan to Watch",
+                "On Hold",
+                "Dropped",
+                "Rewatched",
+                "Rewatching"
+              ]
+            },
+            "poster": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "kind": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "comments": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "rating": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "progress": {
+              "type": "number",
+              "required": true,
+              "nullable": false
+            },
+            "released": {
+              "type": "number",
+              "required": true,
+              "nullable": false
+            },
+            "isNew": {
+              "type": "boolean",
+              "required": true,
+              "nullable": false
+            }
+          },
+          "cardinality": "one",
+          "required": true
+        }
+      },
+      "acceptsChildren": false
+    },
+    {
+      "id": "cap-70c1f279aa8ab465.collection",
+      "title": "SDK collection of MediaCard: built-in count, grouping, filters, sorting and grid; reuses host cards",
+      "provenance": {
+        "version": 1,
+        "evidence": "Opt-in SDK collection of cap-70c1f279aa8ab465 from cap-83a3e73694ceb2c9",
+        "status": "developer-reviewed"
+      },
+      "kind": "host",
+      "props": {
+        "title": {
+          "type": "string",
+          "required": false,
+          "nullable": false
+        },
+        "groupBy": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "values": [
+            "",
+            "id",
+            "title",
+            "year",
+            "status",
+            "poster",
+            "kind",
+            "comments",
+            "rating",
+            "progress",
+            "released",
+            "isNew"
+          ]
+        },
+        "filterBy": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "values": [
+            "",
+            "id",
+            "title",
+            "year",
+            "status",
+            "poster",
+            "kind",
+            "comments",
+            "rating",
+            "progress",
+            "released",
+            "isNew"
+          ]
+        },
+        "sortBy": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "values": [
+            "",
+            "id",
+            "title",
+            "year",
+            "status",
+            "poster",
+            "kind",
+            "comments",
+            "rating",
+            "progress",
+            "released",
+            "isNew"
+          ]
+        },
+        "sortDirection": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "values": ["asc", "desc"]
+        },
+        "sortLabel": {
+          "type": "string",
+          "required": false,
+          "nullable": false
+        },
+        "columns": {
+          "type": "number",
+          "required": false,
+          "nullable": false,
+          "values": [1, 2, 3, 4]
+        },
+        "showCount": {
+          "type": "boolean",
+          "required": false,
+          "nullable": false
+        },
+        "showFilters": {
+          "type": "boolean",
+          "required": false,
+          "nullable": false
+        },
+        "showSort": {
+          "type": "boolean",
+          "required": false,
+          "nullable": false
+        },
+        "expanded": {
+          "type": "boolean",
+          "required": false,
+          "nullable": false
+        }
+      },
+      "dataInputs": {
+        "items": {
+          "fields": {
+            "id": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "title": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "year": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "status": {
+              "type": "string",
+              "required": true,
+              "nullable": false,
+              "values": [
+                "Watching",
+                "Up to Date",
+                "Watched",
+                "Plan to Watch",
+                "On Hold",
+                "Dropped",
+                "Rewatched",
+                "Rewatching"
+              ]
+            },
+            "poster": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "kind": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "comments": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "rating": {
+              "type": "string",
+              "required": true,
+              "nullable": false
+            },
+            "progress": {
+              "type": "number",
+              "required": true,
+              "nullable": false
+            },
+            "released": {
+              "type": "number",
+              "required": true,
+              "nullable": false
+            },
+            "isNew": {
+              "type": "boolean",
+              "required": true,
+              "nullable": false
+            }
+          },
+          "cardinality": "many",
+          "required": true
+        }
+      },
+      "acceptsChildren": false,
+      "sourceIds": ["cap-83a3e73694ceb2c9"],
+      "collection": {
+        "itemComponentId": "cap-70c1f279aa8ab465",
+        "input": "item",
+        "sourceId": "cap-83a3e73694ceb2c9"
+      }
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "collection",
+      "title": "Collection",
+      "provenance": {
+        "version": 1,
+        "evidence": "Approve the original Home card and complete library, plus opt-in SDK collection controls; no host collection controls.",
+        "status": "developer-reviewed"
+      },
+      "mode": "compose",
+      "policy": {
+        "sourceFields": {
+          "cap-83a3e73694ceb2c9": [
+            "id",
+            "title",
+            "year",
+            "status",
+            "poster",
+            "kind",
+            "comments",
+            "rating",
+            "progress",
+            "released",
+            "isNew"
+          ]
+        },
+        "actionIds": [],
+        "destinationIds": [],
+        "themeTokenIds": [],
+        "editableProps": [],
+        "operations": ["layout", "data"],
+        "maxNodes": 16
+      },
+      "defaultLayout": [],
+      "requiredNodeIds": [],
+      "allowedComponentIds": [
+        "cap-70c1f279aa8ab465",
+        "cap-70c1f279aa8ab465.collection"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "cap-83a3e73694ceb2c9",
+      "title": "loadLibrary",
+      "provenance": {
+        "version": 1,
+        "evidence": "src/data/library.ts:149",
+        "status": "proposed"
+      },
+      "completeness": "complete",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "year": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "values": [
+            "Watching",
+            "Up to Date",
+            "Watched",
+            "Plan to Watch",
+            "On Hold",
+            "Dropped",
+            "Rewatched",
+            "Rewatching"
+          ],
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "poster": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "kind": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "comments": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "rating": {
+          "type": "string",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "contains", "in"],
+          "sortable": true,
+          "groupable": true
+        },
+        "progress": {
+          "type": "number",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "lt", "lte", "gt", "gte"],
+          "sortable": true,
+          "groupable": true
+        },
+        "released": {
+          "type": "number",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq", "lt", "lte", "gt", "gte"],
+          "sortable": true,
+          "groupable": true
+        },
+        "isNew": {
+          "type": "boolean",
+          "required": true,
+          "nullable": false,
+          "filterOps": ["eq", "neq"],
+          "sortable": true,
+          "groupable": true
+        }
+      },
+      "idField": "id",
+      "titleField": "title",
+      "maxRows": 500,
+      "pageSize": 50,
+      "supportsCount": true,
+      "supportsGrouping": true
+    }
+  ],
+  "destinations": [],
+  "themeTokens": {},
+  "defaultNavigation": [],
+  "limits": {
+    "depth": 5,
+    "nodes": 40,
+    "tabs": 4,
+    "sources": 3
+  }
+}

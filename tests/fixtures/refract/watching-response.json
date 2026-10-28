@@ -1,0 +1,78 @@
+{
+  "kind": "proposal",
+  "proposal": {
+    "requestId": "local-mvs239uj-1-mmjsp4ok",
+    "baseRevision": 1,
+    "registryRevision": "r-18c74e598d035285",
+    "summary": "Show only Watching in Collection, preserving the heading with the full library count, expanded status filters, Last released sorting and three-column poster grid. Leave Home unchanged.",
+    "operations": [
+      {
+        "op": "setSurfaceLayout",
+        "surfaceId": "collection",
+        "nodes": [
+          {
+            "id": "collection-heading",
+            "componentId": "cap-a2fe41427f7b3395",
+            "props": {
+              "title": "Collection"
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-library",
+                "mapping": {
+                  "id": "id"
+                }
+              }
+            }
+          },
+          {
+            "id": "collection-status-filters",
+            "componentId": "cap-4da68a8ce0b0ccf7",
+            "props": {
+              "expanded": true
+            },
+            "children": []
+          },
+          {
+            "id": "collection-sort",
+            "componentId": "cap-a1b9f28bc5ba4ec9",
+            "props": {},
+            "children": []
+          },
+          {
+            "id": "collection-watching-shelf",
+            "componentId": "cap-2e3b1c78f1a7e5ff",
+            "props": {
+              "title": "Watching",
+              "layout": "grid",
+              "icon": "🔵",
+              "status": "Watching",
+              "showCount": true,
+              "columns": 3
+            },
+            "children": [],
+            "data": {
+              "items": {
+                "viewId": "collection-watching",
+                "mapping": {
+                  "id": "id",
+                  "title": "title",
+                  "year": "year",
+                  "status": "status",
+                  "poster": "poster",
+                  "kind": "kind",
+                  "comments": "comments",
+                  "rating": "rating",
+                  "progress": "progress",
+                  "released": "released",
+                  "isNew": "isNew"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
